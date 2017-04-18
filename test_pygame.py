@@ -13,6 +13,7 @@ If you are not familiar with python classes, you might want to check the
 Missing tests:
 - object rotation
 """
+import sys
 import pygame
 from pygame.locals import *
 from pytmx import *
@@ -27,19 +28,42 @@ ch.setLevel(logging.INFO)
 logger.addHandler(ch)
 logger.setLevel(logging.INFO)
 
+class Screen():
+    """A screen had
+    - a pygame.display
+    - a tile_size (since it's constituted by square
+    - a list of objects, which are tuple of
+        [0] : the actual object
+        [1] : the coordinates (a tuple of int)
+        [2] ; its type (sprite, map, or anything else), a string"""
+    def __init__(self, width, height, tile_size):
+        self._display = pygame.display.set_mode((width, height), pygame.RESIZABLE)
+        self._tile_size = tile_size
+        self._objects = []
 
-def init_screen(width, height):
-    """ Set the screen mode
-    This function is used to handle window resize events
-    """
-    return pygame.display.set_mode((width, height), pygame.RESIZABLE)
+    def refresh(self):
+        for ele, position, type_ele in self._objects:
+            if type_ele == 'tiled_map':
+                ele.draw(self._display)
+            elif type_ele == 'sprite':
+                ele.blit(self._display, position)
+        pygame.display.update()
 
-def AddSprite(sheet_file, rows, cols, begin = 0, end = -1):
-    perso = pyganim.getImagesFromSpriteSheet(sheet_file,cols=cols,rows= rows)[begin:end]
-    frames = list(zip(perso, [200, 200, 200, 200]))
-    animObj = pyganim.PygAnimation(frames)
-    animObj.play()
-    return animObj
+
+    def AddSprite(self, sheet_file, rows=1, cols=1, begin = 0, end = -1, pos_x = 0, pos_y = 0):
+        """The len is returned to know where is the sprite"""
+        perso = pyganim.getImagesFromSpriteSheet(sheet_file,cols=cols,rows= rows)[begin:end]
+        frames = list(zip(perso, [200, 200, 200, 200]))
+        animObj = pyganim.PygAnimation(frames)
+        animObj.play()
+        self._objects.append([animObj, (pos_x, pos_y), 'sprite'])
+        print(self._objects[-1])
+        return len(self._objects)
+
+    def AddMap(self, filename):
+        self._objects.append([TiledMap(filename), (0, 0), 'tiled_map'])
+        self._objects[-1][0].run()
+        return len(self._objects)
 
 
 class TiledRenderer(object):
@@ -82,23 +106,17 @@ class TiledRenderer(object):
                 self.render_image_layer(surface, layer)
 
     def render_tile_layer(self, surface, layer):
-        # deref these heavily used references for speed
         tw = self.tmx_data.tilewidth
         th = self.tmx_data.tileheight
         surface_blit = surface.blit
-
-        # iterate over the tiles in the layer
         for x, y, image in layer.tiles():
             surface_blit(image, (x * tw, y * th))
 
     def render_object_layer(self, surface, layer):
-        # deref these heavily used references for speed
         draw_rect = pygame.draw.rect
         draw_lines = pygame.draw.lines
         surface_blit = surface.blit
 
-        # these colors are used to draw vector shapes,
-        # like polygon and box shapes
         rect_color = (255, 0, 0)
         poly_color = (0, 255, 0)
 
@@ -127,7 +145,7 @@ class TiledRenderer(object):
             surface.blit(layer.image, (0, 0))
 
 
-class SimpleTest(object):
+class TiledMap(object):
     """ Basic app to display a rendered Tiled map
     """
 
@@ -143,41 +161,47 @@ class SimpleTest(object):
     def draw(self, surface):
         """ Draw our map to some surface (probably the display)
         """
-        # first we make a temporary surface that will accommodate the entire
-        # size of the map because this demo does not implement scrolling, we
-        # render the entire map
         temp = pygame.Surface(self.renderer.pixel_size)
-        # render the map onto the temporary surface
         self.renderer.render_map(temp)
-
-        # now resize the temporary surface to the size of the display
-        # this will also 'blit' the temp surface to the display
         pygame.transform.smoothscale(temp, surface.get_size(), surface)
 
     def run(self):
-        self.draw(screen)
+        self.draw(screen._display)
         pygame.display.flip()
 
 
 if __name__ == '__main__':
+    tile_size = 29
     pygame.init()
-    pygame.font.init()
-    screen = init_screen(320, 320)
-    pygame.display.set_caption('PyTMX Map Viewer')
+    screen = Screen(320, 320, tile_size)
 
-    logger.info(pytmx.__version__)
-    filename = "Res\\Map2.tmx"
-    SimpleTest(filename).run()
-    animObj = AddSprite("Res\\63468.png",  cols = 12, rows = 144, begin = 12, end = 16)
+
+    mapname = "Res\\Map2.tmx"
+    map_index = screen.AddMap(mapname)
+    sprite_index = screen.AddSprite("Res\\63468.png", rows = 144,  cols = 12,
+                                    begin = 12, end = 16, pos_x = 138, pos_y = 138)
+    pygame.display.update()  # Initial display
+    screen.refresh()
 
     mainClock = pygame.time.Clock()
+    print(screen._objects[sprite_index-1][0].getRect())
     while True:
         for event in pygame.event.get():
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 pygame.quit()
                 sys.exit()
-        screen.fill([0, 0, 0])
-        SimpleTest(filename).run()
-        animObj.blit(screen, (138, 138))
-        pygame.display.update()
-    mainClock.tick(30)
+            if event.type == KEYDOWN:
+                rect = screen._objects[sprite_index-1][0].getRect()
+                position_perso = screen._objects[sprite_index-1][1]
+                if event.key == K_DOWN:
+                    position_perso = rect.move(position_perso[0],position_perso[1] + tile_size)
+                elif event.key == K_UP:
+                    position_perso = rect.move(position_perso[0],position_perso[1] - tile_size)
+                elif event.key == K_LEFT:
+                    position_perso = rect.move(position_perso[0] - tile_size,position_perso[1])
+                elif event.key == K_RIGHT:
+                    position_perso = rect.move(position_perso[0] + tile_size,position_perso[1])
+                print(position_perso)
+                screen._objects[sprite_index-1][1] = position_perso
+        screen.refresh()
+        mainClock.tick(30)
