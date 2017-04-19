@@ -18,7 +18,6 @@ import pygame
 from pygame.locals import *
 from pytmx import *
 from pytmx.util_pygame import load_pygame
-import pytmx
 import pyganim
 import logging
 
@@ -81,13 +80,8 @@ class TiledRenderer(object):
 
     def render_map(self, surface):
         """ Render our map to a pygame surface
-        Feel free to use this as a starting point for your pygame app.
-        This method expects that the surface passed is the same pixel
-        size as the map.
-
-        Scrolling is a often requested feature, but pytmx is a map
-        loader, not a renderer!  If you'd like to have a scrolling map
-        renderer, please see my pyscroll project.
+        The map MUST be of the same size as the surface
+        There is no support for scrolling
         """
 
         # fill the background color of our render surface
@@ -169,22 +163,38 @@ class TiledMap(object):
         self.draw(screen._display)
         pygame.display.flip()
 
+def CheckProperties(xy, P,  map_data):
+    # Add a try, because some properties aren't define on all tiles
+    try:
+        x_id = xy[0]//tile_size
+        y_id = xy[1]//tile_size
+        gid = map_data.get_tile_gid(x_id, y_id,0)
+        properties = map_data.get_tile_properties_by_gid(gid)
+        print('CheckProperties', x_id, y_id, properties[P])
+        return properties[P]
+    except Exception as e:
+        print(e)
+        return 0
 
 if __name__ == '__main__':
     tile_size = 29
+    rows, cols = (144,12)
+    begin, end = (0,4)
+    pos_x, pos_y = (0,0)
     pygame.init()
-    screen = Screen(320, 320, tile_size)
+    screen_height, screen_width = (320,320)
+    screen = Screen(screen_height, screen_width, tile_size)
 
-
-    mapname = "Res\\Map2.tmx"
-    map_index = screen.AddMap(mapname)
-    sprite_index = screen.AddSprite("Res\\63468.png", rows = 144,  cols = 12,
-                                    begin = 12, end = 16, pos_x = 138, pos_y = 138)
+    map_index = screen.AddMap("Res\\Map2.tmx")
+    sprite_index = screen.AddSprite("Res\\63468.png", rows = rows,  cols = cols,
+                                    begin = begin, end = end,
+                                    pos_x = pos_x, pos_y = pos_y)
     pygame.display.update()  # Initial display
     screen.refresh()
 
     mainClock = pygame.time.Clock()
-    print(screen._objects[sprite_index-1][0].getRect())
+    map_data = screen._objects[map_index-1][0].renderer.tmx_data
+
     while True:
         for event in pygame.event.get():
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
@@ -193,15 +203,22 @@ if __name__ == '__main__':
             if event.type == KEYDOWN:
                 rect = screen._objects[sprite_index-1][0].getRect()
                 position_perso = screen._objects[sprite_index-1][1]
-                if event.key == K_DOWN:
-                    position_perso = rect.move(position_perso[0],position_perso[1] + tile_size)
-                elif event.key == K_UP:
-                    position_perso = rect.move(position_perso[0],position_perso[1] - tile_size)
-                elif event.key == K_LEFT:
-                    position_perso = rect.move(position_perso[0] - tile_size,position_perso[1])
-                elif event.key == K_RIGHT:
-                    position_perso = rect.move(position_perso[0] + tile_size,position_perso[1])
-                print(position_perso)
+                temp_pos = position_perso
+                if event.key == K_DOWN and position_perso[1] < screen_height-2*tile_size:
+                    position_perso=rect.move(position_perso[0],position_perso[1] + tile_size)
+                elif event.key == K_UP and position_perso[1] > 0:
+                    position_perso=rect.move(position_perso[0],position_perso[1] - tile_size)
+                elif event.key == K_LEFT and position_perso[0] > 0:
+                    position_perso=rect.move(position_perso[0] - tile_size,position_perso[1])
+                elif event.key == K_RIGHT and  position_perso[0] < screen_width-2*tile_size:
+                    print( position_perso[0] < screen_width,position_perso[0],screen_width)
+                    position_perso=rect.move(position_perso[0] + tile_size,position_perso[1])
+
+                # Condition to be able to go to this tile
+                p = CheckProperties(position_perso, 'slowness', map_data)
+                if p == "-1":
+                    position_perso = rect.move(temp_pos[0], temp_pos[1])
                 screen._objects[sprite_index-1][1] = position_perso
+                print("Anna's position:", position_perso[0],position_perso[1])
         screen.refresh()
         mainClock.tick(30)
