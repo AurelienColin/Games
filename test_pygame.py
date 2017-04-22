@@ -27,6 +27,54 @@ ch.setLevel(logging.INFO)
 logger.addHandler(ch)
 logger.setLevel(logging.INFO)
 
+#Each class will later be in a different file
+
+class Character():
+    def __init__(self):
+        self._name = "Anna"
+        self._class = 'Aventurier'
+        self._sex = 'f'
+        self._niveau = 1
+        self._PV = 100
+        self._sprite_sheet = "Res\\63468.png"
+        self._maxPA = 6
+        self._PA = self._maxPA
+        self._maxPM = 4
+        self._PM = self._maxPM
+        self._active_skills = [Skill()]
+        self._passive_skills = []
+        self._XP = 0
+        self._effects = []
+
+    def UsePM(self, slowness):
+        if slowness < self._PM:
+            self._PM -= slowness
+            return True
+        else:
+            return False
+
+    def UsePA(self, cost):
+        if cost < self._PA:
+            self._PA -= cost
+            return True
+        else:
+            return False
+
+    def NewTurn(self):
+        self._PA = self._maxPA
+        self._PM = self._maxPM
+
+# The skills will be later wroten in XML
+class Skill():
+    def __init__(self):
+        self._name = 'Horizontal'
+        self._AOE = 'parallel'
+        self._size = 3
+        self._cost = 4
+        self._sprite_sheet = ''
+        self._effects = []
+
+
 class Screen():
     """A screen had
     - a pygame.display
@@ -42,21 +90,23 @@ class Screen():
 
     def refresh(self):
         for ele, position, type_ele in self._objects:
+            print('Object:', ele, position)
             if type_ele == 'tiled_map':
                 ele.draw(self._display)
             elif type_ele == 'sprite':
                 ele.blit(self._display, position)
+            else:
+                self._display.blit(ele, position)
         pygame.display.update()
 
 
-    def AddSprite(self, sheet_file, rows=1, cols=1, begin = 0, end = -1, pos_x = 0, pos_y = 0):
+    def AddSprite(self, sheet_file, pos_x = 0, pos_y = 0, rows=1, cols=1, begin = 0, end = -1):
         """The len is returned to know where is the sprite"""
         perso = pyganim.getImagesFromSpriteSheet(sheet_file,cols=cols,rows= rows)[begin:end]
         frames = list(zip(perso, [200, 200, 200, 200]))
         animObj = pyganim.PygAnimation(frames)
         animObj.play()
         self._objects.append([animObj, (pos_x, pos_y), 'sprite'])
-        print(self._objects[-1])
         return len(self._objects)
 
     def AddMap(self, filename):
@@ -173,27 +223,37 @@ def CheckProperties(xy, P,  map_data):
         print('CheckProperties', x_id, y_id, properties[P])
         return properties[P]
     except Exception as e:
-        print(e)
+        print('ERROR:',e)
         return 0
 
 if __name__ == '__main__':
     tile_size = 29
     rows, cols = (144,12)
     begin, end = (0,4)
-    pos_x, pos_y = (0,0)
+    pos_x, pos_y = (58,58)
     pygame.init()
-    screen_height, screen_width = (320,320)
+    screen_height, screen_width = (640,640)
     screen = Screen(screen_height, screen_width, tile_size)
 
-    map_index = screen.AddMap("Res\\Map2.tmx")
+    map_index = screen.AddMap("Res\\sans-titre.tmx")
     sprite_index = screen.AddSprite("Res\\63468.png", rows = rows,  cols = cols,
                                     begin = begin, end = end,
                                     pos_x = pos_x, pos_y = pos_y)
-    pygame.display.update()  # Initial display
-    screen.refresh()
 
     mainClock = pygame.time.Clock()
     map_data = screen._objects[map_index-1][0].renderer.tmx_data
+
+    # We will make a object textbox to have the text and the box in the same place
+    # It will be necessary to resize it
+    screen._objects.append([pygame.image.load("Res//TextBox1.png"), (0,0), 'textbox'])
+
+    text = pygame.font.SysFont('freesans', 24)
+    title_text = text.render('Push enter to get the menu', True, (0,0,0))
+    screen._objects.append([title_text, (30,40), 'text'])
+
+
+    pygame.display.update()  # Initial display
+    screen.refresh()
 
     while True:
         for event in pygame.event.get():
@@ -220,5 +280,6 @@ if __name__ == '__main__':
                     position_perso = rect.move(temp_pos[0], temp_pos[1])
                 screen._objects[sprite_index-1][1] = position_perso
                 print("Anna's position:", position_perso[0],position_perso[1])
+                print()
         screen.refresh()
         mainClock.tick(30)
