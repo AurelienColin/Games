@@ -20,6 +20,7 @@ from pytmx import *
 from pytmx.util_pygame import load_pygame
 import pyganim
 import logging
+from os.path import join
 
 logger = logging.getLogger(__name__)
 ch = logging.StreamHandler()
@@ -90,7 +91,6 @@ class Screen():
 
     def refresh(self):
         for ele, position, type_ele in self._objects:
-            print('Object:', ele, position)
             if type_ele == 'tiled_map':
                 ele.draw(self._display)
             elif type_ele == 'sprite':
@@ -102,7 +102,8 @@ class Screen():
 
     def AddSprite(self, sheet_file, pos_x = 0, pos_y = 0, rows=1, cols=1, begin = 0, end = -1):
         """The len is returned to know where is the sprite"""
-        perso = pyganim.getImagesFromSpriteSheet(sheet_file,cols=cols,rows= rows)[begin:end]
+        fullname = join('res', 'sprite', sheet_file)
+        perso = pyganim.getImagesFromSpriteSheet(fullname,cols=cols,rows= rows)[begin:end]
         frames = list(zip(perso, [200, 200, 200, 200]))
         animObj = pyganim.PygAnimation(frames)
         animObj.play()
@@ -110,10 +111,17 @@ class Screen():
         return len(self._objects)
 
     def AddMap(self, filename):
-        self._objects.append([TiledMap(filename), (0, 0), 'tiled_map'])
+        fullname = join('res', 'map', filename)
+        self._objects.append([TiledMap(fullname), (0, 0), 'tiled_map'])
         self._objects[-1][0].run()
         return len(self._objects)
 
+    def AddTextBox(self, box, pos_x = 0, pos_y = 0):
+        self._objects.append([box._box, (pos_x, pos_y), 'box'])
+        self._objects.append([box._text,
+                             (pos_x + box._text_pos_x, pos_y + box._text_pos_y),
+                             'text'])
+        return len(self._objects)-1, len(self._objects)
 
 class TiledRenderer(object):
     """
@@ -214,7 +222,8 @@ class TiledMap(object):
         pygame.display.flip()
 
 def CheckProperties(xy, P,  map_data):
-    # Add a try, because some properties aren't define on all tiles
+    # Add a try, because if some properties aren't define on all tiles
+    # there will be casualties
     try:
         x_id = xy[0]//tile_size
         y_id = xy[1]//tile_size
@@ -226,6 +235,19 @@ def CheckProperties(xy, P,  map_data):
         print('ERROR:',e)
         return 0
 
+class TextBox():
+    def __init__(self, box_file, text, height=0, width=0, pos_x = 0, pos_y = 0, size = 20):
+        fullname = join('res', 'textbox', box_file)
+        font = pygame.font.SysFont('freesans', size)
+        self._text = font.render(text, True, (0,0,0))
+        if height == 0 or width == 0:
+            self._box =  pygame.image.load(fullname)
+        else:
+            img = pygame.image.load(fullname)
+            self._box = pygame.transform.smoothscale(img, (width, height))
+        self._text_pos_x = pos_x
+        self._text_pos_y = pos_y
+
 if __name__ == '__main__':
     tile_size = 29
     rows, cols = (144,12)
@@ -235,8 +257,8 @@ if __name__ == '__main__':
     screen_height, screen_width = (640,640)
     screen = Screen(screen_height, screen_width, tile_size)
 
-    map_index = screen.AddMap("Res\\sans-titre.tmx")
-    sprite_index = screen.AddSprite("Res\\63468.png", rows = rows,  cols = cols,
+    map_index = screen.AddMap("sans-titre.tmx")
+    sprite_index = screen.AddSprite("63468.png", rows = rows,  cols = cols,
                                     begin = begin, end = end,
                                     pos_x = pos_x, pos_y = pos_y)
 
@@ -245,11 +267,10 @@ if __name__ == '__main__':
 
     # We will make a object textbox to have the text and the box in the same place
     # It will be necessary to resize it
-    screen._objects.append([pygame.image.load("Res//TextBox1.png"), (0,0), 'textbox'])
-
-    text = pygame.font.SysFont('freesans', 24)
-    title_text = text.render('Push enter to get the menu', True, (0,0,0))
-    screen._objects.append([title_text, (30,40), 'text'])
+    string = 'Push enter to get the menu'
+    box_file = "TextBox_LongSmall.png"
+    text_box = TextBox(box_file, string, height=50, width=240, pos_x = 20, pos_y = 13)
+    screen.AddTextBox(text_box)
 
 
     pygame.display.update()  # Initial display
