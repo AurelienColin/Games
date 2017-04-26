@@ -43,13 +43,13 @@ class Screen():
         animObj = pyganim.PygAnimation(frames)
         animObj.play()
         self._objects.append([animObj, (pos_x, pos_y), 'sprite'])
-        return len(self._objects)
+        return len(self._objects)-1
 
     def AddMap(self, filename):
         fullname = join('res', 'map', filename)
         self._objects.append([Map.TiledMap(fullname), (0, 0), 'tiled_map'])
         self._objects[-1][0].run(self)
-        return len(self._objects)
+        return len(self._objects)-1
 
     def AddTextBox(self, box, pos_x = 0, pos_y = 0):
         self._objects.append([box._box, (pos_x, pos_y), 'box'])
@@ -61,4 +61,4 @@ class Screen():
     def AddHighlight(self, height, width, alpha, color, pos_x, pos_y):
         s = Highlight.Highlight(height, width, alpha, color, pos_x, pos_y)
         self._objects.append([s._content, (s._pos_x, s._pos_y), 'highlight'])
-        return len(self._objects)
+        return len(self._objects)-1
