@@ -42,12 +42,17 @@ def IfDeplacement(character, key, screen, map_data):
     else:
         diff = (0, 0)
     new_pos = (position[0]+diff[0] , position[1]+diff[1])
+    change = True
+    for obj in screen._objects:
+        if obj and obj[2] == 'character' and obj != screen._objects[character._index[1]] and obj[1] == new_pos:
+            change = False
     p = Map.CheckProperties(new_pos, 'slowness', map_data, tile_size)
-    if p != "-1":
+    if p == "-1":
+        change = False
+    if change:
         character._lifebar1._pos = (character._lifebar1._pos[0] + diff[0], character._lifebar1._pos[1] + diff[1])
         character._lifebar2._pos = (character._lifebar2._pos[0] + diff[0], character._lifebar2._pos[1] + diff[1])
         character._pos = new_pos
-
     screen._objects[character._index[0]][1] = character._pos
     screen._objects[character._index[1]][1] = character._lifebar1._pos
     screen._objects[character._index[2]][1] = character._lifebar2._pos

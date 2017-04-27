@@ -26,7 +26,7 @@ class Screen():
                 ele, position, type_ele = element
                 if type_ele == 'tiled_map':
                     ele.draw(self._display)
-                elif type_ele == 'sprite':
+                elif type_ele == 'character':
                     ele.blit(self._display, position)
                 else:
                     self._display.blit(ele, position)
@@ -38,8 +38,7 @@ class Screen():
     def AddCharacter(self, character, key):
         """The len is returned to know where is the sprite"""
         sprite = character._sprite[key]
-        print(character._lifebar1, character._lifebar2)
-        self._objects.append([sprite, character._pos, 'sprite'])
+        self._objects.append([sprite, character._pos, 'character'])
         bar1_index = self.AddHighlight(character._lifebar1)
         bar2_index = self.AddHighlight(character._lifebar2)
         return bar1_index-1, bar1_index, bar2_index

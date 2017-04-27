@@ -16,7 +16,7 @@ class Character():
     def ini_cara(self):
         self._cara['name'] = 'Anna'
         self._cara['sex'] = 'f'
-        self._cara['PV'] = 60
+        self._cara['PV'] = 20
         self._cara['PV_max'] = 100
         self._cara['PM'] = 4
         self._cara['PM_max'] = 4
@@ -37,8 +37,16 @@ class Character():
 
     def AddLifeBar(self, tile_size):
         width = 2
-        height_life = tile_size*self._cara['PV']/self._cara['PV_max']
+        percentage = self._cara['PV']/self._cara['PV_max']
+        height_life = tile_size*percentage
         height_void = tile_size - height_life
-        print(self._pos)
-        self._lifebar1 = Highlight.Highlight(height_life, width, 255, (0, 255, 0), self._pos[0], self._pos[1])
-        self._lifebar2 = Highlight.Highlight(height_void, width, 255, (0, 0, 0), self._pos[0]+height_void, self._pos[1])
+        if percentage < 0.5:
+            R = 255
+            G = 255 - 255*(1-percentage*2)
+        else:
+            R = 255*(1-percentage)*2
+            G = 255
+        B = 0
+        print(R,G,B)
+        self._lifebar1 = Highlight.Highlight(height_life, width, 255, (R, G, B), self._pos[0], self._pos[1])
+        self._lifebar2 = Highlight.Highlight(height_void, width, 255, (0, 0, 0), self._pos[0]+height_life, self._pos[1])
