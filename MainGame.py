@@ -28,19 +28,80 @@ def ObjToCoord(obj):
     print('coord:',rect.height, rect.width, pos_x, pos_y)
     return rect.height, rect.width, pos_x, pos_y
 
+def IfDeplacement(personnage_index, key, screen, map_data):
+    rect = screen._objects[personnage_index][0].getRect()
+    position = screen._objects[personnage_index][1]
+    temp_pos = position
+    tile_size = screen._tile_size
+    if key == K_DOWN and position[1] < screen_height-2*tile_size:
+        position=rect.move(position[0], position[1] + tile_size)
+    elif key == K_UP and position[1] > 0:
+        position=rect.move(position[0], position[1] - tile_size)
+    elif key == K_LEFT and position[0] > 0:
+        position=rect.move(position[0] - tile_size, position[1])
+    elif key == K_RIGHT and position[0] < screen_width-2*tile_size:
+        position=rect.move(position[0] + tile_size, position[1])
+    # Condition to be able to go to this tile
+    p = Map.CheckProperties(position, 'slowness', map_data, tile_size)
+    if p == "-1":
+        position = rect.move(temp_pos[0], temp_pos[1])
+    screen._objects[personnage_index][1] = position
+    print("Character's position:", int(position[0]/tile_size), int(position[1]/tile_size))
+    return position
+
+def OpenMenu(screen):
+    string = 'Aide\nSkills\nObjets\nStatus\nExit'
+    height, width = (150, 100)
+    text_box = TextBox.TextBox("TextBox_ExtraLarge.png", string, height = height,
+                               width = width, pos_x = 30, pos_y = 20)
+
+    pos_x = (screen_height - height)/2
+    pos_y = (screen_width - width)/2
+    menu_index = screen.AddTextBox(text_box, pos_x, pos_y)
+
+    alpha = 80
+    color = (0,0,0)
+    height, width, pos_x, pos_y = ObjToCoord(screen._objects[menu_index[selection]])
+    selection_id = screen.AddHighlight(width,height, alpha, color, pos_x, pos_y)
+    return menu_index, selection_id
+
+def MenuNavigation(key, screen, menu_index, selection, selection_id):
+    alpha = 80
+    color = (0,0,0)
+    if key == K_DOWN:
+        screen.RemoveObject(selection_id)
+        selection = (selection+1)%len(menu_index)
+        if selection == 0:
+            selection +=1
+        height, width, pos_x, pos_y = ObjToCoord(screen._objects[menu_index[selection]])
+        selection_id = screen.AddHighlight( width,height, alpha, color, pos_x, pos_y)
+    elif key == K_UP:
+        screen.RemoveObject(selection_id)
+        selection = (selection-1)%len(menu_index)
+        if selection == 0:
+            selection = len(menu_index)-1
+        height, width, pos_x, pos_y = ObjToCoord(screen._objects[menu_index[selection]])
+        selection_id = screen.AddHighlight(width,height, alpha, color, pos_x, pos_y)
+    return selection, selection_id
+
+def QuitMenu(screen, menu_index, selection_id):
+    for i in menu_index:
+        screen.RemoveObject(i)
+    screen.RemoveObject(selection_id)
+
 if __name__ == '__main__':
     tile_size = 29
-    rows, cols = (144,12)
-    begin, end = (0,4)
-    pos_x, pos_y = (58,58)
     pygame.init()
     screen_height, screen_width = (640,640)
     screen = Screen.Screen(screen_height, screen_width, tile_size)
 
     map_index = screen.AddMap("sans-titre.tmx")
-    sprite_index = screen.AddSprite("63468.png", rows = rows,  cols = cols,
-                                    begin = begin, end = end,
-                                    pos_x = pos_x, pos_y = pos_y)
+    anna_index = screen.AddSprite("63468.png", rows = 144,  cols = 12,
+                                    begin = 0, end = 4,
+                                    pos_x = 2*tile_size, pos_y = 2*tile_size)
+    henry_index = screen.AddSprite("63482.png", rows = 80,  cols = 12,
+                                    begin = 384, end = 388,
+                                    pos_x = 10*tile_size, pos_y = 4*tile_size)
 
     mainClock = pygame.time.Clock()
     map_data = screen._objects[map_index][0].renderer.tmx_data
@@ -58,68 +119,27 @@ if __name__ == '__main__':
     selection = 0
     while True:
         for event in pygame.event.get():
-            if event.type == QUIT:
+            if event.type == QUIT:  # The game is closed
                 pygame.quit()
                 sys.exit()
             if event.type == KEYDOWN:
-                if not selection:
-                    rect = screen._objects[sprite_index][0].getRect()
-                    position_perso = screen._objects[sprite_index][1]
-                    temp_pos = position_perso
-                    if event.key == K_DOWN and position_perso[1] < screen_height-2*tile_size:
-                        position_perso=rect.move(position_perso[0],position_perso[1] + tile_size)
-                    elif event.key == K_UP and position_perso[1] > 0:
-                        position_perso=rect.move(position_perso[0],position_perso[1] - tile_size)
-                    elif event.key == K_LEFT and position_perso[0] > 0:
-                        position_perso=rect.move(position_perso[0] - tile_size,position_perso[1])
-                    elif event.key == K_RIGHT and  position_perso[0] < screen_width-2*tile_size:
-                        position_perso=rect.move(position_perso[0] + tile_size,position_perso[1])
-                    screen._objects[sprite_index][1] = position_perso
-
-                if event.key == K_RETURN and not menu:
-                    string = 'Aide\nSkills\nObjets\nStatus\nExit'
-                    height, width = (150, 100)
-                    text_box = TextBox.TextBox("TextBox_ExtraLarge.png", string,
-                                               height = height, width = width,
-                                               pos_x = 30, pos_y = 20)
-                    pos_x = (screen_height - height)/2
-                    pos_y = (screen_width - width)/2
-                    menu_index = screen.AddTextBox(text_box, pos_x, pos_y)
-                    menu = True
-
-                    selection = 1
-                    print(menu_index[selection], screen._objects[menu_index[selection]])
-                    height, width, pos_x, pos_y = ObjToCoord(screen._objects[menu_index[selection]])
-
-                    # We should take the width of the textbox for highligh
-
-                    selection_id = screen.AddHighlight(height, width, 128, (0,0,0), pos_x, pos_y)
-                if event.key == K_ESCAPE and menu:
-                    for i in menu_index:
-                        screen.RemoveObject(i)
+                if menu:  # We are in a menu
+                    if event.key == K_ESCAPE: # We close the menu
                         menu = False
-                if selection and event.key == K_DOWN:
-                    screen.RemoveObject(selection_id)
-                    selection = (selection+1)%len(menu_index)
-                    if selection == 0:
-                        selection +=1
-                    height, width, pos_x, pos_y = ObjToCoord(screen._objects[menu_index[selection]])
-                    selection_id = screen.AddHighlight(height, width, 128, (0,0,0), pos_x, pos_y)
-                if selection and event.key == K_UP:
-                    screen.RemoveObject(selection_id)
-                    selection = (selection-1)%len(menu_index)
-                    if selection == 0:
-                        selection +=1
-                    height, width, pos_x, pos_y = ObjToCoord(screen._objects[menu_index[selection]])
-                    selection_id = screen.AddHighlight(height, width, 128, (0,0,0), pos_x, pos_y)
-
-
-                # Condition to be able to go to this tile
-                p = Map.CheckProperties(position_perso, 'slowness', map_data, tile_size)
-                if p == "-1":
-                    position_perso = rect.move(temp_pos[0], temp_pos[1])
-
-                print("Anna's position:", position_perso[0],position_perso[1])
+                        selection = 0
+                        QuitMenu(screen, menu_index, selection_id)
+                    elif event.key == K_UP or event.key == K_DOWN:  # We navigate through the menu
+                        selection, selection_id = MenuNavigation(event.key, screen, menu_index, selection, selection_id)
+                    elif event.key == K_RETURN: # We selection the menu item
+                        pass # Not yet implemented
+                else:  # We are on the map
+                    if event.key == K_RETURN: # We open a menu
+                        menu = True
+                        selection = 1
+                        menu_index, selection_id = OpenMenu(screen)
+                    elif event.key == K_UP or event.key == K_DOWN or event.key == K_RIGHT or event.key == K_LEFT:
+                        # We move the current character
+                        anna_position = IfDeplacement(anna_index, event.key, screen, map_data)
                 print()
         screen.refresh()
         mainClock.tick(30)

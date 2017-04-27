@@ -39,7 +39,7 @@ class Screen():
         """The len is returned to know where is the sprite"""
         fullname = join('res', 'sprite', sheet_file)
         perso = pyganim.getImagesFromSpriteSheet(fullname,cols=cols,rows= rows)[begin:end]
-        frames = list(zip(perso, [200, 200, 200, 200]))
+        frames = list(zip(perso, [200]*(end-begin)))
         animObj = pyganim.PygAnimation(frames)
         animObj.play()
         self._objects.append([animObj, (pos_x, pos_y), 'sprite'])
