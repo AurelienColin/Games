@@ -15,11 +15,11 @@ Missing tests:
 """
 import sys
 import pygame
-import Class
-import Skill
+import Character
 import Screen
 import Map
 import TextBox
+import Highlight
 from pygame.locals import *
 
 def ObjToCoord(obj):
@@ -28,24 +28,30 @@ def ObjToCoord(obj):
     print('coord:',rect.height, rect.width, pos_x, pos_y)
     return rect.height, rect.width, pos_x, pos_y
 
-def IfDeplacement(personnage_index, key, screen, map_data):
-    rect = screen._objects[personnage_index][0].getRect()
-    position = screen._objects[personnage_index][1]
-    temp_pos = position
+def IfDeplacement(character, key, screen, map_data):
+    position = character._pos
     tile_size = screen._tile_size
     if key == K_DOWN and position[1] < screen_height-2*tile_size:
-        position=rect.move(position[0], position[1] + tile_size)
+        diff = (0, tile_size)
     elif key == K_UP and position[1] > 0:
-        position=rect.move(position[0], position[1] - tile_size)
+        diff = (0, -tile_size)
     elif key == K_LEFT and position[0] > 0:
-        position=rect.move(position[0] - tile_size, position[1])
+        diff = (-tile_size, 0)
     elif key == K_RIGHT and position[0] < screen_width-2*tile_size:
-        position=rect.move(position[0] + tile_size, position[1])
-    # Condition to be able to go to this tile
-    p = Map.CheckProperties(position, 'slowness', map_data, tile_size)
-    if p == "-1":
-        position = rect.move(temp_pos[0], temp_pos[1])
-    screen._objects[personnage_index][1] = position
+        diff = (tile_size, 0)
+    else:
+        diff = (0, 0)
+    new_pos = (position[0]+diff[0] , position[1]+diff[1])
+    p = Map.CheckProperties(new_pos, 'slowness', map_data, tile_size)
+    if p != "-1":
+        character._lifebar1._pos = (character._lifebar1._pos[0] + diff[0], character._lifebar1._pos[1] + diff[1])
+        character._lifebar2._pos = (character._lifebar2._pos[0] + diff[0], character._lifebar2._pos[1] + diff[1])
+        character._pos = new_pos
+
+    screen._objects[character._index[0]][1] = character._pos
+    screen._objects[character._index[1]][1] = character._lifebar1._pos
+    screen._objects[character._index[2]][1] = character._lifebar2._pos
+
     print("Character's position:", int(position[0]/tile_size), int(position[1]/tile_size))
     return position
 
@@ -62,7 +68,8 @@ def OpenMenu(screen):
     alpha = 80
     color = (0,0,0)
     height, width, pos_x, pos_y = ObjToCoord(screen._objects[menu_index[selection]])
-    selection_id = screen.AddHighlight(width,height, alpha, color, pos_x, pos_y)
+    s = Highlight.Highlight(width, height, alpha, color, pos_x, pos_y)
+    selection_id = screen.AddHighlight(s)
     return menu_index, selection_id
 
 def MenuNavigation(key, screen, menu_index, selection, selection_id):
@@ -74,14 +81,16 @@ def MenuNavigation(key, screen, menu_index, selection, selection_id):
         if selection == 0:
             selection +=1
         height, width, pos_x, pos_y = ObjToCoord(screen._objects[menu_index[selection]])
-        selection_id = screen.AddHighlight( width,height, alpha, color, pos_x, pos_y)
+        s = Highlight.Highlight(width, height, alpha, color, pos_x, pos_y)
+        selection_id = screen.AddHighlight(s)
     elif key == K_UP:
         screen.RemoveObject(selection_id)
         selection = (selection-1)%len(menu_index)
         if selection == 0:
             selection = len(menu_index)-1
         height, width, pos_x, pos_y = ObjToCoord(screen._objects[menu_index[selection]])
-        selection_id = screen.AddHighlight(width,height, alpha, color, pos_x, pos_y)
+        s = Highlight.Highlight(width, height, alpha, color, pos_x, pos_y)
+        selection_id = screen.AddHighlight(s)
     return selection, selection_id
 
 def QuitMenu(screen, menu_index, selection_id):
@@ -96,12 +105,17 @@ if __name__ == '__main__':
     screen = Screen.Screen(screen_height, screen_width, tile_size)
 
     map_index = screen.AddMap("sans-titre.tmx")
-    anna_index = screen.AddSprite("63468.png", rows = 144,  cols = 12,
-                                    begin = 0, end = 4,
-                                    pos_x = 2*tile_size, pos_y = 2*tile_size)
-    henry_index = screen.AddSprite("63482.png", rows = 80,  cols = 12,
-                                    begin = 384, end = 388,
-                                    pos_x = 10*tile_size, pos_y = 4*tile_size)
+    anna = Character.Character()
+    anna.AddSprite('standing', "63468.png", rows = 144,  cols = 12,begin = 0, end = 4)
+    anna._pos = (2*tile_size, 2*tile_size)
+    anna.AddLifeBar(tile_size)
+    anna._index = screen.AddCharacter(anna, 'standing')
+
+    henry = Character.Character()
+    henry.AddSprite('standing', "63482.png", rows = 80,  cols = 12,begin = 384, end = 388,)
+    henry._pos = (10*tile_size, 4*tile_size)
+    henry.AddLifeBar(tile_size)
+    henry._index = screen.AddCharacter(henry, 'standing')
 
     mainClock = pygame.time.Clock()
     map_data = screen._objects[map_index][0].renderer.tmx_data
@@ -139,7 +153,7 @@ if __name__ == '__main__':
                         menu_index, selection_id = OpenMenu(screen)
                     elif event.key == K_UP or event.key == K_DOWN or event.key == K_RIGHT or event.key == K_LEFT:
                         # We move the current character
-                        anna_position = IfDeplacement(anna_index, event.key, screen, map_data)
+                        anna_position = IfDeplacement(anna, event.key, screen, map_data)
                 print()
         screen.refresh()
         mainClock.tick(30)

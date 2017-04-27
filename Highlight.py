@@ -6,5 +6,4 @@ class Highlight():
         s.fill(color)
         s.set_alpha(alpha)
         self._content = s
-        self._pos_x = pos_x
-        self._pos_y = pos_y
+        self._pos = pos_x, pos_y

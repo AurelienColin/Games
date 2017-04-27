@@ -35,15 +35,14 @@ class Screen():
     def RemoveObject(self, index):
         self._objects[index] = None
 
-    def AddSprite(self, sheet_file, pos_x = 0, pos_y = 0, rows=1, cols=1, begin = 0, end = -1):
+    def AddCharacter(self, character, key):
         """The len is returned to know where is the sprite"""
-        fullname = join('res', 'sprite', sheet_file)
-        perso = pyganim.getImagesFromSpriteSheet(fullname,cols=cols,rows= rows)[begin:end]
-        frames = list(zip(perso, [200]*(end-begin)))
-        animObj = pyganim.PygAnimation(frames)
-        animObj.play()
-        self._objects.append([animObj, (pos_x, pos_y), 'sprite'])
-        return len(self._objects)-1
+        sprite = character._sprite[key]
+        print(character._lifebar1, character._lifebar2)
+        self._objects.append([sprite, character._pos, 'sprite'])
+        bar1_index = self.AddHighlight(character._lifebar1)
+        bar2_index = self.AddHighlight(character._lifebar2)
+        return bar1_index-1, bar1_index, bar2_index
 
     def AddMap(self, filename):
         fullname = join('res', 'map', filename)
@@ -58,7 +57,6 @@ class Screen():
             self._objects.append([text._string, (text._pos_x + pos_x, text._pos_y + pos_y), 'text'])
         return [i for i in range(prec-1, len(self._objects))]
 
-    def AddHighlight(self, height, width, alpha, color, pos_x, pos_y):
-        s = Highlight.Highlight(height, width, alpha, color, pos_x, pos_y)
-        self._objects.append([s._content, (s._pos_x, s._pos_y), 'highlight'])
+    def AddHighlight(self, s):
+        self._objects.append([s._content, (s._pos[0], s._pos[1]), 'highlight'])
         return len(self._objects)-1
