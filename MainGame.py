@@ -60,12 +60,15 @@ def IfDeplacement(character, key, screen, map_data):
     print("Character's position:", int(position[0]/tile_size), int(position[1]/tile_size))
     return position
 
-def OpenMenu(screen):
-    string = 'Aide\nSkills\nObjets\nStatus\nExit'
-    height, width = (150, 100)
-    text_box = TextBox.TextBox("TextBox_ExtraLarge.png", string, height = height,
-                               width = width, pos_x = 30, pos_y = 20)
-
+def OpenMenu(key, screen, character=None, team=None):
+    if key == 'main':
+        string = 'Aide\nSkills\nObjets\nStatus\nExit'
+        height, width = (150, 100)
+        text_box = TextBox.TextBox("TextBox_ExtraLarge.png", string, height = height,
+                                   width = width, pos_x = 30, pos_y = 20)
+    else:
+        print(key)
+        return
     pos_x = (screen_height - height)/2
     pos_y = (screen_width - width)/2
     menu_index = screen.AddTextBox(text_box, pos_x, pos_y)
@@ -150,12 +153,13 @@ if __name__ == '__main__':
                     elif event.key == K_UP or event.key == K_DOWN:  # We navigate through the menu
                         selection, selection_id = MenuNavigation(event.key, screen, menu_index, selection, selection_id)
                     elif event.key == K_RETURN: # We selection the menu item
-                        pass # Not yet implemented
+                        #Open the at (selection+menu_index[0])
+                        OpenMenu(screen._objects[menu_index[0]][0]._string[selection-1], screen)
                 else:  # We are on the map
                     if event.key == K_RETURN: # We open a menu
                         menu = True
                         selection = 1
-                        menu_index, selection_id = OpenMenu(screen)
+                        menu_index, selection_id = OpenMenu('main', screen)
                     elif event.key == K_UP or event.key == K_DOWN or event.key == K_RIGHT or event.key == K_LEFT:
                         # We move the current character
                         anna_position = IfDeplacement(anna, event.key, screen, map_data)

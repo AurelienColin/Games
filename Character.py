@@ -12,6 +12,7 @@ class Character():
         self._lifebar1 = None
         self._lifebar2 = None
         self._pos = None
+        self._skills = {}
 
     def ini_cara(self):
         self._cara['name'] = 'Anna'

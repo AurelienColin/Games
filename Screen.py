@@ -28,6 +28,8 @@ class Screen():
                     ele.draw(self._display)
                 elif type_ele == 'character':
                     ele.blit(self._display, position)
+                elif type_ele == 'box':
+                    self._display.blit(ele._box, position)
                 else:
                     self._display.blit(ele, position)
         pygame.display.update()
@@ -50,7 +52,7 @@ class Screen():
         return len(self._objects)-1
 
     def AddTextBox(self, box, pos_x = 0, pos_y = 0):
-        self._objects.append([box._box, (pos_x, pos_y), 'box'])
+        self._objects.append([box, (pos_x, pos_y), 'box'])
         prec = len(self._objects)
         for text in box._text:
             self._objects.append([text._string, (text._pos_x + pos_x, text._pos_y + pos_y), 'text'])
