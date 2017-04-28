@@ -2,19 +2,31 @@ import pygame
 from os.path import join
 
 class TextBox():
-    def __init__(self, box_file, text, height=0, width=0, pos_x = 0, pos_y = 0, size = 20):
+    def __init__(self, box_file, text, height, width, pos, size=20):
         fullname = join('res', 'textbox', box_file)
-        self._string = text.split('\n')
-        self._text = [Text(self._string[i], pos_x, pos_y+i*20, 20) for i in range(len(self._string))]
-        if height == 0 or width == 0:
-            self._box =  pygame.image.load(fullname)
+        self._string = text.split(';')
+        self._text = [Text(self._string[i], (pos[0], pos[1]+i*size), 20) for i in range(len(self._string))]
+        self._height = height
+        self._width = width
+
+        img = pygame.image.load(fullname)
+        self._box = pygame.transform.smoothscale(img, (width, height))
+
+    def Initialization(name):
+        if name == 'MainMenu':
+            self = MainMenu()
         else:
-            img = pygame.image.load(fullname)
-            self._box = pygame.transform.smoothscale(img, (width, height))
+            self = None
+        return self
 
 class Text():
-    def __init__(self, text, pos_x, pos_y, size):
+    def __init__(self, text, pos, size):
         font = pygame.font.SysFont('freesans', size)
         self._string = font.render(text, True, (0,0,0))
-        self._pos_x = pos_x
-        self._pos_y = pos_y
+        self._pos = pos
+
+class MainMenu(TextBox):
+    def __init__(self):
+        string = "Aide;Skills;Objets;Status;Exit"
+        name = "TextBox_ExtraLarge.png"
+        TextBox.__init__(self,name, string, 150, 100, (30, 20))

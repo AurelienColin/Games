@@ -20,7 +20,7 @@ import Screen
 import Map
 import TextBox
 import Highlight
-from pygame.locals import *
+from pygame.locals import *  # Import the event
 
 def ObjToCoord(obj):
     rect = obj[0].get_rect()
@@ -61,17 +61,14 @@ def IfDeplacement(character, key, screen, map_data):
     return position
 
 def OpenMenu(key, screen, character=None, team=None):
-    if key == 'main':
-        string = 'Aide\nSkills\nObjets\nStatus\nExit'
-        height, width = (150, 100)
-        text_box = TextBox.TextBox("TextBox_ExtraLarge.png", string, height = height,
-                                   width = width, pos_x = 30, pos_y = 20)
+    if key == 'MainMenu':
+        text_box = TextBox.TextBox.Initialization('MainMenu')
     else:
         print(key)
         return
-    pos_x = (screen_height - height)/2
-    pos_y = (screen_width - width)/2
-    menu_index = screen.AddTextBox(text_box, pos_x, pos_y)
+    pos_x = (screen_height - text_box._height)/2
+    pos_y = (screen_width - text_box._width)/2
+    menu_index = screen.AddTextBox(text_box, (pos_x, pos_y))
 
     alpha = 80
     color = (0,0,0)
@@ -112,33 +109,32 @@ if __name__ == '__main__':
     screen_height, screen_width = (640,640)
     screen = Screen.Screen(screen_height, screen_width, tile_size)
 
-    map_index = screen.AddMap("sans-titre.tmx")
-    anna = Character.Character()
-    anna.AddSprite('standing', "63468.png", rows = 144,  cols = 12,begin = 0, end = 4)
+    map_index = screen.AddMap("TestLevel.tmx")
+    map_data = screen._objects[map_index][0].renderer.tmx_data
+
+    anna = Character.Character.Initialization('Anna')
     anna._pos = (2*tile_size, 2*tile_size)
     anna.AddLifeBar(tile_size)
     anna._index = screen.AddCharacter(anna, 'standing')
 
-    henry = Character.Character()
-    henry.AddSprite('standing', "63482.png", rows = 80,  cols = 12,begin = 384, end = 388,)
+    henry = Character.Character.Initialization('Henry')
     henry._pos = (10*tile_size, 4*tile_size)
     henry.AddLifeBar(tile_size)
     henry._index = screen.AddCharacter(henry, 'standing')
 
-    mainClock = pygame.time.Clock()
-    map_data = screen._objects[map_index][0].renderer.tmx_data
 
     string = 'Push enter to get the menu'
     box_file = "TextBox_LongSmall.png"
-    text_box = TextBox.TextBox(box_file, string, height=50, width=240,
-                               pos_x = 20, pos_y = 13)
-    screen.AddTextBox(text_box, pos_x = 100)
+    text_box = TextBox.TextBox(box_file, string, 50, 240, (20, 13))
+    screen.AddTextBox(text_box, (100,0))
 
 
+    mainClock = pygame.time.Clock()
     pygame.display.update()  # Initial display
     screen.refresh()
     menu = False
     selection = 0
+    current_character = anna
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:  # The game is closed
@@ -154,15 +150,15 @@ if __name__ == '__main__':
                         selection, selection_id = MenuNavigation(event.key, screen, menu_index, selection, selection_id)
                     elif event.key == K_RETURN: # We selection the menu item
                         #Open the at (selection+menu_index[0])
-                        OpenMenu(screen._objects[menu_index[0]][0]._string[selection-1], screen)
+                        OpenMenu(screen._objects[menu_index[0]][0]._string[selection-1], screen, character=current_character)
                 else:  # We are on the map
                     if event.key == K_RETURN: # We open a menu
                         menu = True
                         selection = 1
-                        menu_index, selection_id = OpenMenu('main', screen)
+                        menu_index, selection_id = OpenMenu('MainMenu', screen)
                     elif event.key == K_UP or event.key == K_DOWN or event.key == K_RIGHT or event.key == K_LEFT:
                         # We move the current character
-                        anna_position = IfDeplacement(anna, event.key, screen, map_data)
+                        anna_position = IfDeplacement(current_character, event.key, screen, map_data)
                 print()
         screen.refresh()
         mainClock.tick(30)
