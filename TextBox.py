@@ -12,9 +12,11 @@ class TextBox():
         img = pygame.image.load(fullname)
         self._box = pygame.transform.smoothscale(img, (width, height))
 
-    def Initialization(name):
+    def Initialization(name, character=None):
         if name == 'MainMenu':
             self = MainMenu()
+        elif name == 'Skills':
+            self = SkillMenu(character)
         else:
             self = None
         return self
@@ -30,3 +32,13 @@ class MainMenu(TextBox):
         string = "Aide;Skills;Objets;Status;Exit"
         name = "TextBox_ExtraLarge.png"
         TextBox.__init__(self,name, string, 150, 100, (30, 20))
+
+class SkillMenu(TextBox):
+    def __init__(self, character):
+        string = ';'.join(character._skills)
+        name = "TextBox_ExtraLarge.png"
+        TextBox.__init__(self, name, string, 150, 150, (30, 30))
+
+
+def ListMenus():
+    return set(['MainMenu', 'Skills', 'Exit'])

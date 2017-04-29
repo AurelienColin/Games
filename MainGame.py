@@ -19,13 +19,13 @@ import Character
 import Screen
 import Map
 import TextBox
+import Skill
 import Highlight
 from pygame.locals import *  # Import the event
 
 def ObjToCoord(obj):
     rect = obj[0].get_rect()
     pos_x, pos_y = obj[1]
-    print('coord:',rect.height, rect.width, pos_x, pos_y)
     return rect.height, rect.width, pos_x, pos_y
 
 def IfDeplacement(character, key, screen, map_data):
@@ -56,23 +56,21 @@ def IfDeplacement(character, key, screen, map_data):
     screen._objects[character._index[0]][1] = character._pos
     screen._objects[character._index[1]][1] = character._lifebar1._pos
     screen._objects[character._index[2]][1] = character._lifebar2._pos
-
     print("Character's position:", int(position[0]/tile_size), int(position[1]/tile_size))
     return position
 
 def OpenMenu(key, screen, character=None, team=None):
     if key == 'MainMenu':
         text_box = TextBox.TextBox.Initialization('MainMenu')
-    else:
-        print(key)
-        return
+    elif key == 'Skills':
+        text_box = TextBox.TextBox.Initialization('Skills', character=character)
     pos_x = (screen_height - text_box._height)/2
     pos_y = (screen_width - text_box._width)/2
     menu_index = screen.AddTextBox(text_box, (pos_x, pos_y))
 
     alpha = 80
     color = (0,0,0)
-    height, width, pos_x, pos_y = ObjToCoord(screen._objects[menu_index[selection]])
+    height, width, pos_x, pos_y = ObjToCoord(screen._objects[menu_index[1]])
     s = Highlight.Highlight(width, height, alpha, color, pos_x, pos_y)
     selection_id = screen.AddHighlight(s)
     return menu_index, selection_id
@@ -132,33 +130,52 @@ if __name__ == '__main__':
     mainClock = pygame.time.Clock()
     pygame.display.update()  # Initial display
     screen.refresh()
-    menu = False
     selection = 0
+    menus = []
     current_character = anna
+    skills = Skill.ListSkills()
+    implemented_menu = TextBox.ListMenus()
+    choice = None
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:  # The game is closed
                 pygame.quit()
                 sys.exit()
             if event.type == KEYDOWN:
-                if menu:  # We are in a menu
-                    if event.key == K_ESCAPE: # We close the menu
-                        menu = False
-                        selection = 0
-                        QuitMenu(screen, menu_index, selection_id)
+                if menus:  # We are in a menu
+                    if event.key == K_RETURN:
+                        choice = screen._objects[menu_index[0]][0]._string[selection-1]
+                        if choice not in skills and choice != 'Exit' and choice in implemented_menu:
+                            menus.append(choice)
+                            old_menu_index, old_selection_id = menu_index, selection_id
+                            menu_index, selection_id = OpenMenu(menus[-1], screen, character=current_character)
+                            QuitMenu(screen, old_menu_index, old_selection_id)
+                            selection = 1
+                        else: # We selection a skill
+                            pass
+
+                    if event.key == K_ESCAPE or choice == 'Exit': # We close the menu
+                        choice = None
+                        if len(menus) > 1:  # Go to the previous menu
+                            menus.pop(-1)
+                            print('Go to', menus[-1])
+                            QuitMenu(screen, menu_index, selection_id)
+                            menu_index, selection_id = OpenMenu(menus[-1], screen, character=current_character)
+                            selection = 1
+                        elif len(menus) == 1: # We quit the last menu
+                            menus = []
+                            QuitMenu(screen, menu_index, selection_id)
+                            selection = 0
                     elif event.key == K_UP or event.key == K_DOWN:  # We navigate through the menu
                         selection, selection_id = MenuNavigation(event.key, screen, menu_index, selection, selection_id)
-                    elif event.key == K_RETURN: # We selection the menu item
-                        #Open the at (selection+menu_index[0])
-                        OpenMenu(screen._objects[menu_index[0]][0]._string[selection-1], screen, character=current_character)
+
                 else:  # We are on the map
                     if event.key == K_RETURN: # We open a menu
-                        menu = True
+                        menus.append('MainMenu')
                         selection = 1
                         menu_index, selection_id = OpenMenu('MainMenu', screen)
                     elif event.key == K_UP or event.key == K_DOWN or event.key == K_RIGHT or event.key == K_LEFT:
                         # We move the current character
                         anna_position = IfDeplacement(current_character, event.key, screen, map_data)
-                print()
         screen.refresh()
         mainClock.tick(30)

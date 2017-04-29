@@ -34,9 +34,9 @@ class Character():
         height_life = tile_size*percentage
         height_void = tile_size - height_life
         if percentage < 0.5:
-            R = 255
             G = 255 - 255*(1-percentage*2)
         else:
+            R = 255
             R = 255*(1-percentage)*2
             G = 255
         B = 0

@@ -34,6 +34,7 @@ class Screen():
                     self._display.blit(ele, position)
         pygame.display.update()
 
+
     def RemoveObject(self, index):
         self._objects[index] = None
 

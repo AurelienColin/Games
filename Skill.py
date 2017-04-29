@@ -16,7 +16,7 @@ class Skill():
             self = None
         return self
 
-class Horizontal():
+class Horizontal(Skill):
     def __init__(self):
         Skill.__init__(self)
         self._name = 'Horizontal'
@@ -27,7 +27,7 @@ class Horizontal():
         self._range = 1
         self._sprite_sheet = None
 
-class Vertical():
+class Vertical(Skill):
     def __init__(self):
         Skill.__init__(self)
         self._name = 'Vertical'
@@ -38,7 +38,7 @@ class Vertical():
         self._range = 2
         self._sprite_sheet = None
 
-class Execution():
+class Execution(Skill):
     def __init__(self):
         Skill.__init__(self)
         self._name = 'Execution'
@@ -49,7 +49,7 @@ class Execution():
         self._range = 1
         self._sprite_sheet = None
 
-class Apocalypse():
+class Apocalypse(Skill):
     def __init__(self):
         Skill.__init__(self)
         self._name = 'Apocalypse'
@@ -59,3 +59,6 @@ class Apocalypse():
         self._damage = 50
         self._range = 5
         self._sprite_sheet = None
+
+def ListSkills():
+    return set(['Horizontal', 'Vertical', 'Execution', 'Apocalypse'])
