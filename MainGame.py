@@ -56,7 +56,7 @@ def IfDeplacement(character, key, screen, map_data):
     screen._objects[character._index[0]][1] = character._pos
     screen._objects[character._index[1]][1] = character._lifebar1._pos
     screen._objects[character._index[2]][1] = character._lifebar2._pos
-    print("Character's position:", int(position[0]/tile_size), int(position[1]/tile_size))
+    print("Character's position:", character._pos)
     return position
 
 def OpenMenu(key, screen, character=None, team=None):
@@ -96,6 +96,96 @@ def MenuNavigation(key, screen, menu_index, selection, selection_id):
         selection_id = screen.AddHighlight(s)
     return selection, selection_id
 
+def AimingLoop(current_character, screen, skill):
+    blue = skill.Aim(current_character, screen)
+    while True:
+        screen.refresh()
+        mainClock.tick(30)
+        for event in pygame.event.get():
+            if event.type == QUIT:  # The game is closed
+                pygame.quit()
+                sys.exit()
+
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:  # Return to skill menu
+                    print('return to skill menu')
+                    for blue_id in blue.values():
+                        screen.RemoveObject(blue_id)
+                    return False  # We didn't used the skill
+
+def MenusLoop(menu, current_character, screen):
+    menus = [menu]
+    selection = 1
+    menu_index, selection_id = OpenMenu('MainMenu', screen)
+    choice = None
+    while True:
+        screen.refresh()
+        mainClock.tick(30)
+        for event in pygame.event.get():
+            if event.type == QUIT:  # The game is closed
+                pygame.quit()
+                sys.exit()
+
+            if event.type == KEYDOWN:
+                ####### We are doing something in the menu ######
+                if event.key == K_RETURN:  # We open a menu
+                    choice = screen._objects[menu_index[0]][0]._string[selection-1]
+                    if choice in skills: # We use a skill
+                        for skill in current_character._skills:
+                            if choice == skill._name:
+                                print('Aim with skill', choice)
+                                QuitMenu(screen, menu_index, selection_id)
+                                selection = 1
+                                use = AimingLoop(current_character, screen, skill)
+                                if not use:
+                                    menu_index, selection_id = OpenMenu(menus[-1], screen, character=current_character)
+                                else:
+                                    return
+
+                    elif choice in implemented_menu:
+                        print('Open menu:', choice)
+                        menus.append(choice)
+                        old_menu_index, old_selection_id = menu_index, selection_id
+                        menu_index, selection_id = OpenMenu(menus[-1], screen, character=current_character)
+                        QuitMenu(screen, old_menu_index, old_selection_id)
+                        selection = 1
+                    else: # Nothing
+                        pass
+
+                if event.key == K_UP or event.key == K_DOWN:  # We navigate through the menu
+                    selection, selection_id = MenuNavigation(event.key, screen, menu_index, selection, selection_id)
+                ##### We are closing a menu #####
+                if event.key == K_ESCAPE or choice == 'Exit':
+                    if len(menus) > 1:  # Go to the previous menu
+                        menus.pop(-1)
+                        print('Return to menu:', menus[-1])
+                        QuitMenu(screen, menu_index, selection_id)
+                        menu_index, selection_id = OpenMenu(menus[-1], screen, character=current_character)
+                        selection = 1
+                    else: # We quit the last menu
+                        menus = []
+                        QuitMenu(screen, menu_index, selection_id)
+                        return
+
+
+def MovementLoop(current_character, screen, map_data):
+    while True:
+        screen.refresh()
+        mainClock.tick(30)
+        for event in pygame.event.get():
+            if event.type == QUIT:  # The game is closed
+                pygame.quit()
+                sys.exit()
+
+            if event.type == KEYDOWN:
+                if event.key == K_RETURN:
+                    print('Opening main menu')
+                    return 'MainMenu'
+                if event.key == K_UP or event.key == K_DOWN or event.key == K_RIGHT or event.key == K_LEFT:
+                    # We move the current character
+                    IfDeplacement(current_character, event.key, screen, map_data)
+
+
 def QuitMenu(screen, menu_index, selection_id):
     for i in menu_index:
         screen.RemoveObject(i)
@@ -130,52 +220,11 @@ if __name__ == '__main__':
     mainClock = pygame.time.Clock()
     pygame.display.update()  # Initial display
     screen.refresh()
-    selection = 0
-    menus = []
+
     current_character = anna
     skills = Skill.ListSkills()
     implemented_menu = TextBox.ListMenus()
-    choice = None
+
     while True:
-        for event in pygame.event.get():
-            if event.type == QUIT:  # The game is closed
-                pygame.quit()
-                sys.exit()
-            if event.type == KEYDOWN:
-                if menus:  # We are in a menu
-                    if event.key == K_RETURN:
-                        choice = screen._objects[menu_index[0]][0]._string[selection-1]
-                        if choice not in skills and choice != 'Exit' and choice in implemented_menu:
-                            menus.append(choice)
-                            old_menu_index, old_selection_id = menu_index, selection_id
-                            menu_index, selection_id = OpenMenu(menus[-1], screen, character=current_character)
-                            QuitMenu(screen, old_menu_index, old_selection_id)
-                            selection = 1
-                        else: # We selection a skill
-                            pass
-
-                    if event.key == K_ESCAPE or choice == 'Exit': # We close the menu
-                        choice = None
-                        if len(menus) > 1:  # Go to the previous menu
-                            menus.pop(-1)
-                            print('Go to', menus[-1])
-                            QuitMenu(screen, menu_index, selection_id)
-                            menu_index, selection_id = OpenMenu(menus[-1], screen, character=current_character)
-                            selection = 1
-                        elif len(menus) == 1: # We quit the last menu
-                            menus = []
-                            QuitMenu(screen, menu_index, selection_id)
-                            selection = 0
-                    elif event.key == K_UP or event.key == K_DOWN:  # We navigate through the menu
-                        selection, selection_id = MenuNavigation(event.key, screen, menu_index, selection, selection_id)
-
-                else:  # We are on the map
-                    if event.key == K_RETURN: # We open a menu
-                        menus.append('MainMenu')
-                        selection = 1
-                        menu_index, selection_id = OpenMenu('MainMenu', screen)
-                    elif event.key == K_UP or event.key == K_DOWN or event.key == K_RIGHT or event.key == K_LEFT:
-                        # We move the current character
-                        anna_position = IfDeplacement(current_character, event.key, screen, map_data)
-        screen.refresh()
-        mainClock.tick(30)
+        menu = MovementLoop(current_character, screen, map_data)
+        MenusLoop(menu, current_character, screen)

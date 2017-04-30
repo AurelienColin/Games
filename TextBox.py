@@ -35,10 +35,11 @@ class MainMenu(TextBox):
 
 class SkillMenu(TextBox):
     def __init__(self, character):
-        string = ';'.join(character._skills)
+        skills = [skill._name for skill in character._skills]
+        string = ';'.join(skills)
         name = "TextBox_ExtraLarge.png"
         TextBox.__init__(self, name, string, 150, 150, (30, 30))
 
 
 def ListMenus():
-    return set(['MainMenu', 'Skills', 'Exit'])
+    return set(['MainMenu', 'Skills'])

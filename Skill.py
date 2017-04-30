@@ -1,3 +1,6 @@
+import Highlight
+import Screen
+
 class Skill():
     def __init__(self):
         self._effects = {}
@@ -6,15 +9,37 @@ class Skill():
     def Initialization(name):
         if name == 'Execution':
             self = Execution()
-        if name == 'Vertical':
+        elif name == 'Vertical':
             self = Vertical()
-        if name == 'Horizontal':
+        elif name == 'Horizontal':
             self = Horizontal()
-        if name == 'Apocalypse':
+        elif name == 'Apocalypse':
             self = Apocalypse()
         else:
             self = None
         return self
+
+    def Aim(self, character, screen):
+        center = (int(character._pos[0]/screen._tile_size),
+                  int(character._pos[1]/screen._tile_size))
+        aimable = GetAimable(center, self._range)
+        highlighted = Highlight.HighlightTiles(screen._tile_size, aimable,
+                                               60, (0, 0,255))
+        blue = {}
+        for pos in highlighted:
+            blue[pos] = screen.AddHighlight(highlighted[pos])
+        return blue
+
+def GetAimable(pos, scope):
+    aimable = set()
+    for x in range(pos[0]-scope, pos[0]+scope+1):
+        diff_x = abs(pos[0]-x)
+        for y in range(pos[1]-scope, pos[1]+scope+1):
+            diff_y = abs(pos[1]-y)
+            if diff_x + diff_y <= scope:
+                aimable.add((x, y))
+    return aimable
+
 
 class Horizontal(Skill):
     def __init__(self):

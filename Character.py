@@ -1,6 +1,7 @@
 import pyganim
 from os.path import join
 import Highlight
+import Skill
 
 class Character():
     def __init__(self):
@@ -60,7 +61,8 @@ class Anna(Character):
         if save:
             pass
         else:
-            self._skills = ['Exécution', 'Horizontal', 'Vertical']
+            skills = ['Execution', 'Horizontal', 'Vertical']
+            self._skills = [Skill.Skill.Initialization(skill) for skill in skills]
             self._cara['PV'], self._cara['PV_max'] = 100, 100
             self._cara['PA'], self._cara['PA_max'] = 6, 6
             self._cara['PM'], self._cara['PM_max'] = 3, 3
@@ -87,7 +89,8 @@ class Henry(Character):
         if save:
             pass
         else:
-            self._skills = ['Apocalypse']
+            skills = ['Apocalypse']
+            self._skills = [Skill.Skill.Initialization(skill) for skill in skills]
             self._cara['PV'], self._cara['PV_max'] = 100, 100
             self._cara['PA'], self._cara['PA_max'] = 6, 6
             self._cara['PM'], self._cara['PM_max'] = 3, 3
