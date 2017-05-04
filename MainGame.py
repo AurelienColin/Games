@@ -55,7 +55,7 @@ def IfDeplacement(character, key, screen, map_data):
     screen._objects[character._index[1]][1] = character._lifebar1._pos
     screen._objects[character._index[2]][1] = character._lifebar2._pos
     print("Character's position:", character._pos)
-    return position
+    return
 
 def OpenMenu(key, screen, character=None, playerTeam=None):
     if key == 'MainMenu':
@@ -96,6 +96,11 @@ def MenuNavigation(key, screen, menu_index, selection, selection_id):
 
 def AimingLoop(current_character, screen, skill, map_data, playerTeam):
     blue = skill.Aim(current_character, screen, map_data, playerTeam)
+    alpha = 80
+    color = (255, 0, 0)
+    red = {}
+    selection_tile = current_character._pos_tile
+    change = True
     while True:
         screen.refresh()
         mainClock.tick(30)
@@ -109,7 +114,53 @@ def AimingLoop(current_character, screen, skill, map_data, playerTeam):
                     print('Return to skill menu')
                     for blue_id in blue.values():
                         screen.RemoveObject(blue_id)
+                    for red_id in red.values():
+                        screen.RemoveObject(red_id)
                     return False  # We didn't used the skill
+                elif event.key == K_RETURN:
+                    pass
+                elif event.key == K_KP2 or event.key == K_DOWN:
+                    if (selection_tile[0], selection_tile[1]+1) in blue:
+                        selection_tile = (selection_tile[0], selection_tile[1]+1)
+                        change = True
+                elif event.key == K_KP8 or event.key == K_UP:
+                    if (selection_tile[0], selection_tile[1]-1) in blue:
+                        selection_tile = (selection_tile[0], selection_tile[1]-1)
+                        change = True
+                elif event.key == K_KP4 or event.key == K_LEFT:
+                    if (selection_tile[0]-1, selection_tile[1]) in blue:
+                        selection_tile = (selection_tile[0]-1, selection_tile[1])
+                        change = True
+                elif event.key == K_KP6 or event.key == K_RIGHT:
+                    if (selection_tile[0]+1, selection_tile[1]) in blue:
+                        selection_tile = (selection_tile[0]+1, selection_tile[1])
+                        change = True
+                elif event.key == K_KP7:
+                    if (selection_tile[0]-1, selection_tile[1]-1) in blue:
+                        selection_tile = (selection_tile[0]-1, selection_tile[1]-1)
+                        change = True
+                elif event.key == K_KP9:
+                    if (selection_tile[0]+1, selection_tile[1]-1) in blue:
+                        selection_tile = (selection_tile[0]+1, selection_tile[1]-1)
+                        change = True
+                elif event.key == K_KP3:
+                    if (selection_tile[0]+1, selection_tile[1]+1) in blue:
+                        selection_tile = (selection_tile[0]+1, selection_tile[1]+1)
+                        change = True
+                elif event.key == K_KP1:
+                    if (selection_tile[0]-1, selection_tile[1]+1) in blue:
+                        selection_tile = (selection_tile[0]-1, selection_tile[1]+1)
+                        change = True
+            if change:
+                change = False
+                selection_tiles = skill.AOE(selection_tile, current_character, screen)
+                s = Highlight.HighlightTiles(screen._tile_size, selection_tiles, alpha, color)
+                for red_id in red.values():
+                    screen.RemoveObject(red_id)
+                red = {}
+                for pos in s:
+                        red[pos] = screen.AddHighlight(s[pos])
+
 
 def MenusLoop(menu, current_character, screen, map_data, playerTeam):
     menus = [menu]
@@ -165,7 +216,6 @@ def MenusLoop(menu, current_character, screen, map_data, playerTeam):
                         QuitMenu(screen, menu_index, selection_id)
                         return
 
-
 def MovementLoop(current_character, screen, map_data):
     while True:
         screen.refresh()
@@ -220,7 +270,6 @@ if __name__ == '__main__':
     box_file = "TextBox_LongSmall.png"
     text_box = TextBox.TextBox(box_file, string, 50, 240, (20, 13))
     screen.AddTextBox(text_box, (100,0))
-
 
     mainClock = pygame.time.Clock()
     pygame.display.update()  # Initial display

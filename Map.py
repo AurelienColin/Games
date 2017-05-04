@@ -109,7 +109,6 @@ def CheckProperties(xy, P,  map_data, tile_size):
         y_id = xy[1]//tile_size
         gid = map_data.get_tile_gid(x_id, y_id,0)
         properties = map_data.get_tile_properties_by_gid(gid)
-        print('CheckProperties', x_id, y_id, properties[P])
         return properties[P]
     except Exception as e:
         print('ERROR: no propertie',P,'at', x_id, y_id, 'for', xy)
