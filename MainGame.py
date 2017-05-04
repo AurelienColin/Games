@@ -21,12 +21,10 @@ import Map
 import TextBox
 import Skill
 import Highlight
+import util
+import Team
 from pygame.locals import *  # Import the event
 
-def ObjToCoord(obj):
-    rect = obj[0].get_rect()
-    pos_x, pos_y = obj[1]
-    return rect.height, rect.width, pos_x, pos_y
 
 def IfDeplacement(character, key, screen, map_data):
     position = character._pos
@@ -52,14 +50,14 @@ def IfDeplacement(character, key, screen, map_data):
     if change:
         character._lifebar1._pos = (character._lifebar1._pos[0] + diff[0], character._lifebar1._pos[1] + diff[1])
         character._lifebar2._pos = (character._lifebar2._pos[0] + diff[0], character._lifebar2._pos[1] + diff[1])
-        character._pos = new_pos
+        character.pos(tile_size, pos_pixel = new_pos)
     screen._objects[character._index[0]][1] = character._pos
     screen._objects[character._index[1]][1] = character._lifebar1._pos
     screen._objects[character._index[2]][1] = character._lifebar2._pos
     print("Character's position:", character._pos)
     return position
 
-def OpenMenu(key, screen, character=None, team=None):
+def OpenMenu(key, screen, character=None, playerTeam=None):
     if key == 'MainMenu':
         text_box = TextBox.TextBox.Initialization('MainMenu')
     elif key == 'Skills':
@@ -70,7 +68,7 @@ def OpenMenu(key, screen, character=None, team=None):
 
     alpha = 80
     color = (0,0,0)
-    height, width, pos_x, pos_y = ObjToCoord(screen._objects[menu_index[1]])
+    height, width, pos_x, pos_y = util.ObjToCoord(screen._objects[menu_index[1]])
     s = Highlight.Highlight(width, height, alpha, color, pos_x, pos_y)
     selection_id = screen.AddHighlight(s)
     return menu_index, selection_id
@@ -83,7 +81,7 @@ def MenuNavigation(key, screen, menu_index, selection, selection_id):
         selection = (selection+1)%len(menu_index)
         if selection == 0:
             selection +=1
-        height, width, pos_x, pos_y = ObjToCoord(screen._objects[menu_index[selection]])
+        height, width, pos_x, pos_y = util.ObjToCoord(screen._objects[menu_index[selection]])
         s = Highlight.Highlight(width, height, alpha, color, pos_x, pos_y)
         selection_id = screen.AddHighlight(s)
     elif key == K_UP:
@@ -91,13 +89,13 @@ def MenuNavigation(key, screen, menu_index, selection, selection_id):
         selection = (selection-1)%len(menu_index)
         if selection == 0:
             selection = len(menu_index)-1
-        height, width, pos_x, pos_y = ObjToCoord(screen._objects[menu_index[selection]])
+        height, width, pos_x, pos_y = util.ObjToCoord(screen._objects[menu_index[selection]])
         s = Highlight.Highlight(width, height, alpha, color, pos_x, pos_y)
         selection_id = screen.AddHighlight(s)
     return selection, selection_id
 
-def AimingLoop(current_character, screen, skill):
-    blue = skill.Aim(current_character, screen)
+def AimingLoop(current_character, screen, skill, map_data, playerTeam):
+    blue = skill.Aim(current_character, screen, map_data, playerTeam)
     while True:
         screen.refresh()
         mainClock.tick(30)
@@ -108,12 +106,12 @@ def AimingLoop(current_character, screen, skill):
 
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:  # Return to skill menu
-                    print('return to skill menu')
+                    print('Return to skill menu')
                     for blue_id in blue.values():
                         screen.RemoveObject(blue_id)
                     return False  # We didn't used the skill
 
-def MenusLoop(menu, current_character, screen):
+def MenusLoop(menu, current_character, screen, map_data, playerTeam):
     menus = [menu]
     selection = 1
     menu_index, selection_id = OpenMenu('MainMenu', screen)
@@ -136,7 +134,7 @@ def MenusLoop(menu, current_character, screen):
                                 print('Aim with skill', choice)
                                 QuitMenu(screen, menu_index, selection_id)
                                 selection = 1
-                                use = AimingLoop(current_character, screen, skill)
+                                use = AimingLoop(current_character, screen, skill, map_data, playerTeam)
                                 if not use:
                                     menu_index, selection_id = OpenMenu(menus[-1], screen, character=current_character)
                                 else:
@@ -151,9 +149,9 @@ def MenusLoop(menu, current_character, screen):
                         selection = 1
                     else: # Nothing
                         pass
-
                 if event.key == K_UP or event.key == K_DOWN:  # We navigate through the menu
                     selection, selection_id = MenuNavigation(event.key, screen, menu_index, selection, selection_id)
+
                 ##### We are closing a menu #####
                 if event.key == K_ESCAPE or choice == 'Exit':
                     if len(menus) > 1:  # Go to the previous menu
@@ -201,15 +199,22 @@ if __name__ == '__main__':
     map_data = screen._objects[map_index][0].renderer.tmx_data
 
     anna = Character.Character.Initialization('Anna')
-    anna._pos = (2*tile_size, 2*tile_size)
+    anna.pos(tile_size, pos_tile = (2, 2))
     anna.AddLifeBar(tile_size)
     anna._index = screen.AddCharacter(anna, 'standing')
+    playerTeam = Team.Team(1, [anna], tile_size)
 
     henry = Character.Character.Initialization('Henry')
-    henry._pos = (10*tile_size, 4*tile_size)
+    henry.pos(tile_size, pos_tile = (10, 4))
     henry.AddLifeBar(tile_size)
     henry._index = screen.AddCharacter(henry, 'standing')
+    opponentTeam = Team.Team(2, [henry], tile_size)
 
+    teams = [playerTeam, opponentTeam]
+    playerTeam._team_opponent.append(opponentTeam._number)
+    opponentTeam._team_opponent.append(playerTeam._number)
+    playerTeam.relations(teams)
+    opponentTeam.relations(teams)
 
     string = 'Push enter to get the menu'
     box_file = "TextBox_LongSmall.png"
@@ -227,4 +232,4 @@ if __name__ == '__main__':
 
     while True:
         menu = MovementLoop(current_character, screen, map_data)
-        MenusLoop(menu, current_character, screen)
+        MenusLoop(menu, current_character, screen, map_data, playerTeam)

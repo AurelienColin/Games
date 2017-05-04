@@ -602,6 +602,11 @@
     <property name="slowness" value="1"/>
    </properties>
   </tile>
+  <tile id="136">
+   <properties>
+    <property name="slowness" type="int" value="1"/>
+   </properties>
+  </tile>
   <tile id="137">
    <properties>
     <property name="slowness" value="1"/>

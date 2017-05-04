@@ -112,5 +112,5 @@ def CheckProperties(xy, P,  map_data, tile_size):
         print('CheckProperties', x_id, y_id, properties[P])
         return properties[P]
     except Exception as e:
-        print('ERROR:',e)
+        print('ERROR: no propertie',P,'at', x_id, y_id, 'for', xy)
         return 0
