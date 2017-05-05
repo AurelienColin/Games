@@ -1,11 +1,14 @@
 import Highlight
-import Screen
 import Map
 import numpy as np
 
 class Skill():
     def __init__(self):
-        self._effects = {}
+        self._char_effect = {}
+        self._damage = 0
+        self._heal = 0
+        self._tile_effect = {}
+        self._ele = 'neutral'
 
     def Initialization(name):
         if name == 'Execution':
@@ -69,6 +72,25 @@ class Skill():
                 final_tiles.append(tuple(tile))
         return final_tiles
 
+    def Affect(self, current_character, all_affected, tiles, map_data):
+        for affected in all_affected:
+            if self._type == 'magic':
+                dmg = current_character.MagicalDmg(self._damage)
+                dmg = affected.MagicalReduction(dmg, self._ele)
+            elif self._type == 'physic':
+                dmg = current_character.PhysicalDmg(self._damage)
+                dmg = affected.PhysicalReduction(dmg, self._ele)
+            else:    # skill._type == 'heal'
+                dmg = -current_character.MagicalDmg(self._damage)
+            affected.Affect(dmg)
+            for effect in self._char_effect:
+                affected.Affect(effect)
+        for tile in tiles:
+            gid = map_data.get_tile_gid(tile[0], tile[1],0)
+            map_data.set_tile_properties(gid, self._tile_effect)
+    # MàJ of life bar
+        pass
+
     def GetAimable(self, pos, map_data, tile_size, playerTeam):
         aimable = set()
         scope = self._range
@@ -124,6 +146,7 @@ class Horizontal(Skill):
         self._range = 2
         self._sprite_sheet = None
         self._perce = False
+        self._type = 'physic'
 
 class Vertical(Skill):
     def __init__(self):
@@ -136,6 +159,7 @@ class Vertical(Skill):
         self._range = 3
         self._sprite_sheet = None
         self._perce = False
+        self._type = 'physic'
 
 class Execution(Skill):
     def __init__(self):
@@ -148,6 +172,7 @@ class Execution(Skill):
         self._range = 5
         self._sprite_sheet = None
         self._perce = False
+        self._type = 'physic'
 
 class Apocalypse(Skill):
     def __init__(self):
@@ -160,6 +185,7 @@ class Apocalypse(Skill):
         self._range = 5
         self._sprite_sheet = None
         self._perce = False
+        self._type = 'physic'
 
 def ListSkills():
     return set(['Horizontal', 'Vertical', 'Execution', 'Apocalypse'])

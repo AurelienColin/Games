@@ -3,6 +3,8 @@ from os.path import join
 import Highlight
 import Skill
 
+from random import uniform
+
 class Character():
     def __init__(self):
         self._sprite = {}
@@ -13,6 +15,23 @@ class Character():
         self._pos = None
         self._pos_tile = None
         self._index = None
+        self._xp_on_damage = 0
+        self._xp_on_kill = 0
+        self._xp = 0
+
+        self._skills = []
+        self._cara['PV'], self._cara['PV_max'] = 0, 0
+        self._cara['PA'], self._cara['PA_max'] = 0, 0
+        self._cara['PM'], self._cara['PM_max'] = 0, 0
+        self._cara['speed'] = 0
+        self._cara['magic'] = 0
+        self._cara['strength'] = 0
+        self._cara['defense'] = 0
+        self._cara['resistance'] = 0
+        self._cara['effects'] = []
+        self._cara['elementalRes'] = {'fire':0, 'water':0, 'earth':0,
+                                      'wind':0, 'holy':0, 'unholy':0,
+                                      'neutral':0}
 
 
     def Initialization(name):
@@ -56,6 +75,32 @@ class Character():
             self._pos_tile = pos_tile
             self._pos = (pos_tile[0]*tile_size, pos_tile[1]*tile_size)
 
+    def PhysicalReduction(self, dmg, element):
+        # Each defense point reduce the damages by 0.4%
+        random = uniform(0.9, 1.1)
+        reduction = pow(0.996, self._cara['defense'])
+        return int(random*dmg*reduction*(1+self._cara['elementalRes'][element]))
+
+    def MagicalReduction(self, dmg, element):
+        # Each resistance point reduce the damages by 0.4%
+        random = uniform(0.9, 1.1)
+        reduction = pow(0.996, self._cara['resistance'])
+        return int(random*dmg*reduction*(1+self._cara['elementalRes'][element]))
+
+    def PhysicalDmg(self, dmg):
+        random = uniform(0.9, 1.1)
+        return int(random*dmg*pow(0.996, self._cara['strength']))
+
+    def MagicalDmg(self, dmg):
+        random = uniform(0.9, 1.1)
+        return int(random*dmg*pow(0.996, self._cara['magic']))
+
+    def Affect(self,effect):
+        if type(effect) == int:
+            pass  # It is a damage if positif, heal if negatif
+        else:
+            pass  # It's a debuff, a buff, or anything else
+
 class Anna(Character):
     def __init__(self, save=None):
         Character.__init__(self)
@@ -77,15 +122,10 @@ class Anna(Character):
             self._cara['PV'], self._cara['PV_max'] = 100, 100
             self._cara['PA'], self._cara['PA_max'] = 6, 6
             self._cara['PM'], self._cara['PM_max'] = 3, 3
-            self._cara['speed'] = 100
-            self._cara['attack'] = 100
-            self._cara['defense'] = 100
-            self._cara['effects'] = []
 
 class Henry(Character):
     def __init__(self, save=None):
         Character.__init__(self)
-        self._cara = {}
         self._sprite = {}
         self._id = 2
         self._cara['name'] = 'Henry'
@@ -105,7 +145,3 @@ class Henry(Character):
             self._cara['PV'], self._cara['PV_max'] = 100, 100
             self._cara['PA'], self._cara['PA_max'] = 6, 6
             self._cara['PM'], self._cara['PM_max'] = 3, 3
-            self._cara['speed'] = 100
-            self._cara['attack'] = 100
-            self._cara['defense'] = 100
-            self._cara['effects'] = []

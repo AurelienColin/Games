@@ -2,7 +2,7 @@ class Team():
     def __init__(self, nb, characters, tile_size):
         self._number = nb
         self._team_allies = []
-        self._character_allies = [nb]
+        self._character_allies = []
         self._team_opponent = []
         self._character_opponent = []
         self._members = characters

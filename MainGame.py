@@ -117,8 +117,8 @@ def AimingLoop(current_character, screen, skill, map_data, playerTeam):
                     for red_id in red.values():
                         screen.RemoveObject(red_id)
                     return False  # We didn't used the skill
-                elif event.key == K_RETURN:
-                    pass
+                elif event.key == K_RETURN:  # We use the skill
+                    util.Attack(current_character, skill, red, playerTeam, map_data)
                 elif event.key == K_KP2 or event.key == K_DOWN:
                     if (selection_tile[0], selection_tile[1]+1) in blue:
                         selection_tile = (selection_tile[0], selection_tile[1]+1)

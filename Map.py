@@ -101,6 +101,7 @@ class TiledMap(object):
         self.draw(screen._display)
         pygame.display.flip()
 
+
 def CheckProperties(xy, P,  map_data, tile_size):
     # Add a try, because if some properties aren't define on all tiles
     # there will be casualties
