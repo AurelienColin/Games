@@ -44,13 +44,14 @@ def IfDeplacement(character, key, screen, map_data):
     for obj in screen._objects:
         if obj and obj[2] == 'character' and obj != screen._objects[character._index[1]] and obj[1] == new_pos:
             change = False
-    p = Map.CheckProperties(new_pos, 'slowness', map_data, tile_size)
-    if p == "-1":
+    p = int(Map.CheckProperties(new_pos, 'slowness', map_data, tile_size))
+    if p == -1 or p > character._cara['PM']:
         change = False
     if change:
         character._lifebar1._pos = (character._lifebar1._pos[0] + diff[0], character._lifebar1._pos[1] + diff[1])
         character._lifebar2._pos = (character._lifebar2._pos[0] + diff[0], character._lifebar2._pos[1] + diff[1])
         character.pos(tile_size, pos_pixel = new_pos)
+        character._cara['PM'] -= p
     screen._objects[character._index[0]][1] = character._pos
     screen._objects[character._index[1]][1] = character._lifebar1._pos
     screen._objects[character._index[2]][1] = character._lifebar2._pos
@@ -101,6 +102,7 @@ def AimingLoop(current_character, screen, skill, map_data, playerTeam):
     red = {}
     selection_tile = current_character._pos_tile
     change = True
+    end = False
     while True:
         screen.refresh()
         mainClock.tick(30)
@@ -109,16 +111,19 @@ def AimingLoop(current_character, screen, skill, map_data, playerTeam):
                 pygame.quit()
                 sys.exit()
 
+            if (event.type == KEYDOWN and event.key == K_ESCAPE) or end:# Return to skill menu
+                print('Return to skill menu')
+                for blue_id in blue.values():
+                    screen.RemoveObject(blue_id)
+                for red_id in red.values():
+                    screen.RemoveObject(red_id)
+                if end:
+                    return True
+                return False
             if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:  # Return to skill menu
-                    print('Return to skill menu')
-                    for blue_id in blue.values():
-                        screen.RemoveObject(blue_id)
-                    for red_id in red.values():
-                        screen.RemoveObject(red_id)
-                    return False  # We didn't used the skill
-                elif event.key == K_RETURN:  # We use the skill
-                    util.Attack(current_character, skill, red, playerTeam, map_data)
+                if event.key == K_RETURN and current_character._cara['PA'] > skill._cost:  # We use the skill
+                    current_character.Attack(skill, red, playerTeam, map_data, screen)
+                    end = True
                 elif event.key == K_KP2 or event.key == K_DOWN:
                     if (selection_tile[0], selection_tile[1]+1) in blue:
                         selection_tile = (selection_tile[0], selection_tile[1]+1)
@@ -204,7 +209,7 @@ def MenusLoop(menu, current_character, screen, map_data, playerTeam):
                     selection, selection_id = MenuNavigation(event.key, screen, menu_index, selection, selection_id)
 
                 ##### We are closing a menu #####
-                if event.key == K_ESCAPE or choice == 'Exit':
+                if event.key == K_ESCAPE or choice == 'Exit' or choice == 'End Turn':
                     if len(menus) > 1:  # Go to the previous menu
                         menus.pop(-1)
                         print('Return to menu:', menus[-1])
@@ -214,7 +219,7 @@ def MenusLoop(menu, current_character, screen, map_data, playerTeam):
                     else: # We quit the last menu
                         menus = []
                         QuitMenu(screen, menu_index, selection_id)
-                        return
+                        return choice
 
 def MovementLoop(current_character, screen, map_data):
     while True:
@@ -233,6 +238,19 @@ def MovementLoop(current_character, screen, map_data):
                     # We move the current character
                     IfDeplacement(current_character, event.key, screen, map_data)
 
+def PassTurn(turn, characters):
+    deads = []
+    for character in characters:
+        if character._dead:
+            deads.append(character)
+    if len(characters) == len(deads):
+        return 0,0
+    characters[turn%len(characters)].passTurn()
+    turn += 1
+    while characters[turn%len(characters)]._dead:
+        turn += 1
+    character = characters[turn%len(characters)]
+    return turn, character
 
 def QuitMenu(screen, menu_index, selection_id):
     for i in menu_index:
@@ -255,7 +273,7 @@ if __name__ == '__main__':
     playerTeam = Team.Team(1, [anna], tile_size)
 
     henry = Character.Character.Initialization('Henry')
-    henry.pos(tile_size, pos_tile = (10, 4))
+    henry.pos(tile_size, pos_tile = (3, 3))
     henry.AddLifeBar(tile_size)
     henry._index = screen.AddCharacter(henry, 'standing')
     opponentTeam = Team.Team(2, [henry], tile_size)
@@ -279,6 +297,18 @@ if __name__ == '__main__':
     skills = Skill.ListSkills()
     implemented_menu = TextBox.ListMenus()
 
+    characters = []
+    for team in teams:
+        for character in team._members:
+            characters.append(character)
+    characters.sort(key=lambda x: x._cara['speed'], reverse=True)
+    deads = []
+    turn = 0
+    character = characters[turn]
     while True:
-        menu = MovementLoop(current_character, screen, map_data)
-        MenusLoop(menu, current_character, screen, map_data, playerTeam)
+        menu = MovementLoop(character, screen, map_data)
+        if character._cara['PA'] == 0 and character._cara['PM'] == 0 :
+            turn, character = PassTurn(turn, characters)
+        menu = MenusLoop(menu, character, screen, map_data, playerTeam)
+        if menu == 'End Turn' or (character._cara['PA'] == 0 and character._cara['PM'] == 0) or character._dead:
+            turn, character = PassTurn(turn, characters)

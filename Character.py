@@ -18,6 +18,7 @@ class Character():
         self._xp_on_damage = 0
         self._xp_on_kill = 0
         self._xp = 0
+        self._dead = False
 
         self._skills = []
         self._cara['PV'], self._cara['PV_max'] = 0, 0
@@ -58,8 +59,8 @@ class Character():
         height_void = tile_size - height_life
         if percentage < 0.5:
             G = 255 - 255*(1-percentage*2)
-        else:
             R = 255
+        else:
             R = 255*(1-percentage)*2
             G = 255
         B = 0
@@ -95,11 +96,35 @@ class Character():
         random = uniform(0.9, 1.1)
         return int(random*dmg*pow(0.996, self._cara['magic']))
 
-    def Affect(self,effect):
+    def Affect(self,effect, screen):
         if type(effect) == int:
-            pass  # It is a damage if positif, heal if negatif
+            xp = abs(self._xp_on_damage*effect)
+            self._cara['PV'] = min(self._cara['PV_max'], max(0,self._cara['PV']-effect))
         else:
             pass  # It's a debuff, a buff, or anything else
+        for i in self._index:
+            screen.RemoveObject(i)
+        if self._cara['PV'] == 0:
+                self._dead = True
+                xp += self._xp_on_kill
+        else:
+            self.AddLifeBar(screen._tile_size)
+            self._index = screen.AddCharacter(self, 'standing')
+        return xp
+
+    def Attack(self, skill, tiles, team, map_data, screen):
+        characters = team._character_allies + team._character_opponent + team._members
+        print(characters)
+        affected = []
+        for character in characters:
+            if character._pos_tile in tiles:
+                affected.append(character)
+        self._xp += skill.Affect(self, affected, tiles, map_data, screen)
+        self._cara['PA'] -= skill._cost
+
+    def passTurn(self):
+        self._cara['PA'] = self._cara['PA_max']
+        self._cara['PM'] = self._cara['PM_max']
 
 class Anna(Character):
     def __init__(self, save=None):
@@ -122,6 +147,7 @@ class Anna(Character):
             self._cara['PV'], self._cara['PV_max'] = 100, 100
             self._cara['PA'], self._cara['PA_max'] = 6, 6
             self._cara['PM'], self._cara['PM_max'] = 3, 3
+            self._cara['speed'] = 1
 
 class Henry(Character):
     def __init__(self, save=None):
@@ -142,6 +168,8 @@ class Henry(Character):
         else:
             skills = ['Apocalypse']
             self._skills = [Skill.Skill.Initialization(skill) for skill in skills]
-            self._cara['PV'], self._cara['PV_max'] = 100, 100
+            self._cara['PV'], self._cara['PV_max'] = 1, 100
             self._cara['PA'], self._cara['PA_max'] = 6, 6
             self._cara['PM'], self._cara['PM_max'] = 3, 3
+
+            self._cara['speed'] = 0

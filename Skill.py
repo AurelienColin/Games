@@ -72,7 +72,8 @@ class Skill():
                 final_tiles.append(tuple(tile))
         return final_tiles
 
-    def Affect(self, current_character, all_affected, tiles, map_data):
+    def Affect(self, current_character, all_affected, tiles, map_data, screen):
+        xp = 0
         for affected in all_affected:
             if self._type == 'magic':
                 dmg = current_character.MagicalDmg(self._damage)
@@ -82,14 +83,14 @@ class Skill():
                 dmg = affected.PhysicalReduction(dmg, self._ele)
             else:    # skill._type == 'heal'
                 dmg = -current_character.MagicalDmg(self._damage)
-            affected.Affect(dmg)
+            affected.Affect(dmg, screen)
             for effect in self._char_effect:
-                affected.Affect(effect)
-        for tile in tiles:
-            gid = map_data.get_tile_gid(tile[0], tile[1],0)
-            map_data.set_tile_properties(gid, self._tile_effect)
-    # MàJ of life bar
-        pass
+                xp += affected.Affect(effect, screen)
+        if self._tile_effect:
+            for tile in tiles:
+                gid = map_data.get_tile_gid(tile[0], tile[1],0)
+                map_data.set_tile_properties(gid, self._tile_effect)
+        return xp
 
     def GetAimable(self, pos, map_data, tile_size, playerTeam):
         aimable = set()

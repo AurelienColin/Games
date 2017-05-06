@@ -29,9 +29,9 @@ class Text():
 
 class MainMenu(TextBox):
     def __init__(self):
-        string = "Aide;Skills;Objets;Status;Exit"
+        string = "Aide;Skills;Objets;Status;Exit;End Turn"
         name = "TextBox_ExtraLarge.png"
-        TextBox.__init__(self,name, string, 150, 100, (30, 20))
+        TextBox.__init__(self,name, string, 170, 130, (30, 20))
 
 class SkillMenu(TextBox):
     def __init__(self, character):
