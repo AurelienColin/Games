@@ -242,22 +242,23 @@ def IniTurns(characters):
     characters.sort(key=lambda x: x._cara['speed'], reverse=True)
     turns = {}
     for character in characters:
-        speed = character._cara['speed']
+        speed = (100-character._cara['speed'])
         while speed in turns:
             speed += 1
-        turns[character._cara['speed']] = character
+        turns[speed] = character
     turn = min(turns)
     return turns, turn
 
 def NextTurn(turns, turn):
     if not turns[turn]._dead:
-        speed = turn + turns[turn]._cara['speed']
+        speed = turn + (100-turns[turn]._cara['speed'])
         while speed in turns:
             speed += 1
         turns[speed] = turns[turn]
     turn+=1
     while turn not in turns or turns[turn]._dead:
         turn +=1
+    print('turns:', turns, 'turn:', turn, 'character:', turns[turn], 'PM:', turns[turn]._cara['PM'])
     turns[turn].passTurn()
     return turn
 
@@ -310,12 +311,14 @@ if __name__ == '__main__':
     for team in teams:
         for character in team._members:
             characters.append(character)
-
+    turns, turn = IniTurns(characters)
     character = turns[turn]
     while True:
         menu = MovementLoop(character, screen, map_data)
         if character._cara['PA'] == 0 and character._cara['PM'] == 0 :
             turn = NextTurn(turns, turn)
+            character = turns[turn]
         menu = MenusLoop(menu, character, screen, map_data, playerTeam)
         if menu == 'End Turn' or (character._cara['PA'] == 0 and character._cara['PM'] == 0) or character._dead:
             turn = NextTurn(turns, turn)
+            character = turns[turn]
