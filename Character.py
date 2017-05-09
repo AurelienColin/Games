@@ -172,4 +172,4 @@ class Henry(Character):
             self._cara['PA'], self._cara['PA_max'] = 6, 6
             self._cara['PM'], self._cara['PM_max'] = 3, 3
 
-            self._cara['speed'] = 0
+            self._cara['speed'] = 2

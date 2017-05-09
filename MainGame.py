@@ -238,19 +238,28 @@ def MovementLoop(current_character, screen, map_data):
                     # We move the current character
                     IfDeplacement(current_character, event.key, screen, map_data)
 
-def PassTurn(turn, characters):
-    deads = []
+def IniTurns(characters):
+    characters.sort(key=lambda x: x._cara['speed'], reverse=True)
+    turns = {}
     for character in characters:
-        if character._dead:
-            deads.append(character)
-    if len(characters) == len(deads):
-        return 0,0
-    characters[turn%len(characters)].passTurn()
-    turn += 1
-    while characters[turn%len(characters)]._dead:
-        turn += 1
-    character = characters[turn%len(characters)]
-    return turn, character
+        speed = character._cara['speed']
+        while speed in turns:
+            speed += 1
+        turns[character._cara['speed']] = character
+    turn = min(turns)
+    return turns, turn
+
+def NextTurn(turns, turn):
+    if not turns[turn]._dead:
+        speed = turn + turns[turn]._cara['speed']
+        while speed in turns:
+            speed += 1
+        turns[speed] = turns[turn]
+    turn+=1
+    while turn not in turns or turns[turn]._dead:
+        turn +=1
+    turns[turn].passTurn()
+    return turn
 
 def QuitMenu(screen, menu_index, selection_id):
     for i in menu_index:
@@ -301,14 +310,12 @@ if __name__ == '__main__':
     for team in teams:
         for character in team._members:
             characters.append(character)
-    characters.sort(key=lambda x: x._cara['speed'], reverse=True)
-    deads = []
-    turn = 0
-    character = characters[turn]
+
+    character = turns[turn]
     while True:
         menu = MovementLoop(character, screen, map_data)
         if character._cara['PA'] == 0 and character._cara['PM'] == 0 :
-            turn, character = PassTurn(turn, characters)
+            turn = NextTurn(turns, turn)
         menu = MenusLoop(menu, character, screen, map_data, playerTeam)
         if menu == 'End Turn' or (character._cara['PA'] == 0 and character._cara['PM'] == 0) or character._dead:
-            turn, character = PassTurn(turn, characters)
+            turn = NextTurn(turns, turn)
