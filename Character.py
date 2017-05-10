@@ -112,11 +112,9 @@ class Character():
             self._index = screen.AddCharacter(self, 'standing')
         return xp
 
-    def Attack(self, skill, tiles, team, map_data, screen):
-        characters = team._character_allies + team._character_opponent + team._members
-        print(characters)
+    def Attack(self, skill, tiles, map_data, screen):
         affected = []
-        for character in characters:
+        for character in screen._characters:
             if character._pos_tile in tiles:
                 affected.append(character)
         self._xp += skill.Affect(self, affected, tiles, map_data, screen)

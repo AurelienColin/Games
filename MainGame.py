@@ -24,7 +24,6 @@ import Highlight
 import util
 import Team
 from pygame.locals import *  # Import the event
-from os.path import join
 
 
 def IfDeplacement(character, key, screen, map_data):
@@ -42,8 +41,9 @@ def IfDeplacement(character, key, screen, map_data):
         diff = (0, 0)
     new_pos = (position[0]+diff[0] , position[1]+diff[1])
     change = True
-    for obj in screen._objects:
-        if obj and obj[2] == 'character' and obj != screen._objects[character._index[1]] and obj[1] == new_pos:
+    for other_char in screen._characters:
+        if not other_char._dead and other_char._pos == new_pos and character != other_char:
+            print(other_char, character)
             change = False
     p = int(Map.CheckProperties(new_pos, 'slowness', map_data, tile_size))
     if p == -1 or p > character._cara['PM']:
@@ -60,7 +60,7 @@ def IfDeplacement(character, key, screen, map_data):
     print("Character's position:", character._pos)
     return
 
-def OpenMenu(key, screen, character=None, playerTeam=None):
+def OpenMenu(key, screen, character=None):
     if key == 'MainMenu':
         text_box = TextBox.TextBox.Initialization('MainMenu')
     elif key == 'Skills':
@@ -112,19 +112,9 @@ def AimingLoop(current_character, screen, skill, map_data, playerTeam):
             if event.type == QUIT:  # The game is closed
                 pygame.quit()
                 sys.exit()
-
-            if (event.type == KEYDOWN and event.key == K_ESCAPE) or end:# Return to skill menu
-                print('Return to skill menu')
-                for blue_id in blue.values():
-                    screen.RemoveObject(blue_id)
-                for red_id in red.values():
-                    screen.RemoveObject(red_id)
-                if end:
-                    return True
-                return False
-            if event.type == KEYDOWN:
+            elif event.type == KEYDOWN:
                 if event.key == K_RETURN and current_character._cara['PA'] > skill._cost:  # We use the skill
-                    current_character.Attack(skill, red, playerTeam, map_data, screen)
+                    current_character.Attack(skill, red, map_data, screen)
                     end = True
                 elif event.key == K_KP2 or event.key == K_DOWN:
                     if (selection_tile[0], selection_tile[1]+1) in blue:
@@ -158,6 +148,20 @@ def AimingLoop(current_character, screen, skill, map_data, playerTeam):
                     if (selection_tile[0]-1, selection_tile[1]+1) in blue:
                         selection_tile = (selection_tile[0]-1, selection_tile[1]+1)
                         change = True
+
+            elif event.type == MOUSEMOTION:
+                screen.onHover(event.pos)
+
+            if (event.type == KEYDOWN and event.key == K_ESCAPE) or end:# Return to skill menu
+                print('Return to skill menu')
+                for blue_id in blue.values():
+                    screen.RemoveObject(blue_id)
+                for red_id in red.values():
+                    screen.RemoveObject(red_id)
+                if end:
+                    return True
+                return False
+
             if change:
                 change = False
                 selection_tiles = skill.AOE(selection_tile, current_character, screen)
@@ -182,7 +186,7 @@ def MenusLoop(menu, current_character, screen, map_data, playerTeam):
                 pygame.quit()
                 sys.exit()
 
-            if event.type == KEYDOWN:
+            elif event.type == KEYDOWN:
                 ####### We are doing something in the menu ######
                 if event.key == K_RETURN:  # We open a menu
                     choice = screen._objects[menu_index[0]][0]._string[selection-1]
@@ -232,13 +236,16 @@ def MovementLoop(current_character, screen, map_data):
                 pygame.quit()
                 sys.exit()
 
-            if event.type == KEYDOWN:
+            elif event.type == KEYDOWN:
                 if event.key == K_RETURN:
                     print('Opening main menu')
                     return 'MainMenu'
                 if event.key == K_UP or event.key == K_DOWN or event.key == K_RIGHT or event.key == K_LEFT:
                     # We move the current character
                     IfDeplacement(current_character, event.key, screen, map_data)
+
+            elif event.type == MOUSEMOTION:
+                screen.onHover(event.pos)
 
 def IniTurns(characters):
     characters.sort(key=lambda x: x._cara['speed'], reverse=True)
@@ -269,6 +276,10 @@ def QuitMenu(screen, menu_index, selection_id):
     for i in menu_index:
         screen.RemoveObject(i)
     screen.RemoveObject(selection_id)
+
+
+
+
 
 if __name__ == '__main__':
     tile_size = 29
@@ -311,11 +322,8 @@ if __name__ == '__main__':
     skills = Skill.ListSkills()
     implemented_menu = TextBox.ListMenus()
 
-    characters = []
-    for team in teams:
-        for character in team._members:
-            characters.append(character)
-    turns, turn = IniTurns(characters)
+    screen.SetCharacters(teams)
+    turns, turn = IniTurns(screen._characters)
     character = turns[turn]
     screen.MoveCircle(pos = character._pos)
     while True:

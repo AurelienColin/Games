@@ -48,6 +48,18 @@ class Screen():
                     self._display.blit(ele, position)
         pygame.display.update()
 
+    def SetCharacters(self, teams):
+        self._characters = []
+        for team in teams:
+            for character in team._members:
+                self._characters.append(character)
+
+    def onHover(self, pos):
+        mouse_pos = (pos[0]//self._tile_size, pos[1]//self._tile_size)
+        for character in self._characters:
+            if mouse_pos == character._pos_tile and not character._dead:
+                print('Hovering on:', character)
+                break
 
     def RemoveObject(self, index):
         self._objects[index] = None
