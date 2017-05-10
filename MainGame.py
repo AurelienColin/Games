@@ -24,6 +24,7 @@ import Highlight
 import util
 import Team
 from pygame.locals import *  # Import the event
+from os.path import join
 
 
 def IfDeplacement(character, key, screen, map_data):
@@ -55,6 +56,7 @@ def IfDeplacement(character, key, screen, map_data):
     screen._objects[character._index[0]][1] = character._pos
     screen._objects[character._index[1]][1] = character._lifebar1._pos
     screen._objects[character._index[2]][1] = character._lifebar2._pos
+    screen.MoveCircle(pos = character._pos)
     print("Character's position:", character._pos)
     return
 
@@ -249,7 +251,7 @@ def IniTurns(characters):
     turn = min(turns)
     return turns, turn
 
-def NextTurn(turns, turn):
+def NextTurn(screen, turns, turn):
     if not turns[turn]._dead:
         speed = turn + (100-turns[turn]._cara['speed'])
         while speed in turns:
@@ -260,6 +262,7 @@ def NextTurn(turns, turn):
         turn +=1
     print('turns:', turns, 'turn:', turn, 'character:', turns[turn], 'PM:', turns[turn]._cara['PM'])
     turns[turn].passTurn()
+    screen.MoveCircle(pos = turns[turn]._pos)
     return turn
 
 def QuitMenu(screen, menu_index, selection_id):
@@ -288,6 +291,7 @@ if __name__ == '__main__':
     henry._index = screen.AddCharacter(henry, 'standing')
     opponentTeam = Team.Team(2, [henry], tile_size)
 
+
     teams = [playerTeam, opponentTeam]
     playerTeam._team_opponent.append(opponentTeam._number)
     opponentTeam._team_opponent.append(playerTeam._number)
@@ -313,12 +317,13 @@ if __name__ == '__main__':
             characters.append(character)
     turns, turn = IniTurns(characters)
     character = turns[turn]
+    screen.MoveCircle(pos = character._pos)
     while True:
         menu = MovementLoop(character, screen, map_data)
         if character._cara['PA'] == 0 and character._cara['PM'] == 0 :
-            turn = NextTurn(turns, turn)
+            turn = NextTurn(screen, turns, turn)
             character = turns[turn]
         menu = MenusLoop(menu, character, screen, map_data, playerTeam)
         if menu == 'End Turn' or (character._cara['PA'] == 0 and character._cara['PM'] == 0) or character._dead:
-            turn = NextTurn(turns, turn)
+            turn = NextTurn(screen, turns, turn)
             character = turns[turn]

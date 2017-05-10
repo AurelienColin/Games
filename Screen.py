@@ -18,25 +18,43 @@ class Screen():
     def __init__(self, width, height, tile_size):
         self._display = pygame.display.set_mode((width, height), pygame.RESIZABLE)
         self._tile_size = tile_size
-        self._objects = []
+
+
+        circle = pygame.image.load(join('res', 'sprite', 'circle.png'))
+        self._objects = [[circle, (0, 0), 'hide']]
+
+    def MoveCircle(self, pos = None, hide = False):
+        if hide:
+            self._objects[0][2] = 'hide'
+        else:
+            self._objects[0][1] = pos
+            self._objects[0][2] = 'show'
 
     def refresh(self):
+        circle, circle_pos, show = self._objects[0]
+        circle_pos = (circle_pos[0]-4, circle_pos[1])
         for element in self._objects:
             if element:
                 ele, position, type_ele = element
                 if type_ele == 'tiled_map':
                     ele.draw(self._display)
+                    if show != 'hide':
+                        self._display.blit(circle, circle_pos)
                 elif type_ele == 'character':
                     ele.blit(self._display, position)
                 elif type_ele == 'box':
                     self._display.blit(ele._box, position)
-                else:
+                elif type_ele != 'hide':
                     self._display.blit(ele, position)
         pygame.display.update()
 
 
     def RemoveObject(self, index):
         self._objects[index] = None
+
+    def AddSprite(self, sprite, pos):
+        self._objects.append([sprite, pos, 'sprite'])
+        return len(self._objects)-1
 
     def AddCharacter(self, character, key):
         """The len is returned to know where is the sprite"""
