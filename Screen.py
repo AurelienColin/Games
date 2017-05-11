@@ -19,9 +19,9 @@ class Screen():
         self._display = pygame.display.set_mode((width, height), pygame.RESIZABLE)
         self._tile_size = tile_size
 
-
         circle = pygame.image.load(join('res', 'sprite', 'circle.png'))
         self._objects = [[circle, (0, 0), 'hide']]
+        self._portrait = False
 
     def MoveCircle(self, pos = None, hide = False):
         if hide:
@@ -55,11 +55,17 @@ class Screen():
                 self._characters.append(character)
 
     def onHover(self, pos):
+        if self._portrait:
+            for i in self._portrait:
+                self.RemoveObject(i)
         mouse_pos = (pos[0]//self._tile_size, pos[1]//self._tile_size)
         for character in self._characters:
             if mouse_pos == character._pos_tile and not character._dead:
+                pos = character._pos[0]+self._tile_size, character._pos[1]+self._tile_size
+                self._portrait = self.AddTextBox(TextBox.Portrait(character), pos)
                 print('Hovering on:', character)
-                break
+                print(self._portrait)
+                return
 
     def RemoveObject(self, index):
         self._objects[index] = None
@@ -85,6 +91,8 @@ class Screen():
     def AddTextBox(self, box, pos):
         self._objects.append([box, pos, 'box'])
         prec = len(self._objects)
+        if box._img:
+            self._objects.append([box._img[0], (pos[0]+box._img[1][0], pos[1]+box._img[1][1]), 'sprite'])
         for text in box._text:
             self._objects.append([text._string, (text._pos[0] + pos[0], text._pos[1] + pos[1]), 'text'])
         return [i for i in range(prec-1, len(self._objects))]

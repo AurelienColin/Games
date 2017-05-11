@@ -2,6 +2,7 @@ import pyganim
 from os.path import join
 import Highlight
 import Skill
+import pygame
 
 from random import uniform
 
@@ -137,6 +138,7 @@ class Anna(Character):
         self._sprite['walking_right'] =  self.AddSprite(36,40)
         self._sprite['walking_down'] =  self.AddSprite(48,52)
         self._sprite['walking_up'] =  self.AddSprite(50,56)
+        self._portrait = pygame.image.load(join('res', 'sprite', 'Anna_portrait.png'))
         if save:
             pass
         else:
@@ -161,6 +163,7 @@ class Henry(Character):
         self._sprite['walking_right'] =  self.AddSprite(424,428)
         self._sprite['walking_down'] =  self.AddSprite(436,440)
         self._sprite['walking_up'] =  self.AddSprite(448,452)
+        self._portrait = pygame.image.load(join('res', 'sprite', 'Henry_portrait.png'))
         if save:
             pass
         else:

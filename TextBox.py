@@ -8,7 +8,7 @@ class TextBox():
         self._text = [Text(self._string[i], (pos[0], pos[1]+i*size), 20) for i in range(len(self._string))]
         self._height = height
         self._width = width
-
+        self._img = False
         img = pygame.image.load(fullname)
         self._box = pygame.transform.smoothscale(img, (width, height))
 
@@ -40,6 +40,17 @@ class SkillMenu(TextBox):
         name = "TextBox_ExtraLarge.png"
         TextBox.__init__(self, name, string, 150, 150, (30, 30))
 
+class Portrait(TextBox):
+    def __init__(self, character):
+        size = 230, 128
+        data = [str(character._cara['name']),
+                'PV: '+ str(character._cara['PV']) + '/' + str(character._cara['PV_max']),
+                'PA: '+ str(character._cara['PA']) + '/' + str(character._cara['PA_max']),
+                'PM: '+ str(character._cara['PM']) + '/' + str(character._cara['PM_max'])]
+        string = ';'.join(data)
+        name = "TextBox_ExtraLarge.png"
+        TextBox.__init__(self, name, string, size[0], size[1], (20, 10))
+        self._img = [character._portrait, (0, size[0]-128-12)]
 
 def ListMenus():
     return set(['MainMenu', 'Skills'])
