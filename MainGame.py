@@ -58,6 +58,7 @@ def IfDeplacement(character, key, screen, map_data):
     screen._objects[character._index[2]][1] = character._lifebar2._pos
     screen.MoveCircle(pos = character._pos)
     print("Character's position:", character._pos)
+    screen.UpdateStatus(turns[turn])
     return
 
 def OpenMenu(key, screen, character=None):
@@ -116,6 +117,7 @@ def AimingLoop(current_character, screen, skill, map_data, playerTeam):
                 if event.key == K_RETURN and current_character._cara['PA'] > skill._cost:  # We use the skill
                     current_character.Attack(skill, red, map_data, screen)
                     end = True
+                    screen.UpdateStatus(turns[turn])
                 elif event.key == K_KP2 or event.key == K_DOWN:
                     if (selection_tile[0], selection_tile[1]+1) in blue:
                         selection_tile = (selection_tile[0], selection_tile[1]+1)
@@ -270,16 +272,13 @@ def NextTurn(screen, turns, turn):
     print('turns:', turns, 'turn:', turn, 'character:', turns[turn], 'PM:', turns[turn]._cara['PM'])
     turns[turn].passTurn()
     screen.MoveCircle(pos = turns[turn]._pos)
+    screen.UpdateStatus(turns[turn])
     return turn
 
 def QuitMenu(screen, menu_index, selection_id):
     for i in menu_index:
         screen.RemoveObject(i)
     screen.RemoveObject(selection_id)
-
-
-
-
 
 if __name__ == '__main__':
     tile_size = 29
@@ -311,7 +310,7 @@ if __name__ == '__main__':
 
     string = 'Push enter to get the menu'
     box_file = "TextBox_LongSmall.png"
-    text_box = TextBox.TextBox(box_file, string, 50, 240, (20, 13))
+    text_box = TextBox.TextBox(box_file, string, 240, 50, (20, 13))
     screen.AddTextBox(text_box, (100,0))
 
     mainClock = pygame.time.Clock()
@@ -326,6 +325,7 @@ if __name__ == '__main__':
     turns, turn = IniTurns(screen._characters)
     character = turns[turn]
     screen.MoveCircle(pos = character._pos)
+    screen.UpdateStatus(turns[turn], (screen_height-128, screen_width-100))
     while True:
         menu = MovementLoop(character, screen, map_data)
         if character._cara['PA'] == 0 and character._cara['PM'] == 0 :

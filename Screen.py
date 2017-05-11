@@ -22,6 +22,7 @@ class Screen():
         circle = pygame.image.load(join('res', 'sprite', 'circle.png'))
         self._objects = [[circle, (0, 0), 'hide']]
         self._portrait = False
+        self._status = False
 
     def MoveCircle(self, pos = None, hide = False):
         if hide:
@@ -100,3 +101,12 @@ class Screen():
     def AddHighlight(self, s):
         self._objects.append([s._content, (s._pos[0], s._pos[1]), 'highlight'])
         return len(self._objects)-1
+
+    def UpdateStatus(self, character, pos=False):
+        if pos:
+            self._status = self.AddTextBox(TextBox.Status(character), pos)
+        elif self._status:
+            pos = self._objects[self._status[0]][1]
+            for i in self._status:
+                self.RemoveObject(i)
+            self._status = self.AddTextBox(TextBox.Status(character), pos)

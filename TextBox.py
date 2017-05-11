@@ -10,7 +10,7 @@ class TextBox():
         self._width = width
         self._img = False
         img = pygame.image.load(fullname)
-        self._box = pygame.transform.smoothscale(img, (width, height))
+        self._box = pygame.transform.smoothscale(img, (height, width))
 
     def Initialization(name, character=None):
         if name == 'MainMenu':
@@ -31,7 +31,7 @@ class MainMenu(TextBox):
     def __init__(self):
         string = "Aide;Skills;Objets;Status;Exit;End Turn"
         name = "TextBox_ExtraLarge.png"
-        TextBox.__init__(self,name, string, 170, 130, (30, 20))
+        TextBox.__init__(self,name, string, 130, 170, (30, 20))
 
 class SkillMenu(TextBox):
     def __init__(self, character):
@@ -40,9 +40,28 @@ class SkillMenu(TextBox):
         name = "TextBox_ExtraLarge.png"
         TextBox.__init__(self, name, string, 150, 150, (30, 30))
 
+class Status(TextBox):
+    def __init__(self, character):
+        data = [str(character._cara['name']),
+                'PV: '+ str(character._cara['PV']) + '/' + str(character._cara['PV_max']),
+                'PA: '+ str(character._cara['PA']) + '/' + str(character._cara['PA_max']),
+                'PM: '+ str(character._cara['PM']) + '/' + str(character._cara['PM_max'])]
+        string = ';'.join(data)
+        name = "TextBox_ExtraLarge.png"
+        TextBox.__init__(self, name, string, 128, 100, (20, 10))
+
+    def Update(self, character):
+        data = [str(character._cara['name']),
+                'PV: '+ str(character._cara['PV']) + '/' + str(character._cara['PV_max']),
+                'PA: '+ str(character._cara['PA']) + '/' + str(character._cara['PA_max']),
+                'PM: '+ str(character._cara['PM']) + '/' + str(character._cara['PM_max'])]
+        text = ';'.join(data)
+        self._string = text.split(';')
+
+
 class Portrait(TextBox):
     def __init__(self, character):
-        size = 230, 128
+        size = 128, 230
         data = [str(character._cara['name']),
                 'PV: '+ str(character._cara['PV']) + '/' + str(character._cara['PV_max']),
                 'PA: '+ str(character._cara['PA']) + '/' + str(character._cara['PA_max']),
@@ -50,7 +69,7 @@ class Portrait(TextBox):
         string = ';'.join(data)
         name = "TextBox_ExtraLarge.png"
         TextBox.__init__(self, name, string, size[0], size[1], (20, 10))
-        self._img = [character._portrait, (0, size[0]-128-12)]
+        self._img = [character._portrait, (0, size[1]-128-12)]
 
 def ListMenus():
     return set(['MainMenu', 'Skills'])
