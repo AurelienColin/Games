@@ -24,6 +24,7 @@ import Highlight
 import util
 import Team
 import Level
+import Effect
 from pygame.locals import *  # Import the event
 
 
@@ -108,6 +109,8 @@ def AimingLoop(current_character, screen, skill, map_data, playerTeam):
     change = True
     end = False
     mainClock = pygame.time.Clock()
+    skillDetails = screen.AddTextBox(TextBox.SkillDetails(skill),
+                                     (screen._height-128,screen._width-2*100))
     while True:
         screen.refresh()
         mainClock.tick(30)
@@ -158,10 +161,9 @@ def AimingLoop(current_character, screen, skill, map_data, playerTeam):
 
             if (event.type == KEYDOWN and event.key == K_ESCAPE) or end:# Return to skill menu
                 print('Return to skill menu')
-                for blue_id in blue.values():
-                    screen.RemoveObject(blue_id)
-                for red_id in red.values():
-                    screen.RemoveObject(red_id)
+                to_remove = list(blue.values()) + list(red.values()) + skillDetails
+                for index in to_remove:
+                    screen.RemoveObject(index)
                 if end:
                     return True
                 return False
@@ -259,26 +261,38 @@ def IniTurns(characters):
     characters.sort(key=lambda x: x._cara['speed'], reverse=True)
     turns = {}
     for character in characters:
-        speed = (100-character._cara['speed'])
+        speed = int(util.StatCalculation(character._cara['speed'])*100)
         while speed in turns:
             speed += 1
         turns[speed] = character
     turn = min(turns)
     return turns, turn
 
-def NextTurn(screen, turns, turn):
+def NextTurn(level, turns, turn):
     if not turns[turn]._dead:
-        speed = turn + (100-turns[turn]._cara['speed'])
+        speed = int(util.StatCalculation(character._cara['speed'])*100)
         while speed in turns:
             speed += 1
         turns[speed] = turns[turn]
     turn+=1
     while turn not in turns or turns[turn]._dead:
         turn +=1
-    print('turns:', turns, 'turn:', turn, 'character:', turns[turn], 'PM:', turns[turn]._cara['PM'])
     turns[turn].passTurn()
-    screen.MoveCircle(pos = turns[turn]._pos)
-    screen.UpdateStatus(turns[turn])
+
+    for i, pos_effect in enumerate(level._screen._tile_effect):
+        if pos_effect:
+            pos, effect = pos_effect
+            char_effect = Effect.Effect(effect._properties, effect._power, 1)
+            if turns[turn]._pos_tile == pos:
+                    turns[turn].Affect(char_effect, level._screen)
+                    break
+            if effect._since != effect._duration:
+                level._screen._tile_effect[i][1]._since += 1
+            else:
+                level._screen._tile_effect.pop(i)
+
+    level._screen.MoveCircle(pos = turns[turn]._pos)
+    level._screen.UpdateStatus(turns[turn])
     return turn
 
 

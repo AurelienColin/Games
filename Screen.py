@@ -25,6 +25,7 @@ class Screen():
         self._objects = [[circle, (0, 0), 'hide']]
         self._portrait = False
         self._status = False
+        self._tile_effect = []
 
     def MoveCircle(self, pos = None, hide = False):
         if hide:

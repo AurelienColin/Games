@@ -3,6 +3,7 @@ from os.path import join
 import Highlight
 import Skill
 import pygame
+import util
 
 from random import uniform
 
@@ -82,22 +83,24 @@ class Character():
     def PhysicalReduction(self, dmg, element):
         # Each defense point reduce the damages by 0.4%
         random = uniform(0.9, 1.1)
-        reduction = pow(0.996, self._cara['defense'])
-        return int(random*dmg*reduction*(1+self._cara['elementalRes'][element]))
+        reduction = util.StatCalculation(self._cara['defense'])
+        return int(random*dmg*reduction*(1-self._cara['elementalRes'][element]))
 
     def MagicalReduction(self, dmg, element):
         # Each resistance point reduce the damages by 0.4%
         random = uniform(0.9, 1.1)
-        reduction = pow(0.996, self._cara['resistance'])
-        return int(random*dmg*reduction*(1+self._cara['elementalRes'][element]))
+        reduction = util.StatCalculation(self._cara['resistance'])
+        return int(random*dmg*reduction*(1-self._cara['elementalRes'][element]))
 
     def PhysicalDmg(self, dmg):
         random = uniform(0.9, 1.1)
-        return int(random*dmg*pow(0.996, self._cara['strength']))
+        enhance = util.StatCalculation(self._cara['strength'])
+        return int(random*dmg*enhance)
 
     def MagicalDmg(self, dmg):
         random = uniform(0.9, 1.1)
-        return int(random*dmg*pow(0.996, self._cara['magic']))
+        enhance = util.StatCalculation(self._cara['magic'])
+        return int(random*dmg*enhance)
 
     def Affect(self,effect, screen):
         xp = 0
@@ -161,7 +164,7 @@ class Anna(Character):
             self._cara['PV'], self._cara['PV_max'] = 100, 100
             self._cara['PA'], self._cara['PA_max'] = 6, 6
             self._cara['PM'], self._cara['PM_max'] = 3, 3
-            self._cara['speed'] = 1
+            self._cara['speed'] = 50
         self.AddLifeBar(tile_size)
 
 class Henry(Character):
@@ -188,5 +191,5 @@ class Henry(Character):
             self._cara['PV'], self._cara['PV_max'] = 1, 100
             self._cara['PA'], self._cara['PA_max'] = 6, 6
             self._cara['PM'], self._cara['PM_max'] = 3, 3
-            self._cara['speed'] = 2
+            self._cara['speed'] = 80
         self.AddLifeBar(tile_size)

@@ -89,10 +89,10 @@ class Skill():
             for effect in self._char_effects:
                 print('Effect:', effect)
                 xp += affected.Affect(effect, screen)
-        """for effect in self._tile_effects
+        for effect in self._tile_effects:
+            print('Affect tiles:', tiles)
             for tile in tiles:
-                gid = map_data.get_tile_gid(tile[0], tile[1],0)
-                map_data.set_tile_properties(gid, self._tile_effect)"""
+                screen._tile_effect.append([tile, effect])
         return xp
 
     def GetAimable(self, pos, map_data, tile_size, playerTeam):
@@ -185,11 +185,12 @@ class Apocalypse(Skill):
         self._AOE = None
         self._size = 2
         self._cost = 4
-        self._damage = 50
+        self._damage = 0
         self._range = 5
         self._sprite_sheet = None
         self._perce = False
         self._char_effects = [Effect.Effect('PA', 1, 2)]
+        self._tile_effects = [Effect.Effect('PV', 1, 5)]
         self._type = 'physic'
 
 def ListSkills():

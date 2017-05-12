@@ -58,6 +58,12 @@ class Status(TextBox):
         text = ';'.join(data)
         self._string = text.split(';')
 
+class SkillDetails(TextBox):
+    def __init__(self, skill):
+        data = [skill._name, 'Type: ' + skill._type, 'PA: ' + str(skill._cost), 'Dmg: ' + str(skill._damage)]
+        string =';'.join(data)
+        name = "TextBox_ExtraLarge.png"
+        TextBox.__init__(self, name, string, 128, 100, (20, 10))
 
 class Portrait(TextBox):
     def __init__(self, character):

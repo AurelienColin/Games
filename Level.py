@@ -6,21 +6,19 @@ import sys
 from MainGame import *
 
 class Level():
-    def __init__(self, map_data, screen, playerTeam, opponentTeam, teams):
+    def __init__(self, map_data, screen, teams):
         self._map_data = map_data
         self._screen = screen
-        self._playerTeam = playerTeam
-        self._opponentTeam = opponentTeam
         self._teams = teams
 
     def CheckVictoryCondition(self):
         playerVictory, opponentVictory = True, True
-        print(self._opponentTeam._members, self._playerTeam._members)
+        print(self._teams[1]._members, self._teams[0]._members)
         if self._victory_condition == 'destroy':
-            for character in self._opponentTeam._members:
+            for character in self._teams[1]._members:
                 if not character._dead:
                     playerVictory = False
-            for character in self._playerTeam._members:
+            for character in self._teams[0]._members:
                 if not character._dead:
                     opponentVictory = False
         if playerVictory:
@@ -33,7 +31,6 @@ class Level():
             sys.exit()
 
     def ModeTRPG(self):
-
         turns, turn = IniTurns(self._screen._characters)
         character = turns[turn]
         self._screen.MoveCircle(pos = character._pos)
@@ -47,14 +44,15 @@ class Level():
                 turn = NextTurn(self._screen, turns, turn)
                 character = turns[turn]
             if character._team_number == 1:
-                current_team = self._playerTeam
+                current_team = self._teams[0]
             elif character._team_number == 2:
-                current_team = self._opponentTeam
+                current_team = self._teams[1]
             menu = MenusLoop(menu, character, self._screen, self._map_data, current_team)
             if menu == 'End Turn' or (character._cara['PA'] == 0 and character._cara['PM'] == 0) or character._dead:
-                turn = NextTurn(self._screen, turns, turn)
+                turn = NextTurn(self, turns, turn)
                 character = turns[turn]
             self.CheckVictoryCondition()
+
 
 class Level_0(Level):
     def __init__(self):
@@ -65,22 +63,26 @@ class Level_0(Level):
         map_data = screen._objects[map_index][0].renderer.tmx_data
 
         characters = [('Anna', (2,2), 1), ('Henry', (3, 3), 2)]
-        playerTeam, opponentTeam = [], []
-        for character in characters:
-            temp = Character.Character.Initialization(character[0], screen._tile_size, character[1], character[2])
-            temp._index = screen.AddCharacter(temp, 'standing')
-            if character[2] == 1:
-                playerTeam.append(temp)
-            elif character[2] == 2:
-                opponentTeam.append(temp)
-        playerTeam = Team.Team(1, playerTeam, screen._tile_size)
-        opponentTeam = Team.Team(2, opponentTeam, screen._tile_size)
-        playerTeam._team_opponent.append(opponentTeam._number)
-        opponentTeam._team_opponent.append(playerTeam._number)
-        teams = [playerTeam, opponentTeam]
-        playerTeam.relations(teams)
-        opponentTeam.relations(teams)
-
+        teams = IniTeam(characters, screen)
         screen.SetCharacters(teams)
-        Level.__init__(self, map_data, screen, playerTeam, opponentTeam, teams)
+
+        Level.__init__(self, map_data, screen, teams)
         self._victory_condition = 'destroy'
+
+def IniTeam(characters, screen):
+    playerTeam, opponentTeam = [], []
+    for character in characters:
+        temp = Character.Character.Initialization(character[0], screen._tile_size, character[1], character[2])
+        temp._index = screen.AddCharacter(temp, 'standing')
+        if character[2] == 1:
+            playerTeam.append(temp)
+        elif character[2] == 2:
+            opponentTeam.append(temp)
+    playerTeam = Team.Team(1, playerTeam, screen._tile_size)
+    opponentTeam = Team.Team(2, opponentTeam, screen._tile_size)
+    playerTeam._team_opponent.append(opponentTeam._number)
+    opponentTeam._team_opponent.append(playerTeam._number)
+    teams = [playerTeam, opponentTeam]
+    teams[0].relations(teams)
+    teams[1].relations(teams)
+    return teams
