@@ -36,13 +36,14 @@ class Character():
                                       'neutral':0}
 
 
-    def Initialization(name):
+    def Initialization(name, tile_size, pos_tile, team_number):
         if name == 'Anna':
-            self = Anna()
+            self = Anna(tile_size, pos_tile)
         elif name == 'Henry':
-            self = Henry()
+            self = Henry(tile_size, pos_tile)
         else:
             self = None
+        self._team_number = team_number
         return self
 
     def AddSprite(self, begin, end):
@@ -70,6 +71,7 @@ class Character():
         self._lifebar2 = Highlight.Highlight(height_void, width, 255, (0, 0, 0), self._pos[0]+height_life, self._pos[1])
 
     def pos(self, tile_size, pos_pixel = None, pos_tile = None):
+        print(pos_tile)
         if pos_pixel:
             self._pos = pos_pixel
             self._pos_tile = (pos_pixel[0]/tile_size, pos_pixel[1]/tile_size)
@@ -126,7 +128,7 @@ class Character():
         self._cara['PM'] = self._cara['PM_max']
 
 class Anna(Character):
-    def __init__(self, save=None):
+    def __init__(self, tile_size, pos_tile, save=None):
         Character.__init__(self)
         self._id = 1
         self._cara['name'] = 'Anna'
@@ -139,6 +141,7 @@ class Anna(Character):
         self._sprite['walking_down'] =  self.AddSprite(48,52)
         self._sprite['walking_up'] =  self.AddSprite(50,56)
         self._portrait = pygame.image.load(join('res', 'sprite', 'Anna_portrait.png'))
+        self.pos(tile_size, pos_tile = pos_tile)
         if save:
             pass
         else:
@@ -148,9 +151,10 @@ class Anna(Character):
             self._cara['PA'], self._cara['PA_max'] = 6, 6
             self._cara['PM'], self._cara['PM_max'] = 3, 3
             self._cara['speed'] = 1
+        self.AddLifeBar(tile_size)
 
 class Henry(Character):
-    def __init__(self, save=None):
+    def __init__(self, tile_size, pos_tile, save=None):
         Character.__init__(self)
         self._sprite = {}
         self._id = 2
@@ -164,13 +168,14 @@ class Henry(Character):
         self._sprite['walking_down'] =  self.AddSprite(436,440)
         self._sprite['walking_up'] =  self.AddSprite(448,452)
         self._portrait = pygame.image.load(join('res', 'sprite', 'Henry_portrait.png'))
+        self.pos(tile_size, pos_tile = pos_tile)
         if save:
             pass
         else:
-            skills = ['Apocalypse']
+            skills = ['Apocalypse', 'Horizontal']
             self._skills = [Skill.Skill.Initialization(skill) for skill in skills]
             self._cara['PV'], self._cara['PV_max'] = 1, 100
             self._cara['PA'], self._cara['PA_max'] = 6, 6
             self._cara['PM'], self._cara['PM_max'] = 3, 3
-
             self._cara['speed'] = 2
+        self.AddLifeBar(tile_size)

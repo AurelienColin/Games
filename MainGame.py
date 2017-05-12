@@ -23,19 +23,20 @@ import Skill
 import Highlight
 import util
 import Team
+import Level
 from pygame.locals import *  # Import the event
 
 
 def IfDeplacement(character, key, screen, map_data):
     position = character._pos
     tile_size = screen._tile_size
-    if key == K_DOWN and position[1] < screen_height-2*tile_size:
+    if key == K_DOWN and position[1] < screen._height-2*tile_size:
         diff = (0, tile_size)
     elif key == K_UP and position[1] > 0:
         diff = (0, -tile_size)
     elif key == K_LEFT and position[0] > 0:
         diff = (-tile_size, 0)
-    elif key == K_RIGHT and position[0] < screen_width-2*tile_size:
+    elif key == K_RIGHT and position[0] < screen._width-2*tile_size:
         diff = (tile_size, 0)
     else:
         diff = (0, 0)
@@ -58,7 +59,7 @@ def IfDeplacement(character, key, screen, map_data):
     screen._objects[character._index[2]][1] = character._lifebar2._pos
     screen.MoveCircle(pos = character._pos)
     print("Character's position:", character._pos)
-    screen.UpdateStatus(turns[turn])
+    screen.UpdateStatus(character)
     return
 
 def OpenMenu(key, screen, character=None):
@@ -66,8 +67,8 @@ def OpenMenu(key, screen, character=None):
         text_box = TextBox.TextBox.Initialization('MainMenu')
     elif key == 'Skills':
         text_box = TextBox.TextBox.Initialization('Skills', character=character)
-    pos_x = (screen_height - text_box._height)/2
-    pos_y = (screen_width - text_box._width)/2
+    pos_x = (screen._height - text_box._height)/2
+    pos_y = (screen._width - text_box._width)/2
     menu_index = screen.AddTextBox(text_box, (pos_x, pos_y))
 
     alpha = 80
@@ -106,6 +107,7 @@ def AimingLoop(current_character, screen, skill, map_data, playerTeam):
     selection_tile = current_character._pos_tile
     change = True
     end = False
+    mainClock = pygame.time.Clock()
     while True:
         screen.refresh()
         mainClock.tick(30)
@@ -117,7 +119,7 @@ def AimingLoop(current_character, screen, skill, map_data, playerTeam):
                 if event.key == K_RETURN and current_character._cara['PA'] > skill._cost:  # We use the skill
                     current_character.Attack(skill, red, map_data, screen)
                     end = True
-                    screen.UpdateStatus(turns[turn])
+                    screen.UpdateStatus(current_character)
                 elif event.key == K_KP2 or event.key == K_DOWN:
                     if (selection_tile[0], selection_tile[1]+1) in blue:
                         selection_tile = (selection_tile[0], selection_tile[1]+1)
@@ -176,10 +178,13 @@ def AimingLoop(current_character, screen, skill, map_data, playerTeam):
 
 
 def MenusLoop(menu, current_character, screen, map_data, playerTeam):
+    skills = Skill.ListSkills()
+    implemented_menu = TextBox.ListMenus()
     menus = [menu]
     selection = 1
     menu_index, selection_id = OpenMenu('MainMenu', screen)
     choice = None
+    mainClock = pygame.time.Clock()
     while True:
         screen.refresh()
         mainClock.tick(30)
@@ -230,6 +235,7 @@ def MenusLoop(menu, current_character, screen, map_data, playerTeam):
                         return choice
 
 def MovementLoop(current_character, screen, map_data):
+    mainClock = pygame.time.Clock()
     while True:
         screen.refresh()
         mainClock.tick(30)
@@ -275,63 +281,13 @@ def NextTurn(screen, turns, turn):
     screen.UpdateStatus(turns[turn])
     return turn
 
+
 def QuitMenu(screen, menu_index, selection_id):
     for i in menu_index:
         screen.RemoveObject(i)
     screen.RemoveObject(selection_id)
 
 if __name__ == '__main__':
-    tile_size = 29
     pygame.init()
-    screen_height, screen_width = (640,640)
-    screen = Screen.Screen(screen_height, screen_width, tile_size)
-
-    map_index = screen.AddMap("TestLevel.tmx")
-    map_data = screen._objects[map_index][0].renderer.tmx_data
-
-    anna = Character.Character.Initialization('Anna')
-    anna.pos(tile_size, pos_tile = (2, 2))
-    anna.AddLifeBar(tile_size)
-    anna._index = screen.AddCharacter(anna, 'standing')
-    playerTeam = Team.Team(1, [anna], tile_size)
-
-    henry = Character.Character.Initialization('Henry')
-    henry.pos(tile_size, pos_tile = (3, 3))
-    henry.AddLifeBar(tile_size)
-    henry._index = screen.AddCharacter(henry, 'standing')
-    opponentTeam = Team.Team(2, [henry], tile_size)
-
-
-    teams = [playerTeam, opponentTeam]
-    playerTeam._team_opponent.append(opponentTeam._number)
-    opponentTeam._team_opponent.append(playerTeam._number)
-    playerTeam.relations(teams)
-    opponentTeam.relations(teams)
-
-    string = 'Push enter to get the menu'
-    box_file = "TextBox_LongSmall.png"
-    text_box = TextBox.TextBox(box_file, string, 240, 50, (20, 13))
-    screen.AddTextBox(text_box, (100,0))
-
-    mainClock = pygame.time.Clock()
-    pygame.display.update()  # Initial display
-    screen.refresh()
-
-    current_character = anna
-    skills = Skill.ListSkills()
-    implemented_menu = TextBox.ListMenus()
-
-    screen.SetCharacters(teams)
-    turns, turn = IniTurns(screen._characters)
-    character = turns[turn]
-    screen.MoveCircle(pos = character._pos)
-    screen.UpdateStatus(turns[turn], (screen_height-128, screen_width-100))
-    while True:
-        menu = MovementLoop(character, screen, map_data)
-        if character._cara['PA'] == 0 and character._cara['PM'] == 0 :
-            turn = NextTurn(screen, turns, turn)
-            character = turns[turn]
-        menu = MenusLoop(menu, character, screen, map_data, playerTeam)
-        if menu == 'End Turn' or (character._cara['PA'] == 0 and character._cara['PM'] == 0) or character._dead:
-            turn = NextTurn(screen, turns, turn)
-            character = turns[turn]
+    level = Level.Level_0()
+    level.ModeTRPG()

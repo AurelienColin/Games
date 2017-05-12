@@ -17,6 +17,8 @@ class Screen():
         [2] ; its type (sprite, map, or anything else), a string"""
     def __init__(self, width, height, tile_size):
         self._display = pygame.display.set_mode((width, height), pygame.RESIZABLE)
+        self._width = width
+        self._height = height
         self._tile_size = tile_size
 
         circle = pygame.image.load(join('res', 'sprite', 'circle.png'))
