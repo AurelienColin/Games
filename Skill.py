@@ -1,13 +1,14 @@
 import Highlight
 import Map
 import numpy as np
+import Effect
 
 class Skill():
     def __init__(self):
-        self._char_effect = {}
+        self._char_effects = {}
         self._damage = 0
         self._heal = 0
-        self._tile_effect = {}
+        self._tile_effects = {}
         self._ele = 'neutral'
 
     def Initialization(name):
@@ -84,12 +85,14 @@ class Skill():
             else:    # skill._type == 'heal'
                 dmg = -current_character.MagicalDmg(self._damage)
             affected.Affect(dmg, screen)
-            for effect in self._char_effect:
+
+            for effect in self._char_effects:
+                print('Effect:', effect)
                 xp += affected.Affect(effect, screen)
-        if self._tile_effect:
+        """for effect in self._tile_effects
             for tile in tiles:
                 gid = map_data.get_tile_gid(tile[0], tile[1],0)
-                map_data.set_tile_properties(gid, self._tile_effect)
+                map_data.set_tile_properties(gid, self._tile_effect)"""
         return xp
 
     def GetAimable(self, pos, map_data, tile_size, playerTeam):
@@ -186,6 +189,7 @@ class Apocalypse(Skill):
         self._range = 5
         self._sprite_sheet = None
         self._perce = False
+        self._char_effects = [Effect.Effect('PA', 1, 2)]
         self._type = 'physic'
 
 def ListSkills():

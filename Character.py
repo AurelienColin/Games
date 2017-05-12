@@ -30,7 +30,7 @@ class Character():
         self._cara['strength'] = 0
         self._cara['defense'] = 0
         self._cara['resistance'] = 0
-        self._cara['effects'] = []
+        self._cara['effects'] = [False]
         self._cara['elementalRes'] = {'fire':0, 'water':0, 'earth':0,
                                       'wind':0, 'holy':0, 'unholy':0,
                                       'neutral':0}
@@ -100,11 +100,13 @@ class Character():
         return int(random*dmg*pow(0.996, self._cara['magic']))
 
     def Affect(self,effect, screen):
+        xp = 0
         if type(effect) == int:
             xp = abs(self._xp_on_damage*effect)
             self._cara['PV'] = min(self._cara['PV_max'], max(0,self._cara['PV']-effect))
-        else:
-            pass  # It's a debuff, a buff, or anything else
+        else:# It's a debuff, a buff, or anything else
+            self._cara['effects'].append(effect)
+            self._cara[effect._properties] = max(0, self._cara[effect._properties]-effect._power)
         for i in self._index:
             screen.RemoveObject(i)
         if self._cara['PV'] == 0:
@@ -126,6 +128,15 @@ class Character():
     def passTurn(self):
         self._cara['PA'] = self._cara['PA_max']
         self._cara['PM'] = self._cara['PM_max']
+        for i, effect in enumerate(self._cara['effects']):
+            if effect:
+                if effect._duration == effect._since:
+                    self._cara['effects'][i] = False
+                elif effect._since == 0 and effect._properties not in ['PA', 'PM']:
+                    self._cara['effects'][i]._since += 1
+                else:
+                    self._cara['effects'][i]._since += 1
+                    self._cara[effect._properties] = max(0, self._cara[effect._properties]-effect._power)
 
 class Anna(Character):
     def __init__(self, tile_size, pos_tile, save=None):
