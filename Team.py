@@ -7,6 +7,8 @@ class Team():
         self._character_opponent = []
         self._members = characters
         self._pos = [character._pos_tile for character in characters]
+        for character in characters:
+            character._team = self
 
     def relations(self, teams):
         for team in teams:

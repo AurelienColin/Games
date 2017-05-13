@@ -28,39 +28,31 @@ import Effect
 from pygame.locals import *  # Import the event
 
 
-def IfDeplacement(character, key, screen, map_data):
-    position = character._pos
+
+def IfDeplacement(character, key, screen):
+    position = character._pos_tile
     tile_size = screen._tile_size
-    if key == K_DOWN and position[1] < screen._height-2*tile_size:
-        diff = (0, tile_size)
+    if key == K_DOWN and position[1] < screen._height//tile_size:
+        new_pos = (position[0], position[1]+1)
     elif key == K_UP and position[1] > 0:
-        diff = (0, -tile_size)
+        new_pos = (position[0], position[1]-1)
     elif key == K_LEFT and position[0] > 0:
-        diff = (-tile_size, 0)
-    elif key == K_RIGHT and position[0] < screen._width-2*tile_size:
-        diff = (tile_size, 0)
+        new_pos = (position[0]-1, position[1])
+    elif key == K_RIGHT and position[0] < screen._width//tile_size:
+        new_pos = (position[0]+1, position[1])
     else:
-        diff = (0, 0)
-    new_pos = (position[0]+diff[0] , position[1]+diff[1])
+        new_pos = position
+    print('Move from', position, 'to', new_pos)
+    px_pos = new_pos[0]*screen._tile_size, new_pos[1]*screen._tile_size
     change = True
     for other_char in screen._characters:
-        if not other_char._dead and other_char._pos == new_pos and character != other_char:
-            print(other_char, character)
+        if not other_char._dead and other_char._pos == px_pos and character != other_char:
             change = False
-    p = int(Map.CheckProperties(new_pos, 'slowness', map_data, tile_size))
+    p = int(Map.CheckProperties(px_pos, 'slowness', screen._map_data, tile_size))
     if p == -1 or p > character._cara['PM']:
         change = False
     if change:
-        character._lifebar1._pos = (character._lifebar1._pos[0] + diff[0], character._lifebar1._pos[1] + diff[1])
-        character._lifebar2._pos = (character._lifebar2._pos[0] + diff[0], character._lifebar2._pos[1] + diff[1])
-        character.pos(tile_size, pos_pixel = new_pos)
-        character._cara['PM'] -= p
-    screen._objects[character._index[0]][1] = character._pos
-    screen._objects[character._index[1]][1] = character._lifebar1._pos
-    screen._objects[character._index[2]][1] = character._lifebar2._pos
-    screen.MoveCircle(pos = character._pos)
-    print("Character's position:", character._pos)
-    screen.UpdateStatus(character)
+        character.Move(screen, p, character._pos_tile, new_pos)
     return
 
 def OpenMenu(key, screen, character=None):
@@ -100,8 +92,8 @@ def MenuNavigation(key, screen, menu_index, selection, selection_id):
         selection_id = screen.AddHighlight(s)
     return selection, selection_id
 
-def AimingLoop(current_character, screen, skill, map_data, playerTeam):
-    blue = skill.Aim(current_character, screen, map_data, playerTeam)
+def AimingLoop(current_character, screen, skill, playerTeam):
+    blue = skill.Aim(current_character, screen, playerTeam)
     alpha = 80
     color = (255, 0, 0)
     red = {}
@@ -120,7 +112,7 @@ def AimingLoop(current_character, screen, skill, map_data, playerTeam):
                 sys.exit()
             elif event.type == KEYDOWN:
                 if event.key == K_RETURN and current_character._cara['PA'] > skill._cost:  # We use the skill
-                    current_character.Attack(skill, red, map_data, screen)
+                    current_character.Attack(skill, red, screen)
                     end = True
                     screen.UpdateStatus(current_character)
                 elif event.key == K_KP2 or event.key == K_DOWN:
@@ -179,7 +171,7 @@ def AimingLoop(current_character, screen, skill, map_data, playerTeam):
                         red[pos] = screen.AddHighlight(s[pos])
 
 
-def MenusLoop(menu, current_character, screen, map_data, playerTeam):
+def MenusLoop(menu, current_character, screen, playerTeam):
     skills = Skill.ListSkills()
     implemented_menu = TextBox.ListMenus()
     menus = [menu]
@@ -205,7 +197,7 @@ def MenusLoop(menu, current_character, screen, map_data, playerTeam):
                                 print('Aim with skill', choice)
                                 QuitMenu(screen, menu_index, selection_id)
                                 selection = 1
-                                use = AimingLoop(current_character, screen, skill, map_data, playerTeam)
+                                use = AimingLoop(current_character, screen, skill, playerTeam)
                                 if not use:
                                     menu_index, selection_id = OpenMenu(menus[-1], screen, character=current_character)
                                 else:
@@ -236,7 +228,7 @@ def MenusLoop(menu, current_character, screen, map_data, playerTeam):
                         QuitMenu(screen, menu_index, selection_id)
                         return choice
 
-def MovementLoop(current_character, screen, map_data):
+def MovementLoop(current_character, screen):
     mainClock = pygame.time.Clock()
     while True:
         screen.refresh()
@@ -252,7 +244,7 @@ def MovementLoop(current_character, screen, map_data):
                     return 'MainMenu'
                 if event.key == K_UP or event.key == K_DOWN or event.key == K_RIGHT or event.key == K_LEFT:
                     # We move the current character
-                    IfDeplacement(current_character, event.key, screen, map_data)
+                    IfDeplacement(current_character, event.key, screen)
 
             elif event.type == MOUSEMOTION:
                 screen.onHover(event.pos)
@@ -270,7 +262,7 @@ def IniTurns(characters):
 
 def NextTurn(level, turns, turn):
     if not turns[turn]._dead:
-        speed = int(util.StatCalculation(character._cara['speed'])*100)
+        speed = turn + int(util.StatCalculation(turns[turn]._cara['speed'])*100)
         while speed in turns:
             speed += 1
         turns[speed] = turns[turn]
@@ -293,6 +285,10 @@ def NextTurn(level, turns, turn):
 
     level._screen.MoveCircle(pos = turns[turn]._pos)
     level._screen.UpdateStatus(turns[turn])
+    if turns[turn]._ia:
+        turns[turn].IA_Action(level._screen)
+        level.CheckVictoryCondition()
+        return NextTurn(level, turns, turn)
     return turn
 
 

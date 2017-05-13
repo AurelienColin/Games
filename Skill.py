@@ -24,11 +24,11 @@ class Skill():
             self = None
         return self
 
-    def Aim(self, character, screen, map_data, playerTeam):
+    def Aim(self, character, screen, playerTeam):
         center = (int(character._pos[0]/screen._tile_size),
                   int(character._pos[1]/screen._tile_size))
 
-        aimable = self.GetAimable(center,map_data, screen._tile_size, playerTeam)
+        aimable = self.GetAimable(center,screen._map_data, screen._tile_size, playerTeam)
         highlighted = Highlight.HighlightTiles(screen._tile_size, aimable,
                                                60, (0, 0,255))
         blue = {}
@@ -73,7 +73,7 @@ class Skill():
                 final_tiles.append(tuple(tile))
         return final_tiles
 
-    def Affect(self, current_character, all_affected, tiles, map_data, screen):
+    def Affect(self, current_character, all_affected, tiles, screen):
         xp = 0
         for affected in all_affected:
             if self._type == 'magic':
@@ -87,10 +87,8 @@ class Skill():
             affected.Affect(dmg, screen)
 
             for effect in self._char_effects:
-                print('Effect:', effect)
                 xp += affected.Affect(effect, screen)
         for effect in self._tile_effects:
-            print('Affect tiles:', tiles)
             for tile in tiles:
                 screen._tile_effect.append([tile, effect])
         return xp
@@ -185,7 +183,7 @@ class Apocalypse(Skill):
         self._AOE = None
         self._size = 2
         self._cost = 4
-        self._damage = 0
+        self._damage = 10
         self._range = 5
         self._sprite_sheet = None
         self._perce = False

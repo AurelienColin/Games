@@ -67,8 +67,7 @@ class Screen():
             if mouse_pos == character._pos_tile and not character._dead:
                 pos = character._pos[0]+self._tile_size, character._pos[1]+self._tile_size
                 self._portrait = self.AddTextBox(TextBox.Portrait(character), pos)
-                print('Hovering on:', character)
-                print(self._portrait)
+                print('Hovering on:', character, self._portrait)
                 return
 
     def RemoveObject(self, index):
