@@ -249,15 +249,23 @@ def MovementLoop(current_character, screen):
             elif event.type == MOUSEMOTION:
                 screen.onHover(event.pos)
 
-def IniTurns(characters):
-    characters.sort(key=lambda x: x._cara['speed'], reverse=True)
+def IniTurns(level):
+    level._screen._characters.sort(key=lambda x: x._cara['speed'], reverse=True)
     turns = {}
-    for character in characters:
+    for character in level._screen._characters:
         speed = int(util.StatCalculation(character._cara['speed'])*100)
         while speed in turns:
             speed += 1
         turns[speed] = character
     turn = min(turns)
+
+    level._screen.MoveCircle(pos = turns[turn]._pos)
+    level._screen.UpdateStatus(turns[turn], (level._screen._height-128, level._screen._width-100))
+    level._screen.UpdateIniList(turns, turn)
+    if turns[turn]._ia:
+        turns[turn].IA_Action(level._screen)
+        level.CheckVictoryCondition()
+        return NextTurn(level, turns, turn)
     return turns, turn
 
 def NextTurn(level, turns, turn):
@@ -285,6 +293,7 @@ def NextTurn(level, turns, turn):
 
     level._screen.MoveCircle(pos = turns[turn]._pos)
     level._screen.UpdateStatus(turns[turn])
+    level._screen.UpdateIniList(turns, turn)
     if turns[turn]._ia:
         turns[turn].IA_Action(level._screen)
         level.CheckVictoryCondition()

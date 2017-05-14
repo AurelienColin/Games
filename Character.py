@@ -49,13 +49,18 @@ class Character():
         self._team_number = team_number
         return self
 
-    def AddSprite(self, begin, end):
+    def AddSprite(self, begin, end=False):
+        if not end:
+            end = begin+1
         fullname = join('res', 'sprite', str(self._id) + '.png')
         perso = pyganim.getImagesFromSpriteSheet(fullname,cols=self._cols,rows= self._rows)[begin:end]
-        frames = list(zip(perso, [200]*(end-begin)))
-        animObj = pyganim.PygAnimation(frames)
-        animObj.play()
-        return animObj
+        if end > begin+1:
+            frames = list(zip(perso, [200]*(end-begin)))
+            obj = pyganim.PygAnimation(frames)
+            obj.play()
+        else:
+            obj = perso[0]
+        return obj
 
     def AddLifeBar(self, tile_size):
         width = 2
@@ -212,6 +217,7 @@ class Character():
         queue[(self._pos_tile[0], self._pos_tile[1])] = (0, [])
         reachable = {}
         tile_size = screen._tile_size
+        transparent = True
         while queue:
             x, y = list(queue.keys())[0]
             d, path = queue.pop((x, y))
@@ -221,12 +227,15 @@ class Character():
             for tile in circle:
                 d_to = int(Map.CheckProperties((tile[0]*tile_size, tile[1]*tile_size), 'slowness', screen._map_data,tile_size))
                 if tile[0] < 0 or tile[0] >= screen._width//tile_size:
-                    pass  # Outside of screen
+                    transparent = False  # Outside of screen
                 elif tile[1] < 0 or tile[1] >= screen._width//tile_size:
-                    pass # Outside of screen
+                    transparent = False # Outside of screen
                 elif tile in reachable and d_to+d > reachable[(tile[0], tile[1])][0]:
-                    pass # Shorter path already in reachable
-                elif d_to != -1 and  d+d_to <= PM:
+                    transparent = False # Shorter path already in reachable
+                for character in screen._characters:
+                    if character not in character._team._members:
+                        transparent = False  # Obstacle on the path
+                if transparent and d_to != -1 and  d+d_to <= PM:  # Obstacle on the path
                     queue[(tile[0], tile[1])] = (d+d_to, path+[(x, y)])
         return reachable
 
@@ -239,6 +248,7 @@ class Anna(Character):
         self._cara['sex'] = 'f'
         self._rows, self._cols = 144, 12
         self._sprite['standing'] = self.AddSprite(0,4)
+        self._sprite['static'] = self.AddSprite(0)
         self._sprite['attacking'] =  self.AddSprite(12,16)
         self._sprite['walking_left'] =  self.AddSprite(24,28)
         self._sprite['walking_right'] =  self.AddSprite(36,40)
@@ -266,6 +276,7 @@ class Henry(Character):
         self._cara['sex'] = 'm'
         self._rows, self._cols = 80, 12
         self._sprite['standing'] = self.AddSprite(388,392)
+        self._sprite['static'] = self.AddSprite(388)
         self._sprite['attacking'] =  self.AddSprite(400,404)
         self._sprite['walking_left'] =  self.AddSprite(412,416)
         self._sprite['walking_right'] =  self.AddSprite(424,428)

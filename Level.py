@@ -30,10 +30,8 @@ class Level():
             sys.exit()
 
     def ModeTRPG(self):
-        turns, turn = IniTurns(self._screen._characters)
+        turns, turn = IniTurns(self, )
         character = turns[turn]
-        self._screen.MoveCircle(pos = character._pos)
-        self._screen.UpdateStatus(turns[turn], (self._screen._height-128, self._screen._width-100))
 
         pygame.display.update()  # Initial display
         self._screen.refresh()
@@ -61,7 +59,7 @@ class Level_0(Level):
         map_index = screen.AddMap("TestLevel.tmx")
         screen._map_data = screen._objects[map_index][0].renderer.tmx_data
 
-        characters = [('Anna', (2,2), 1, False), ('Henry', (3, 3), 2, 'aggresif')]
+        characters = [('Anna', (2,2), 1, False), ('Henry', (3, 3), 2, False)]
         teams = IniTeam(characters, screen)
         screen.SetCharacters(teams)
 

@@ -1,5 +1,6 @@
 import pygame
 from os.path import join
+import util
 
 class TextBox():
     def __init__(self, box_file, text, height, width, pos, size=20):
@@ -8,7 +9,7 @@ class TextBox():
         self._text = [Text(self._string[i], (pos[0], pos[1]+i*size), 20) for i in range(len(self._string))]
         self._height = height
         self._width = width
-        self._img = False
+        self._imgs = False
         img = pygame.image.load(fullname)
         self._box = pygame.transform.smoothscale(img, (height, width))
 
@@ -75,7 +76,31 @@ class Portrait(TextBox):
         string = ';'.join(data)
         name = "TextBox_ExtraLarge.png"
         TextBox.__init__(self, name, string, size[0], size[1], (20, 10))
-        self._img = [character._portrait, (0, size[1]-128-12)]
+        self._imgs = [[character._portrait, (0, size[1]-128-12)]]
+
+class IniList(TextBox):
+    def __init__(self, characters, turns, turn):
+        temp_turns, i, j, temp = turns, turn, 0, []
+        cap = 10
+        margin = 37
+        while j < len(characters)*2:
+            if i in temp_turns:
+                j+=1
+                temp.append(temp_turns[i])
+                k = turn + int(util.StatCalculation(turns[turn]._cara['speed'])*100)
+                while k in temp_turns:
+                    k+=1
+                temp_turns[k] = temp_turns[i]
+            i += 1
+        size = margin*min(cap, len(characters)*2)+10, 50
+        name = "TextBox_LongSmall.png"
+        TextBox.__init__(self, name, '', size[0], size[1], (0, 0))
+        self._imgs = []
+        for i, character in enumerate(temp):
+            self._imgs.append([character._sprite['static'], (5+i*margin, 10)])
+            if i == cap:
+                break
+
 
 def ListMenus():
     return set(['MainMenu', 'Skills'])

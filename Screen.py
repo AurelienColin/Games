@@ -25,6 +25,7 @@ class Screen():
         self._objects = [[circle, (0, 0), 'hide']]
         self._portrait = False
         self._status = False
+        self._ini_list = False
         self._tile_effect = []
 
     def MoveCircle(self, pos = None, hide = False):
@@ -94,8 +95,9 @@ class Screen():
     def AddTextBox(self, box, pos):
         self._objects.append([box, pos, 'box'])
         prec = len(self._objects)
-        if box._img:
-            self._objects.append([box._img[0], (pos[0]+box._img[1][0], pos[1]+box._img[1][1]), 'sprite'])
+        if box._imgs:
+            for img in box._imgs:
+                self._objects.append([img[0], (pos[0]+img[1][0], pos[1]+img[1][1]), 'sprite'])
         for text in box._text:
             self._objects.append([text._string, (text._pos[0] + pos[0], text._pos[1] + pos[1]), 'text'])
         return [i for i in range(prec-1, len(self._objects))]
@@ -112,3 +114,10 @@ class Screen():
             for i in self._status:
                 self.RemoveObject(i)
             self._status = self.AddTextBox(TextBox.Status(character), pos)
+
+
+    def UpdateIniList(self, turns, turn):
+        if self._ini_list:
+            for i in self._ini_list:
+                self.RemoveObject(i)
+        self._ini_list = self.AddTextBox(TextBox.IniList(self._characters, turns, turn), (0, self._height-50))
