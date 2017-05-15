@@ -3,24 +3,39 @@ from os.path import join
 import util
 
 class TextBox():
-    def __init__(self, box_file, text, height, width, pos, size=20):
+    def __init__(self, box_file, texts, height, width, pos, size=20):
         fullname = join('res', 'textbox', box_file)
-        self._string = text.split(';')
-        self._text = [Text(self._string[i], (pos[0], pos[1]+i*size), 20) for i in range(len(self._string))]
+        self._text = []
+        self._string = []
+        for j, text in enumerate(texts):
+            text = text.split(';')
+            self._string += [text[i] for i in range(len(text))]
+            self._text += [Text(text[i], (pos[j][0], pos[j][1]+i*size), 20) for i in range(len(text))]
         self._height = height
         self._width = width
         self._imgs = False
         img = pygame.image.load(fullname)
         self._box = pygame.transform.smoothscale(img, (height, width))
 
-    def Initialization(name, character=None):
+    def Initialization(name, screen = None, character=None):
         if name == 'MainMenu':
             self = MainMenu()
         elif name == 'Skills':
             self = SkillMenu(character)
+        elif name == 'Status':
+            self = StatusBox(screen)
+            if screen._status_box == -1:
+                screen._status_box = 0
         else:
             self = None
         return self
+
+    def Update(self, texts, pos, size=20):
+        self._string = []
+        for j, text in enumerate(texts):
+            text = text.split(';')
+            self._string += [text[i] for i in range(len(text))]
+            self._text += [Text(text[i], (pos[j][0], pos[j][1]+i*size), 20) for i in range(len(text))]
 
 class Text():
     def __init__(self, text, pos, size):
@@ -30,16 +45,16 @@ class Text():
 
 class MainMenu(TextBox):
     def __init__(self):
-        string = "Aide;Skills;Objets;Status;Exit;End Turn"
+        string = ["Aide;Skills;Objets;Status;Exit;End Turn"]
         name = "TextBox_ExtraLarge.png"
-        TextBox.__init__(self,name, string, 130, 170, (30, 20))
+        TextBox.__init__(self,name, string, 130, 170, [(30, 20)])
 
 class SkillMenu(TextBox):
     def __init__(self, character):
         skills = [skill._name for skill in character._skills]
-        string = ';'.join(skills)
+        string = [';'.join(skills)]
         name = "TextBox_ExtraLarge.png"
-        TextBox.__init__(self, name, string, 150, 150, (30, 30))
+        TextBox.__init__(self, name, string, 150, 150, [(30, 30)])
 
 class Status(TextBox):
     def __init__(self, character):
@@ -47,9 +62,9 @@ class Status(TextBox):
                 'PV: '+ str(character._cara['PV']) + '/' + str(character._cara['PV_max']),
                 'PA: '+ str(character._cara['PA']) + '/' + str(character._cara['PA_max']),
                 'PM: '+ str(character._cara['PM']) + '/' + str(character._cara['PM_max'])]
-        string = ';'.join(data)
+        string = [';'.join(data)]
         name = "TextBox_ExtraLarge.png"
-        TextBox.__init__(self, name, string, 128, 100, (20, 10))
+        TextBox.__init__(self, name, string, 128, 100, [(20, 10)])
 
     def Update(self, character):
         data = [str(character._cara['name']),
@@ -62,9 +77,9 @@ class Status(TextBox):
 class SkillDetails(TextBox):
     def __init__(self, skill):
         data = [skill._name, 'Type: ' + skill._type, 'PA: ' + str(skill._cost), 'Dmg: ' + str(skill._damage)]
-        string =';'.join(data)
+        string = [';'.join(data)]
         name = "TextBox_ExtraLarge.png"
-        TextBox.__init__(self, name, string, 128, 100, (20, 10))
+        TextBox.__init__(self, name, string, 128, 100, [(20, 10)])
 
 class Portrait(TextBox):
     def __init__(self, character):
@@ -73,9 +88,9 @@ class Portrait(TextBox):
                 'PV: '+ str(character._cara['PV']) + '/' + str(character._cara['PV_max']),
                 'PA: '+ str(character._cara['PA']) + '/' + str(character._cara['PA_max']),
                 'PM: '+ str(character._cara['PM']) + '/' + str(character._cara['PM_max'])]
-        string = ';'.join(data)
+        string = [';'.join(data)]
         name = "TextBox_ExtraLarge.png"
-        TextBox.__init__(self, name, string, size[0], size[1], (20, 10))
+        TextBox.__init__(self, name, string, size[0], size[1], [(20, 10)])
         self._imgs = [[character._portrait, (0, size[1]-128-12)]]
 
 class IniList(TextBox):
@@ -94,13 +109,26 @@ class IniList(TextBox):
             i += 1
         size = margin*min(cap, len(characters)*2)+10, 50
         name = "TextBox_LongSmall.png"
-        TextBox.__init__(self, name, '', size[0], size[1], (0, 0))
+        TextBox.__init__(self, name, [''], size[0], size[1], [(0, 0)])
         self._imgs = []
         for i, character in enumerate(temp):
             self._imgs.append([character._sprite['static'], (5+i*margin, 10)])
             if i == cap:
                 break
 
+class StatusBox(TextBox):
+    def __init__(self, screen):
+        character = screen._characters[screen._status_box]
+        c = character._cara
+        string = ['', '', '']
+        pos = [(140, 30), (180, 70), (20, 150)]
+        string[0] = 'Name: ' + str(c['name']) + ';' + 'PV: ' + str(c['PV']) + '/' + str(c['PV_max']) + ';PA:' + str(c['PA_max'])
+        string[1] = 'PM: ' + str(c['PM_max'])
+        string[2] = 'Str: ' + str(c['strength']) +';Mgc: ' + str(c['magic']) + ';Def: ' + str(c['defense']) + ';Res: ' + str(c['resistance']) + ';Spd: ' + str(c['speed'])
+        name = 'TextBox_ExtraLarge.png'
+        TextBox.__init__(self, name, string, 300, 300, pos)
+        self._imgs = [[character._portrait, (0, 0)]]
+
 
 def ListMenus():
-    return set(['MainMenu', 'Skills'])
+    return set(['MainMenu', 'Skills', 'Status'])

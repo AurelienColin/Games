@@ -6,6 +6,8 @@ import pygame
 import Map
 import Highlight
 import TextBox
+import util
+import Character
 
 class Screen():
     """A screen had
@@ -25,6 +27,7 @@ class Screen():
         self._objects = [[circle, (0, 0), 'hide']]
         self._portrait = False
         self._status = False
+        self._status_box = 0
         self._ini_list = False
         self._tile_effect = []
 
@@ -53,11 +56,6 @@ class Screen():
                     self._display.blit(ele, position)
         pygame.display.update()
 
-    def SetCharacters(self, teams):
-        self._characters = []
-        for team in teams:
-            for character in team._members:
-                self._characters.append(character)
 
     def onHover(self, pos):
         if self._portrait:
@@ -98,7 +96,7 @@ class Screen():
         if box._imgs:
             for img in box._imgs:
                 self._objects.append([img[0], (pos[0]+img[1][0], pos[1]+img[1][1]), 'sprite'])
-        for text in box._text:
+        for i, text in enumerate(box._text):
             self._objects.append([text._string, (text._pos[0] + pos[0], text._pos[1] + pos[1]), 'text'])
         return [i for i in range(prec-1, len(self._objects))]
 
@@ -121,3 +119,53 @@ class Screen():
             for i in self._ini_list:
                 self.RemoveObject(i)
         self._ini_list = self.AddTextBox(TextBox.IniList(self._characters, turns, turn), (0, self._height-50))
+
+
+    def MenuNavigation(self, key, menu_index, selection, selection_id):
+        alpha = 80
+        color = (0,0,0)
+        if key == K_DOWN:
+            self.RemoveObject(selection_id)
+            selection = (selection+1)%len(menu_index)
+            if selection == 0:
+                selection +=1
+            height, width, pos_x, pos_y = util.ObjToCoord(self._objects[menu_index[selection]])
+            s = Highlight.Highlight(width, height, alpha, color, pos_x, pos_y)
+            selection_id = self.AddHighlight(s)
+        elif key == K_UP:
+            self.RemoveObject(selection_id)
+            selection = (selection-1)%len(menu_index)
+            if selection == 0:
+                selection = len(menu_index)-1
+            height, width, pos_x, pos_y = util.ObjToCoord(self._objects[menu_index[selection]])
+            s = Highlight.Highlight(width, height, alpha, color, pos_x, pos_y)
+            selection_id = self.AddHighlight(s)
+        return selection, selection_id
+
+
+    def OpenMenu(self, key, character=None):
+        text_box = TextBox.TextBox.Initialization(key, character=character, screen = self)
+        pos_x = (self._height - text_box._height)/2
+        pos_y = (self._width - text_box._width)/2
+        self._menu_index = self.AddTextBox(text_box, (pos_x, pos_y))
+
+        alpha = 80
+        color = (0,0,0)
+        height, width, pos_x, pos_y = util.ObjToCoord(self._objects[self._menu_index[1]])
+        s = Highlight.Highlight(width, height, alpha, color, pos_x, pos_y)
+        selection_id = self.AddHighlight(s)
+        return self._menu_index, selection_id
+
+
+    def QuitMenu(self, menu_index, selection_id):
+        for i in menu_index:
+            self.RemoveObject(i)
+        self.RemoveObject(selection_id)
+
+
+    def IniChar(self, characters):
+        self._characters = []
+        for character in characters:
+            char = Character.Character.Initialization(character[0], self._tile_size, character[1], character[2], ia = character[3])
+            char._index = self.AddCharacter(char, 'standing')
+            self._characters.append(char)

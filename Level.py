@@ -1,25 +1,23 @@
 import Character
-import Team
 import Screen
 import pygame
 import sys
 from MainGame import *
 
 class Level():
-    def __init__(self, screen, teams):
+    def __init__(self, screen):
         self._map_data = screen._map_data
         self._screen = screen
-        self._teams = teams
 
     def CheckVictoryCondition(self):
         playerVictory, opponentVictory = True, True
         if self._victory_condition == 'destroy':
-            for character in self._teams[1]._members:
+            for character in self._screen._characters:
                 if not character._dead:
-                    playerVictory = False
-            for character in self._teams[0]._members:
-                if not character._dead:
-                    opponentVictory = False
+                    if character._team == 1:
+                        opponentVictory = False
+                    elif character._team == 2:
+                        playerVictory = False
         if playerVictory:
             print('You win')
             self._screen.refresh()
@@ -30,7 +28,7 @@ class Level():
             sys.exit()
 
     def ModeTRPG(self):
-        turns, turn = IniTurns(self, )
+        turns, turn = self.IniTurns()
         character = turns[turn]
 
         pygame.display.update()  # Initial display
@@ -38,48 +36,76 @@ class Level():
         while True:
             menu = MovementLoop(character, self._screen)
             if character._cara['PA'] == 0 and character._cara['PM'] == 0 :
-                turn = NextTurn(self._screen, turns, turn)
+                turn = self.NextTurn(turns, turn)
                 character = turns[turn]
-            if character._team_number == 1:
-                current_team = self._teams[0]
-            elif character._team_number == 2:
-                current_team = self._teams[1]
-            menu = MenusLoop(menu, character, self._screen, current_team)
+            menu = MenusLoop(menu, character, self._screen)
             if menu == 'End Turn' or (character._cara['PA'] == 0 and character._cara['PM'] == 0) or character._dead:
-                turn = NextTurn(self, turns, turn)
+                turn = self.NextTurn(turns, turn)
                 character = turns[turn]
             self.CheckVictoryCondition()
 
 
+    def IniTurns(self):
+        self._screen._characters.sort(key=lambda x: x._cara['speed'], reverse=True)
+        turns = {}
+        for character in self._screen._characters:
+            speed = int(util.StatCalculation(character._cara['speed'])*100)
+            while speed in turns:
+                speed += 1
+            turns[speed] = character
+        turn = min(turns)
+
+        self._screen.MoveCircle(pos = turns[turn]._pos)
+        self._screen.UpdateStatus(turns[turn], (self._screen._height-128, self._screen._width-100))
+        self._screen.UpdateIniList(turns, turn)
+        if turns[turn]._ia:
+            turns[turn].IA_Action(self._screen)
+            self.CheckVictoryCondition()
+            return self.NextTurn(turns, turn)
+        return turns, turn
+
+    def NextTurn(self, turns, turn):
+        if not turns[turn]._dead:
+            speed = turn + int(util.StatCalculation(turns[turn]._cara['speed'])*100)
+            while speed in turns:
+                speed += 1
+            turns[speed] = turns[turn]
+        turn+=1
+        while turn not in turns or turns[turn]._dead:
+            turn +=1
+        turns[turn].passTurn()
+
+        for i, pos_effect in enumerate(self._screen._tile_effect):
+            if pos_effect:
+                pos, effect = pos_effect
+                char_effect = Effect.Effect(effect._properties, effect._power, 1)
+                if turns[turn]._pos_tile == pos:
+                        turns[turn].Affect(char_effect, self._screen)
+                        break
+                if effect._since != effect._duration:
+                    self._screen._tile_effect[i][1]._since += 1
+                else:
+                    self._screen._tile_effect.pop(i)
+
+        self._screen.MoveCircle(pos = turns[turn]._pos)
+        self._screen.UpdateStatus(turns[turn])
+        self._screen.UpdateIniList(turns, turn)
+        if turns[turn]._ia:
+            turns[turn].IA_Action(level._screen)
+            level.CheckVictoryCondition()
+            return self.NextTurn(turns, turn)
+        return turn
+
+
+
+
 class Level_0(Level):
-    def __init__(self):
-        screen_height, screen_width = (640,640)
-        tile_size = 29
-        screen = Screen.Screen(screen_height, screen_width, tile_size)
+    def __init__(self, screen):
         map_index = screen.AddMap("TestLevel.tmx")
         screen._map_data = screen._objects[map_index][0].renderer.tmx_data
 
         characters = [('Anna', (2,2), 1, False), ('Henry', (3, 3), 2, False)]
-        teams = IniTeam(characters, screen)
-        screen.SetCharacters(teams)
+        screen.IniChar(characters)
 
-        Level.__init__(self, screen, teams)
+        Level.__init__(self, screen)
         self._victory_condition = 'destroy'
-
-def IniTeam(characters, screen):
-    playerTeam, opponentTeam = [], []
-    for character in characters:
-        temp = Character.Character.Initialization(character[0], screen._tile_size, character[1], character[2], ia = character[3])
-        temp._index = screen.AddCharacter(temp, 'standing')
-        if character[2] == 1:
-            playerTeam.append(temp)
-        elif character[2] == 2:
-            opponentTeam.append(temp)
-    playerTeam = Team.Team(1, playerTeam, screen._tile_size)
-    opponentTeam = Team.Team(2, opponentTeam, screen._tile_size)
-    playerTeam._team_opponent.append(opponentTeam._number)
-    opponentTeam._team_opponent.append(playerTeam._number)
-    teams = [playerTeam, opponentTeam]
-    teams[0].relations(teams)
-    teams[1].relations(teams)
-    return teams

@@ -24,11 +24,11 @@ class Skill():
             self = None
         return self
 
-    def Aim(self, character, screen, playerTeam):
+    def Aim(self, character, screen):
         center = (int(character._pos[0]/screen._tile_size),
                   int(character._pos[1]/screen._tile_size))
 
-        aimable = self.GetAimable(center,screen._map_data, screen._tile_size, playerTeam)
+        aimable = self.GetAimable(center,screen, character)
         highlighted = Highlight.HighlightTiles(screen._tile_size, aimable,
                                                60, (0, 0,255))
         blue = {}
@@ -93,7 +93,8 @@ class Skill():
                 screen._tile_effect.append([tile, effect])
         return xp
 
-    def GetAimable(self, pos, map_data, tile_size, playerTeam):
+    def GetAimable(self, pos, screen, current_character):
+        map_data, tile_size = screen._map_data, screen._tile_size
         aimable = set()
         scope = self._range
         p = 'slowness'
@@ -124,8 +125,8 @@ class Skill():
                     tile_range = [(int(x_range[i]+0.5), int(y_range[i]+0.5)) for i in range(R)]
                     for x_c, y_c in tile_range:
                         if not self._perce:
-                            for character in playerTeam._character_opponent:
-                                if character._pos_tile == (x_c, y_c):
+                            for character in screen._characters:
+                                if character._pos_tile == (x_c, y_c) and character._team != current_character._team:
                                     transparent = False
                                     break
                         if Map.CheckProperties((x_c*tile_size, y_c*tile_size), p, map_data, tile_size) != '1':

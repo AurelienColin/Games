@@ -22,12 +22,9 @@ import TextBox
 import Skill
 import Highlight
 import util
-import Team
 import Level
 import Effect
 from pygame.locals import *  # Import the event
-
-
 
 def IfDeplacement(character, key, screen):
     position = character._pos_tile
@@ -55,45 +52,8 @@ def IfDeplacement(character, key, screen):
         character.Move(screen, p, character._pos_tile, new_pos)
     return
 
-def OpenMenu(key, screen, character=None):
-    if key == 'MainMenu':
-        text_box = TextBox.TextBox.Initialization('MainMenu')
-    elif key == 'Skills':
-        text_box = TextBox.TextBox.Initialization('Skills', character=character)
-    pos_x = (screen._height - text_box._height)/2
-    pos_y = (screen._width - text_box._width)/2
-    menu_index = screen.AddTextBox(text_box, (pos_x, pos_y))
-
-    alpha = 80
-    color = (0,0,0)
-    height, width, pos_x, pos_y = util.ObjToCoord(screen._objects[menu_index[1]])
-    s = Highlight.Highlight(width, height, alpha, color, pos_x, pos_y)
-    selection_id = screen.AddHighlight(s)
-    return menu_index, selection_id
-
-def MenuNavigation(key, screen, menu_index, selection, selection_id):
-    alpha = 80
-    color = (0,0,0)
-    if key == K_DOWN:
-        screen.RemoveObject(selection_id)
-        selection = (selection+1)%len(menu_index)
-        if selection == 0:
-            selection +=1
-        height, width, pos_x, pos_y = util.ObjToCoord(screen._objects[menu_index[selection]])
-        s = Highlight.Highlight(width, height, alpha, color, pos_x, pos_y)
-        selection_id = screen.AddHighlight(s)
-    elif key == K_UP:
-        screen.RemoveObject(selection_id)
-        selection = (selection-1)%len(menu_index)
-        if selection == 0:
-            selection = len(menu_index)-1
-        height, width, pos_x, pos_y = util.ObjToCoord(screen._objects[menu_index[selection]])
-        s = Highlight.Highlight(width, height, alpha, color, pos_x, pos_y)
-        selection_id = screen.AddHighlight(s)
-    return selection, selection_id
-
-def AimingLoop(current_character, screen, skill, playerTeam):
-    blue = skill.Aim(current_character, screen, playerTeam)
+def AimingLoop(current_character, screen, skill):
+    blue = skill.Aim(current_character, screen)
     alpha = 80
     color = (255, 0, 0)
     red = {}
@@ -170,13 +130,12 @@ def AimingLoop(current_character, screen, skill, playerTeam):
                 for pos in s:
                         red[pos] = screen.AddHighlight(s[pos])
 
-
-def MenusLoop(menu, current_character, screen, playerTeam):
+def MenusLoop(menu, current_character, screen):
     skills = Skill.ListSkills()
     implemented_menu = TextBox.ListMenus()
     menus = [menu]
     selection = 1
-    menu_index, selection_id = OpenMenu('MainMenu', screen)
+    menu_index, selection_id = screen.OpenMenu('MainMenu')
     choice = None
     mainClock = pygame.time.Clock()
     while True:
@@ -195,11 +154,11 @@ def MenusLoop(menu, current_character, screen, playerTeam):
                         for skill in current_character._skills:
                             if choice == skill._name:
                                 print('Aim with skill', choice)
-                                QuitMenu(screen, menu_index, selection_id)
+                                screen.QuitMenu(menu_index, selection_id)
                                 selection = 1
-                                use = AimingLoop(current_character, screen, skill, playerTeam)
+                                use = AimingLoop(current_character, screen, skill)
                                 if not use:
-                                    menu_index, selection_id = OpenMenu(menus[-1], screen, character=current_character)
+                                    menu_index, selection_id = screen.OpenMenu(menus[-1], character=current_character)
                                 else:
                                     return
 
@@ -207,25 +166,37 @@ def MenusLoop(menu, current_character, screen, playerTeam):
                         print('Open menu:', choice)
                         menus.append(choice)
                         old_menu_index, old_selection_id = menu_index, selection_id
-                        menu_index, selection_id = OpenMenu(menus[-1], screen, character=current_character)
-                        QuitMenu(screen, old_menu_index, old_selection_id)
+                        menu_index, selection_id = screen.OpenMenu(menus[-1], character=current_character)
+                        screen.QuitMenu(old_menu_index, old_selection_id)
                         selection = 1
                     else: # Nothing
                         pass
                 if event.key == K_UP or event.key == K_DOWN:  # We navigate through the menu
-                    selection, selection_id = MenuNavigation(event.key, screen, menu_index, selection, selection_id)
-
+                    selection, selection_id = screen.MenuNavigation(event.key, menu_index, selection, selection_id)
+                if screen._status_box != -1 and (event.key == K_RIGHT or event.key == K_LEFT):
+                    screen.QuitMenu(menu_index, selection_id)
+                    print('Tru to change the status')
+                    if event.key == K_RIGHT:
+                        j = -1
+                    else:
+                        j = 1
+                    print(screen._status_box, j, len(screen._characters))
+                    screen._status_box = (screen._status_box+j)%len(screen._characters)
+                    print(screen._status_box, len(screen._characters))
+                    menu_index, selection_id = screen.OpenMenu('Status')
+                    screen.RemoveObject(selection_id)
                 ##### We are closing a menu #####
                 if event.key == K_ESCAPE or choice == 'Exit' or choice == 'End Turn':
                     if len(menus) > 1:  # Go to the previous menu
                         menus.pop(-1)
                         print('Return to menu:', menus[-1])
-                        QuitMenu(screen, menu_index, selection_id)
-                        menu_index, selection_id = OpenMenu(menus[-1], screen, character=current_character)
+                        screen.QuitMenu(menu_index, selection_id)
+                        menu_index, selection_id = screen.OpenMenu(menus[-1], character=current_character)
                         selection = 1
+                        screen._status_box = -1
                     else: # We quit the last menu
                         menus = []
-                        QuitMenu(screen, menu_index, selection_id)
+                        screen.QuitMenu(menu_index, selection_id)
                         return choice
 
 def MovementLoop(current_character, screen):
@@ -249,64 +220,10 @@ def MovementLoop(current_character, screen):
             elif event.type == MOUSEMOTION:
                 screen.onHover(event.pos)
 
-def IniTurns(level):
-    level._screen._characters.sort(key=lambda x: x._cara['speed'], reverse=True)
-    turns = {}
-    for character in level._screen._characters:
-        speed = int(util.StatCalculation(character._cara['speed'])*100)
-        while speed in turns:
-            speed += 1
-        turns[speed] = character
-    turn = min(turns)
-
-    level._screen.MoveCircle(pos = turns[turn]._pos)
-    level._screen.UpdateStatus(turns[turn], (level._screen._height-128, level._screen._width-100))
-    level._screen.UpdateIniList(turns, turn)
-    if turns[turn]._ia:
-        turns[turn].IA_Action(level._screen)
-        level.CheckVictoryCondition()
-        return NextTurn(level, turns, turn)
-    return turns, turn
-
-def NextTurn(level, turns, turn):
-    if not turns[turn]._dead:
-        speed = turn + int(util.StatCalculation(turns[turn]._cara['speed'])*100)
-        while speed in turns:
-            speed += 1
-        turns[speed] = turns[turn]
-    turn+=1
-    while turn not in turns or turns[turn]._dead:
-        turn +=1
-    turns[turn].passTurn()
-
-    for i, pos_effect in enumerate(level._screen._tile_effect):
-        if pos_effect:
-            pos, effect = pos_effect
-            char_effect = Effect.Effect(effect._properties, effect._power, 1)
-            if turns[turn]._pos_tile == pos:
-                    turns[turn].Affect(char_effect, level._screen)
-                    break
-            if effect._since != effect._duration:
-                level._screen._tile_effect[i][1]._since += 1
-            else:
-                level._screen._tile_effect.pop(i)
-
-    level._screen.MoveCircle(pos = turns[turn]._pos)
-    level._screen.UpdateStatus(turns[turn])
-    level._screen.UpdateIniList(turns, turn)
-    if turns[turn]._ia:
-        turns[turn].IA_Action(level._screen)
-        level.CheckVictoryCondition()
-        return NextTurn(level, turns, turn)
-    return turn
-
-
-def QuitMenu(screen, menu_index, selection_id):
-    for i in menu_index:
-        screen.RemoveObject(i)
-    screen.RemoveObject(selection_id)
-
 if __name__ == '__main__':
+    screen_height, screen_width = (640,640)
+    tile_size = 29
     pygame.init()
-    level = Level.Level_0()
+    screen = Screen.Screen(screen_height, screen_width, tile_size)
+    level = Level.Level_0(screen)
     level.ModeTRPG()

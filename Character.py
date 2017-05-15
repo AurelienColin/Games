@@ -23,6 +23,7 @@ class Character():
         self._xp = 0
         self._dead = False
         self._ia = ia
+        self._team = 0
 
         self._skills = []
         self._cara['PV'], self._cara['PV_max'] = 0, 0
@@ -39,14 +40,14 @@ class Character():
                                       'neutral':0}
 
 
-    def Initialization(name, tile_size, pos_tile, team_number, ia = False):
+    def Initialization(name, tile_size, pos_tile, team, ia = False):
         if name == 'Anna':
             self = Anna(tile_size, pos_tile, ia)
         elif name == 'Henry':
             self = Henry(tile_size, pos_tile, ia)
         else:
             self = None
-        self._team_number = team_number
+        self._team = team
         return self
 
     def AddSprite(self, begin, end=False):
@@ -233,7 +234,7 @@ class Character():
                 elif tile in reachable and d_to+d > reachable[(tile[0], tile[1])][0]:
                     transparent = False # Shorter path already in reachable
                 for character in screen._characters:
-                    if character not in character._team._members:
+                    if character._team != self._team:
                         transparent = False  # Obstacle on the path
                 if transparent and d_to != -1 and  d+d_to <= PM:  # Obstacle on the path
                     queue[(tile[0], tile[1])] = (d+d_to, path+[(x, y)])
