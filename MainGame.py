@@ -175,18 +175,19 @@ def MenusLoop(menu, current_character, screen):
                     selection, selection_id = screen.MenuNavigation(event.key, menu_index, selection, selection_id)
                 if screen._status_box != -1 and (event.key == K_RIGHT or event.key == K_LEFT):
                     screen.QuitMenu(menu_index, selection_id)
-                    print('Tru to change the status')
                     if event.key == K_RIGHT:
                         j = -1
                     else:
                         j = 1
-                    print(screen._status_box, j, len(screen._characters))
                     screen._status_box = (screen._status_box+j)%len(screen._characters)
-                    print(screen._status_box, len(screen._characters))
                     menu_index, selection_id = screen.OpenMenu('Status')
                     screen.RemoveObject(selection_id)
                 ##### We are closing a menu #####
                 if event.key == K_ESCAPE or choice == 'Exit' or choice == 'End Turn':
+                    if screen._childBox:
+                        for index in screen._childBox:
+                            screen.RemoveObject(index)
+                        screen._childBox = False
                     if len(menus) > 1:  # Go to the previous menu
                         menus.pop(-1)
                         print('Return to menu:', menus[-1])

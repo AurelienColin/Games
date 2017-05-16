@@ -1,6 +1,7 @@
 import pygame
 from os.path import join
 import util
+import Skill
 
 class TextBox():
     def __init__(self, box_file, texts, height, width, pos, size=20):
@@ -16,6 +17,7 @@ class TextBox():
         self._imgs = False
         img = pygame.image.load(fullname)
         self._box = pygame.transform.smoothscale(img, (height, width))
+        self._imgs = False
 
     def Initialization(name, screen = None, character=None):
         if name == 'MainMenu':
@@ -40,6 +42,7 @@ class TextBox():
 class Text():
     def __init__(self, text, pos, size):
         font = pygame.font.SysFont('freesans', size)
+        self._text = text
         self._string = font.render(text, True, (0,0,0))
         self._pos = pos
 
@@ -120,15 +123,42 @@ class StatusBox(TextBox):
     def __init__(self, screen):
         character = screen._characters[screen._status_box]
         c = character._cara
-        string = ['', '', '']
-        pos = [(140, 30), (180, 70), (20, 150)]
+        string = ['', '', '', '']
+        pos = [(140, 30), (180, 70), (20, 150), (140, 150)]
         string[0] = 'Name: ' + str(c['name']) + ';' + 'PV: ' + str(c['PV']) + '/' + str(c['PV_max']) + ';PA:' + str(c['PA_max'])
         string[1] = 'PM: ' + str(c['PM_max'])
         string[2] = 'Str: ' + str(c['strength']) +';Mgc: ' + str(c['magic']) + ';Def: ' + str(c['defense']) + ';Res: ' + str(c['resistance']) + ';Spd: ' + str(c['speed'])
+        for skill in character._skills[:5]:
+            string[3] +=skill._name + ';'
+        string[3] = string[3][:-1]  # Remove the last ';'
         name = 'TextBox_ExtraLarge.png'
         TextBox.__init__(self, name, string, 300, 300, pos)
         self._imgs = [[character._portrait, (0, 0)]]
 
+class ChildBox(TextBox):
+    def __init__(self, screen, choice):
+        string = ''
+        if choice[:4] == 'Name':
+            if choice[6:] == 'Anna':
+                string = 'Cute girl'
+        elif choice[:2] == 'PV':
+            string = 'Quantity of;life remaining'
+        elif choice[:2] == 'PA':
+            string = 'Capacity to;act each turn'
+        elif choice[:2] == 'PM':
+            string = 'Capacity to;move each;turn'
+        elif choice[:3] == 'Str':
+            string = 'Increase the;dmg of phys.;attacks'
+        elif choice[:3] == 'Def':
+            string = 'Decrease the;dmg done by;phys. attacks'
+        elif choice[:3] == 'Mgc':
+            string = 'Increase the;dmg of mgc.;attacks'
+        elif choice[:3] == 'Res':
+            string = 'Decrease the;dmg done by;mgc. attacks'
+        elif choice[:3] == 'Spd':
+            string = 'Reduce the;time during;two turns'
+        name = "TextBox_ExtraLarge.png"
+        TextBox.__init__(self, name, [string], 128, 100, [(20, 10)], size=16)
 
 def ListMenus():
     return set(['MainMenu', 'Skills', 'Status'])

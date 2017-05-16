@@ -8,6 +8,7 @@ import Highlight
 import TextBox
 import util
 import Character
+import Skill
 
 class Screen():
     """A screen had
@@ -27,8 +28,9 @@ class Screen():
         self._objects = [[circle, (0, 0), 'hide']]
         self._portrait = False
         self._status = False
-        self._status_box = 0
+        self._status_box = -1
         self._ini_list = False
+        self._childBox = False
         self._tile_effect = []
 
     def MoveCircle(self, pos = None, hide = False):
@@ -43,7 +45,7 @@ class Screen():
         circle_pos = (circle_pos[0]-4, circle_pos[1])
         for element in self._objects:
             if element:
-                ele, position, type_ele = element
+                ele, position, type_ele = element[:3]
                 if type_ele == 'tiled_map':
                     ele.draw(self._display)
                     if show != 'hide':
@@ -97,7 +99,7 @@ class Screen():
             for img in box._imgs:
                 self._objects.append([img[0], (pos[0]+img[1][0], pos[1]+img[1][1]), 'sprite'])
         for i, text in enumerate(box._text):
-            self._objects.append([text._string, (text._pos[0] + pos[0], text._pos[1] + pos[1]), 'text'])
+            self._objects.append([text._string, (text._pos[0] + pos[0], text._pos[1] + pos[1]), 'text', text._text])
         return [i for i in range(prec-1, len(self._objects))]
 
     def AddHighlight(self, s):
@@ -124,22 +126,27 @@ class Screen():
     def MenuNavigation(self, key, menu_index, selection, selection_id):
         alpha = 80
         color = (0,0,0)
+        self.RemoveObject(selection_id)
         if key == K_DOWN:
-            self.RemoveObject(selection_id)
             selection = (selection+1)%len(menu_index)
             if selection == 0:
                 selection +=1
-            height, width, pos_x, pos_y = util.ObjToCoord(self._objects[menu_index[selection]])
-            s = Highlight.Highlight(width, height, alpha, color, pos_x, pos_y)
-            selection_id = self.AddHighlight(s)
         elif key == K_UP:
-            self.RemoveObject(selection_id)
             selection = (selection-1)%len(menu_index)
             if selection == 0:
                 selection = len(menu_index)-1
-            height, width, pos_x, pos_y = util.ObjToCoord(self._objects[menu_index[selection]])
-            s = Highlight.Highlight(width, height, alpha, color, pos_x, pos_y)
-            selection_id = self.AddHighlight(s)
+        if self._status_box!=-1 and len(self._objects[menu_index[selection]])>3:
+            if self._childBox:
+                for index in self._childBox:
+                    self.RemoveObject(index)
+            if self._objects[menu_index[selection]][3] in Skill.ListSkills():
+                box = TextBox.SkillDetails(Skill.Skill.Initialization(self._objects[menu_index[selection]][3]))
+            else:
+                box = TextBox.ChildBox(self, self._objects[menu_index[selection]][3])
+            self._childBox = self.AddTextBox(box,(self._height-128, self._width-2*100))
+        height, width, pos_x, pos_y = util.ObjToCoord(self._objects[menu_index[selection]])
+        s = Highlight.Highlight(width, height, alpha, color, pos_x, pos_y)
+        selection_id = self.AddHighlight(s)
         return selection, selection_id
 
 
