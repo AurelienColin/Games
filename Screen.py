@@ -23,7 +23,7 @@ class Screen():
         self._width = width
         self._height = height
         self._tile_size = tile_size
-
+        self._animation_length = self._tile_size
         circle = pygame.image.load(join('res', 'sprite', 'circle.png'))
         self._objects = [[circle, (0, 0), 'hide']]
         self._portrait = False

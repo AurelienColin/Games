@@ -53,7 +53,7 @@ class Character():
     def AddSprite(self, begin, end=False):
         if not end:
             end = begin+1
-        fullname = join('res', 'sprite', str(self._id) + '.png')
+        fullname = join('res', 'sprite', str(self._sheet_name) + '.png')
         perso = pyganim.getImagesFromSpriteSheet(fullname,cols=self._cols,rows= self._rows)[begin:end]
         if end > begin+1:
             frames = list(zip(perso, [200]*(end-begin)))
@@ -194,22 +194,38 @@ class Character():
     def Move(self, screen, p, ini_pos, new_pos):
         if ini_pos[0] > new_pos[0]:
             diff = (-screen._tile_size, 0)
+            animation = self._sprite['walking_left']
         elif ini_pos[0] < new_pos[0]:
             diff = (screen._tile_size, 0)
+            animation = self._sprite['walking_right']
         elif ini_pos[1] > new_pos[1]:
             diff = (0, -screen._tile_size)
+            animation = self._sprite['walking_up']
         elif ini_pos[1] < new_pos[1]:
             diff = (0, screen._tile_size)
+            animation = self._sprite['walking_down']
         else :
             return
         self._cara['PM'] -= p
-        self._lifebar1._pos = (self._lifebar1._pos[0] + diff[0], self._lifebar1._pos[1] + diff[1])
-        self._lifebar2._pos = (self._lifebar2._pos[0] + diff[0], self._lifebar2._pos[1] + diff[1])
-        self.pos(screen._tile_size, pos_tile = new_pos)
-        screen._objects[self._index[0]][1] = self._pos
-        screen._objects[self._index[1]][1] = self._lifebar1._pos
-        screen._objects[self._index[2]][1] = self._lifebar2._pos
-        screen.MoveCircle(pos = self._pos)
+        pix_pos = self._pos
+        ini_bar1 = self._lifebar1._pos
+        ini_bar2 = self._lifebar2._pos
+        screen._objects[self._index[0]][0] = animation
+        n = screen._animation_length
+        for i in range(n+1):
+            temp_pos = int(diff[0]*i/n), int(diff[1]*i/n)
+            full_temp_pos = pix_pos[0]+temp_pos[0], pix_pos[1]+temp_pos[1]
+            self._lifebar1._pos = (ini_bar1[0] + temp_pos[0], ini_bar1[1] + temp_pos[1])
+            self._lifebar2._pos = (ini_bar2[0] + temp_pos[0], ini_bar2[1] + temp_pos[1])
+            self.pos(screen._tile_size, pos_pixel = full_temp_pos)
+            screen._objects[self._index[0]][1] = self._pos
+            screen._objects[self._index[1]][1] = self._lifebar1._pos
+            screen._objects[self._index[2]][1] = self._lifebar2._pos
+            screen.MoveCircle(pos = self._pos)
+            screen.refresh()
+
+        screen._objects[self._index[0]][0] = self._sprite['standing']
+        print('final pos:', self._pos, self._pos[0]/screen._tile_size, self._pos[1]/screen._tile_size)
         screen.UpdateStatus(self)
 
 
@@ -245,6 +261,7 @@ class Anna(Character):
     def __init__(self, tile_size, pos_tile, ia, save=None):
         Character.__init__(self, ia)
         self._id = 1
+        self._sheet_name = 'Anna_sheet'
         self._cara['name'] = 'Anna'
         self._cara['sex'] = 'f'
         self._rows, self._cols = 144, 12
@@ -254,7 +271,7 @@ class Anna(Character):
         self._sprite['walking_left'] =  self.AddSprite(24,28)
         self._sprite['walking_right'] =  self.AddSprite(36,40)
         self._sprite['walking_down'] =  self.AddSprite(48,52)
-        self._sprite['walking_up'] =  self.AddSprite(50,56)
+        self._sprite['walking_up'] =  self.AddSprite(60,64)
         self._portrait = pygame.image.load(join('res', 'sprite', 'Anna_portrait.png'))
         self.pos(tile_size, pos_tile = pos_tile)
         if save:
@@ -264,7 +281,7 @@ class Anna(Character):
             self._skills = [Skill.Skill.Initialization(skill) for skill in skills]
             self._cara['PV'], self._cara['PV_max'] = 100, 100
             self._cara['PA'], self._cara['PA_max'] = 6, 6
-            self._cara['PM'], self._cara['PM_max'] = 3, 3
+            self._cara['PM'], self._cara['PM_max'] = 100, 100
             self._cara['speed'] = 50
         self.AddLifeBar(tile_size)
 
@@ -273,6 +290,7 @@ class Henry(Character):
         Character.__init__(self, ia)
         self._sprite = {}
         self._id = 2
+        self._sheet_name = 'Henry_sheet'
         self._cara['name'] = 'Henry'
         self._cara['sex'] = 'm'
         self._rows, self._cols = 80, 12

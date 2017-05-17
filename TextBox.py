@@ -1,7 +1,6 @@
 import pygame
 from os.path import join
 import util
-import Skill
 
 class TextBox():
     def __init__(self, box_file, texts, height, width, pos, size=20):
