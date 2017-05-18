@@ -72,7 +72,7 @@ def AimingLoop(current_character, screen, skill):
                 sys.exit()
             elif event.type == KEYDOWN:
                 if event.key == K_RETURN and current_character._cara['PA'] > skill._cost:  # We use the skill
-                    current_character.Attack(skill, red, screen)
+                    current_character.Attack(skill, red, screen, selection_tile)
                     end = True
                     screen.UpdateStatus(current_character)
                 elif event.key == K_KP2 or event.key == K_DOWN:

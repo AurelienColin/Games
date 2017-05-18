@@ -24,6 +24,7 @@ class Character():
         self._dead = False
         self._ia = ia
         self._team = 0
+        self._direction = 2
 
         self._skills = []
         self._cara['PV'], self._cara['PV_max'] = 0, 0
@@ -116,23 +117,37 @@ class Character():
         else:# It's a debuff, a buff, or anything else
             self._cara['effects'].append(effect)
             self._cara[effect._properties] = max(0, self._cara[effect._properties]-effect._power)
-        for i in self._index:
-            screen.RemoveObject(i)
         if self._cara['PV'] == 0:
-                self._dead = True
-                xp += self._xp_on_kill
+            self._dead = True
+            xp += self._xp_on_kill
+            for i in self._index:
+                screen.RemoveObject(i)
         else:
             self.AddLifeBar(screen._tile_size)
-            self._index = screen.AddCharacter(self, 'standing')
+            screen._objects[self._index[1]][0] = self._lifebar1._content
+            screen._objects[self._index[2]][0] = self._lifebar2._content
         return xp
 
-    def Attack(self, skill, tiles, screen):
+    def Attack(self, skill, tiles, screen, tile_target):
         affected = []
         for character in screen._characters:
             if character._pos_tile in tiles:
                 affected.append(character)
         self._xp += skill.Affect(self, affected, tiles, screen)
         self._cara['PA'] -= skill._cost
+        direction = util.GetDirection(self._pos_tile, tile_target)
+        if direction == 0:
+            static = self._sprite['static_up']
+        elif direction == 1:
+            static = self._sprite['static_left']
+        elif direction == 2:
+            static = self._sprite['static_down']
+        elif direction == 3:
+            static = self._sprite['static_right']
+        self._direction = direction
+        screen._objects[self._index[0]][0] = static
+        screen._objects[self._index[0]][2] = 'sprite'
+
 
     def passTurn(self):
         self._cara['PA'] = self._cara['PA_max']
@@ -181,6 +196,7 @@ class Character():
                     if max_dmgs < dmgs:
                         d, path = reachable[tile]
                         path.append(tile)
+                        tile_target = target
                         tiles_target = final_tiles
                         skill_target = skill
                         max_dmgs = dmgs
@@ -189,21 +205,29 @@ class Character():
                 self.Move(screen, 0, self._pos_tile, tile)
             self._cara['PM'] -= d
         if skill_target and tiles_target:
-            self.Attack(skill_target, tiles_target, screen)
+            self.Attack(skill_target, tiles_target, screen, tile_target)
 
     def Move(self, screen, p, ini_pos, new_pos):
         if ini_pos[0] > new_pos[0]:
             diff = (-screen._tile_size, 0)
             animation = self._sprite['walking_left']
+            static = self._sprite['static_left']
+            self._direction = 1
         elif ini_pos[0] < new_pos[0]:
             diff = (screen._tile_size, 0)
             animation = self._sprite['walking_right']
+            static = self._sprite['static_right']
+            self._direction = 3
         elif ini_pos[1] > new_pos[1]:
             diff = (0, -screen._tile_size)
             animation = self._sprite['walking_up']
+            static = self._sprite['static_up']
+            self._direction = 0
         elif ini_pos[1] < new_pos[1]:
             diff = (0, screen._tile_size)
             animation = self._sprite['walking_down']
+            static = self._sprite['static_down']
+            self._direction = 2
         else :
             return
         self._cara['PM'] -= p
@@ -211,6 +235,7 @@ class Character():
         ini_bar1 = self._lifebar1._pos
         ini_bar2 = self._lifebar2._pos
         screen._objects[self._index[0]][0] = animation
+        screen._objects[self._index[0]][2] = 'character'
         n = screen._animation_length
         for i in range(n+1):
             temp_pos = int(diff[0]*i/n), int(diff[1]*i/n)
@@ -223,8 +248,8 @@ class Character():
             screen._objects[self._index[2]][1] = self._lifebar2._pos
             screen.MoveCircle(pos = self._pos)
             screen.refresh()
-
-        screen._objects[self._index[0]][0] = self._sprite['standing']
+        screen._objects[self._index[0]][0] = static
+        screen._objects[self._index[0]][2] = 'sprite'
         print('final pos:', self._pos, self._pos[0]/screen._tile_size, self._pos[1]/screen._tile_size)
         screen.UpdateStatus(self)
 
@@ -269,9 +294,13 @@ class Anna(Character):
         self._sprite['static'] = self.AddSprite(0)
         self._sprite['attacking'] =  self.AddSprite(12,16)
         self._sprite['walking_left'] =  self.AddSprite(24,28)
+        self._sprite['static_left'] = self.AddSprite(24)
         self._sprite['walking_right'] =  self.AddSprite(36,40)
+        self._sprite['static_right'] = self.AddSprite(36)
         self._sprite['walking_down'] =  self.AddSprite(48,52)
+        self._sprite['static_down'] = self.AddSprite(48)
         self._sprite['walking_up'] =  self.AddSprite(60,64)
+        self._sprite['static_up'] = self.AddSprite(60)
         self._portrait = pygame.image.load(join('res', 'sprite', 'Anna_portrait.png'))
         self.pos(tile_size, pos_tile = pos_tile)
         if save:
@@ -280,7 +309,7 @@ class Anna(Character):
             skills = ['Execution', 'Horizontal', 'Vertical']
             self._skills = [Skill.Skill.Initialization(skill) for skill in skills]
             self._cara['PV'], self._cara['PV_max'] = 100, 100
-            self._cara['PA'], self._cara['PA_max'] = 6, 6
+            self._cara['PA'], self._cara['PA_max'] = 100, 100
             self._cara['PM'], self._cara['PM_max'] = 100, 100
             self._cara['speed'] = 50
         self.AddLifeBar(tile_size)
@@ -298,9 +327,13 @@ class Henry(Character):
         self._sprite['static'] = self.AddSprite(388)
         self._sprite['attacking'] =  self.AddSprite(400,404)
         self._sprite['walking_left'] =  self.AddSprite(412,416)
+        self._sprite['static_left'] =  self.AddSprite(412)
         self._sprite['walking_right'] =  self.AddSprite(424,428)
+        self._sprite['static_right'] =  self.AddSprite(424)
         self._sprite['walking_down'] =  self.AddSprite(436,440)
+        self._sprite['static_down'] =  self.AddSprite(436)
         self._sprite['walking_up'] =  self.AddSprite(448,452)
+        self._sprite['static_up'] =  self.AddSprite(448)
         self._portrait = pygame.image.load(join('res', 'sprite', 'Henry_portrait.png'))
         self.pos(tile_size, pos_tile = pos_tile)
         if save:
@@ -308,8 +341,8 @@ class Henry(Character):
         else:
             skills = ['Apocalypse', 'Horizontal']
             self._skills = [Skill.Skill.Initialization(skill) for skill in skills]
-            self._cara['PV'], self._cara['PV_max'] = 20, 100
-            self._cara['PA'], self._cara['PA_max'] = 6, 6
-            self._cara['PM'], self._cara['PM_max'] = 3, 3
+            self._cara['PV'], self._cara['PV_max'] = 100, 100
+            self._cara['PA'], self._cara['PA_max'] = 100, 100
+            self._cara['PM'], self._cara['PM_max'] = 100, 100
             self._cara['speed'] = 80
         self.AddLifeBar(tile_size)

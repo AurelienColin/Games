@@ -1,6 +1,7 @@
 import Highlight
 import Map
 import numpy as np
+import util
 import Effect
 
 class Skill():
@@ -76,11 +77,18 @@ class Skill():
     def Affect(self, current_character, all_affected, tiles, screen):
         xp = 0
         for affected in all_affected:
+            direction = util.GetDirection(affected._pos_tile, current_character._pos_tile)
+            if direction - affected._direction in [-2,2]:
+                dmg = self._damage * 1.5
+            elif direction - affected._direction in [-3,-1,1,3]:
+                dmg = self._damage * 1.25
+            else:
+                dmg = self._damage
             if self._type == 'magic':
-                dmg = current_character.MagicalDmg(self._damage)
+                dmg = current_character.MagicalDmg(dmg)
                 dmg = affected.MagicalReduction(dmg, self._ele)
             elif self._type == 'physic':
-                dmg = current_character.PhysicalDmg(self._damage)
+                dmg = current_character.PhysicalDmg(dmg)
                 dmg = affected.PhysicalReduction(dmg, self._ele)
             else:    # skill._type == 'heal'
                 dmg = -current_character.MagicalDmg(self._damage)
