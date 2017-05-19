@@ -77,7 +77,10 @@ class Skill():
     def Affect(self, current_character, all_affected, tiles, screen):
         xp = 0
         for affected in all_affected:
-            direction = util.GetDirection(affected._pos_tile, current_character._pos_tile)
+            if current_character._aiming == affected._pos_tile:
+                direction = util.GetDirection(affected._pos_tile, current_character._pos_tile)
+            else:
+                direction = util.GetDirection(affected._pos_tile, current_character._aiming)
             if direction - affected._direction in [-2,2]:
                 dmg = self._damage * 1.5
             elif direction - affected._direction in [-3,-1,1,3]:
@@ -142,6 +145,7 @@ class Skill():
                             break
                 if transparent:
                     aimable.add((x, y))
+        current_character._aiming = pos
         return aimable
 
 

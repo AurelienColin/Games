@@ -9,7 +9,7 @@ import Map
 from random import uniform
 
 class Character():
-    def __init__(self, ia):
+    def __init__(self):
         self._sprite = {}
         self._cara = {}
         self._index = None
@@ -22,7 +22,6 @@ class Character():
         self._xp_on_kill = 0
         self._xp = 0
         self._dead = False
-        self._ia = ia
         self._team = 0
         self._direction = 2
 
@@ -41,14 +40,16 @@ class Character():
                                       'neutral':0}
 
 
-    def Initialization(name, tile_size, pos_tile, team, ia = False):
+    def Initialization(name, team, tile_size = None, pos_tile = False, ia = False, leader = False):
         if name == 'Anna':
-            self = Anna(tile_size, pos_tile, ia)
+            self = Anna()
         elif name == 'Henry':
-            self = Henry(tile_size, pos_tile, ia)
-        else:
-            self = None
+            self = Henry()
+        self._ia = ia
+        self._leader = leader
         self._team = team
+        if pos_tile:
+            self.pos(tile_size, pos_tile = pos_tile)
         return self
 
     def AddSprite(self, begin, end=False):
@@ -86,6 +87,7 @@ class Character():
         elif pos_tile:
             self._pos_tile = pos_tile
             self._pos = (pos_tile[0]*tile_size, pos_tile[1]*tile_size)
+        self.AddLifeBar(tile_size)
 
     def PhysicalReduction(self, dmg, element):
         # Each defense point reduce the damages by 0.4%
@@ -283,8 +285,8 @@ class Character():
 
 
 class Anna(Character):
-    def __init__(self, tile_size, pos_tile, ia, save=None):
-        Character.__init__(self, ia)
+    def __init__(self, save=None):
+        Character.__init__(self)
         self._id = 1
         self._sheet_name = 'Anna_sheet'
         self._cara['name'] = 'Anna'
@@ -302,7 +304,6 @@ class Anna(Character):
         self._sprite['walking_up'] =  self.AddSprite(60,64)
         self._sprite['static_up'] = self.AddSprite(60)
         self._portrait = pygame.image.load(join('res', 'sprite', 'Anna_portrait.png'))
-        self.pos(tile_size, pos_tile = pos_tile)
         if save:
             pass
         else:
@@ -312,11 +313,10 @@ class Anna(Character):
             self._cara['PA'], self._cara['PA_max'] = 100, 100
             self._cara['PM'], self._cara['PM_max'] = 100, 100
             self._cara['speed'] = 50
-        self.AddLifeBar(tile_size)
 
 class Henry(Character):
-    def __init__(self, tile_size, pos_tile, ia, save=None):
-        Character.__init__(self, ia)
+    def __init__(self, save=None):
+        Character.__init__(self)
         self._sprite = {}
         self._id = 2
         self._sheet_name = 'Henry_sheet'
@@ -335,7 +335,6 @@ class Henry(Character):
         self._sprite['walking_up'] =  self.AddSprite(448,452)
         self._sprite['static_up'] =  self.AddSprite(448)
         self._portrait = pygame.image.load(join('res', 'sprite', 'Henry_portrait.png'))
-        self.pos(tile_size, pos_tile = pos_tile)
         if save:
             pass
         else:
@@ -345,4 +344,3 @@ class Henry(Character):
             self._cara['PA'], self._cara['PA_max'] = 100, 100
             self._cara['PM'], self._cara['PM_max'] = 100, 100
             self._cara['speed'] = 80
-        self.AddLifeBar(tile_size)

@@ -221,6 +221,43 @@ def MovementLoop(current_character, screen):
             elif event.type == MOUSEMOTION:
                 screen.onHover(event.pos)
 
+def PlacementLoop(ini_tiles, screen):
+    highlighted = Highlight.HighlightTiles(screen._tile_size, ini_tiles,60, (0, 0,255))
+    blue, red = {}, [False, False]
+    for pos in highlighted:
+        blue[pos] = screen.AddHighlight(highlighted[pos])
+    l = list(blue.keys())
+    selection = 0
+    s = Highlight.HighlightTiles(screen._tile_size,l[selection], 120, (255, 0, 0))
+    red = [screen.AddHighlight(s[l[selection]]), l[selection]]
+
+    mainClock = pygame.time.Clock()
+    while True:
+        screen.refresh()
+        mainClock.tick(30)
+        change = False
+        for event in pygame.event.get():
+            if event.type == QUIT:  # The game is closed
+                pygame.quit()
+                sys.exit()
+
+            elif event.type == KEYDOWN:
+                if event.key == K_RIGHT:
+                    selection = (selection+1)%len(l)
+                    change = True
+                elif event.key == K_LEFT:
+                    selection = (selection-1)%len(l)
+                    change = True
+                elif event.key == K_RETURN:
+                    menu_index, selection_id = screen.OpenMenu('Status')
+
+            if change:
+                screen.RemoveObject(red[0])
+                s = Highlight.HighlightTiles(screen._tile_size,l[selection],
+                                             120, (255, 0, 0))
+                red = [screen.AddHighlight(s[l[selection]]), l[selection]]
+
+
 if __name__ == '__main__':
     screen_height, screen_width = (640,640)
     tile_size = 29

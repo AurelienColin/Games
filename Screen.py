@@ -173,6 +173,11 @@ class Screen():
     def IniChar(self, characters):
         self._characters = []
         for character in characters:
-            char = Character.Character.Initialization(character[0], self._tile_size, character[1], character[2], ia = character[3])
-            char._index = self.AddCharacter(char, 'standing')
+            char = Character.Character.Initialization(character[0], character[2],
+                                                      tile_size = self._tile_size,
+                                                      pos_tile = character[1],
+                                                      ia = character[3],
+                                                      leader = character[4])
+            if character[1]:
+                char._index = self.AddCharacter(char, 'standing')
             self._characters.append(char)

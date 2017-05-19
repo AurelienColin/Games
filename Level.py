@@ -11,13 +11,17 @@ class Level():
 
     def CheckVictoryCondition(self):
         playerVictory, opponentVictory = True, True
+        for character in self._screen._characters:
+            if character._team == 1 and character._leader and not character._dead:
+                opponentVictory = False
         if self._victory_condition == 'destroy':
             for character in self._screen._characters:
-                if not character._dead:
-                    if character._team == 1:
-                        opponentVictory = False
-                    elif character._team == 2:
-                        playerVictory = False
+                if not character._dead and character._team == 2:
+                    playerVictory = False
+        elif self._victory_condition == 'kill leaders':
+            for character in self._scree._characters:
+                if not character._dead and character._team == 2 and character._leader:
+                    playerVictory = False
         if playerVictory:
             print('You win')
             self._screen.refresh()
@@ -96,16 +100,17 @@ class Level():
             return self.NextTurn(turns, turn)
         return turn
 
-
-
-
 class Level_0(Level):
     def __init__(self, screen):
         map_index = screen.AddMap("TestLevel.tmx")
         screen._map_data = screen._objects[map_index][0].renderer.tmx_data
+        Level.__init__(self, screen)
 
-        characters = [('Anna', (2,2), 1, False), ('Henry', (3, 3), 2, False)]
+        characters = [('Anna', None, 1, False, True),
+                      ('Henry', (3, 3), 2, False, True)]
         screen.IniChar(characters)
 
-        Level.__init__(self, screen)
+        ini_tiles = [(4, 4), (10, 5), (3, 2)]
+        PlacementLoop(ini_tiles, self._screen)
+
         self._victory_condition = 'destroy'
