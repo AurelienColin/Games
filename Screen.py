@@ -169,7 +169,6 @@ class Screen():
             self.RemoveObject(i)
         self.RemoveObject(selection_id)
 
-
     def IniChar(self, characters):
         self._characters = []
         for character in characters:
