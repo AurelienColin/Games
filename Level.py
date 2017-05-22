@@ -112,5 +112,4 @@ class Level_0(Level):
 
         ini_tiles = [(4, 4), (10, 5), (3, 2)]
         PlacementLoop(ini_tiles, self._screen)
-
         self._victory_condition = 'destroy'

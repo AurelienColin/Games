@@ -30,8 +30,7 @@ class Skill():
                   int(character._pos[1]/screen._tile_size))
 
         aimable = self.GetAimable(center,screen, character)
-        highlighted = Highlight.HighlightTiles(screen._tile_size, aimable,
-                                               60, (0, 0,255))
+        highlighted = Highlight.HighlightTiles(screen._tile_size, aimable,60, (0, 0,255))
         blue = {}
         for pos in highlighted:
             blue[pos] = screen.AddHighlight(highlighted[pos])
@@ -146,7 +145,7 @@ class Skill():
                 if transparent:
                     aimable.add((x, y))
         current_character._aiming = pos
-        return aimable
+        return list(aimable)
 
 
 
@@ -181,7 +180,7 @@ class Execution(Skill):
         Skill.__init__(self)
         self._name = 'Execution'
         self._AOE = None
-        self._size = 2
+        self._size = 1
         self._cost = 3
         self._damage = 30
         self._range = 5

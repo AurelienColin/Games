@@ -228,6 +228,7 @@ def PlacementLoop(ini_tiles, screen):
         blue[pos] = screen.AddHighlight(highlighted[pos])
     l = list(blue.keys())
     selection = 0
+    selection_menu = 0
     s = Highlight.HighlightTiles(screen._tile_size,l[selection], 120, (255, 0, 0))
     red = [screen.AddHighlight(s[l[selection]]), l[selection]]
 
@@ -235,6 +236,12 @@ def PlacementLoop(ini_tiles, screen):
     characters = {}
     menu_open = False
     j = False
+    available = []
+    for i, character in enumerate(screen._characters):
+        if character._team == 1:
+            screen._status_box = i
+            available.append(character)
+    max_chara = len(available)
     while True:
         screen.refresh()
         mainClock.tick(30)
@@ -247,7 +254,7 @@ def PlacementLoop(ini_tiles, screen):
             elif event.type == KEYDOWN:
                 if menu_open:
                     if event.key in [K_UP, K_DOWN]:  # We navigate through the menu
-                        selection, selection_id = screen.MenuNavigation(event.key, menu_index, selection, selection_id)
+                        selection_menu, selection_id = screen.MenuNavigation(event.key, menu_index, selection_menu, selection_id)
                     elif event.key in [K_RIGHT, K_LEFT]:
                         screen.QuitMenu(menu_index, selection_id)
                         if event.key == K_RIGHT:
@@ -255,45 +262,66 @@ def PlacementLoop(ini_tiles, screen):
                         else:
                             j = 1
                         screen._status_box = (screen._status_box+j)%len(screen._characters)
+                        while screen._characters[screen._status_box] not in available:
+                            screen._status_box = (screen._status_box+j)%len(screen._characters)
                         menu_index, selection_id = screen.OpenMenu('Status')
                     elif event.key == K_RETURN:
-                            characters[l[selection]] = screen._characters[screen._status_box]
+                            characters[l[screen._status_box]] = screen._characters[screen._status_box]
                             screen._characters[screen._status_box].pos(screen._tile_size, pos_tile = l[selection])
-                            screen.AddCharacter(screen._characters[screen._status_box], 'standing')
-                            selection = 0
+                            screen._characters[screen._status_box]._index = screen.AddCharacter(screen._characters[screen._status_box], 'standing')
                             change = True
-                            while l[selection] in characters and len(characters)!=len(l):
-                                selection = (selection+1)%len(l)
-                    elif event.key == K_ESCAPE:
+                            for i, character in enumerate(available):
+                                if character == screen._characters[screen._status_box]:
+                                    available.pop(i)
+                                    break
+                            if len(available) == 0:
+                                screen.RemoveObject(red[0])
+                                for tile in blue:
+                                    screen.RemoveObject(blue[tile])
+                                if screen._childBox:
+                                    for index in screen._childBox:
+                                        screen.RemoveObject(index)
+                                    screen._childBox = False
+                                screen.QuitMenu(menu_index, selection_id)
+                                screen._status_box = -1
+                                return characters
+                            screen._status_box = (screen._status_box+1)%len(l)
+                            while screen._characters[screen._status_box]._team == 1:
+                                screen._status_box = (screen._status_box+1)%len(l)
+                            event.key = K_ESCAPE
+                    if event.key == K_ESCAPE:
                         if screen._childBox:
                             for index in screen._childBox:
                                 screen.RemoveObject(index)
                             screen._childBox = False
-                            screen.QuitMenu(menu_index, selection_id)
+                        screen.QuitMenu(menu_index, selection_id)
                         screen._status_box = -1
                         menu_open = False
-
-
                 else:
                     if event.key == K_RIGHT:
+                        selection = (selection+1)%len(l)
                         while l[selection] in characters and len(characters)!=len(l):
                             selection = (selection+1)%len(l)
                         change = True
                     elif event.key == K_LEFT:
+                        selection = (selection-1)%len(l)
                         while l[selection] in characters and len(characters)!=len(l):
                             selection = (selection-1)%len(l)
                         change = True
                     elif event.key == K_RETURN:
-                        screen._status_box = 0
                         menu_index, selection_id = screen.OpenMenu('Status')
                         menu_open = True
+                    elif event.key == K_ESCAPE and len(available)!=max_chara:
+                        screen.RemoveObject(red[0])
+                        for tile in blue:
+                            screen.RemoveObject(blue[tile])
+                        return characters
             if change:
                 change = False
                 screen.RemoveObject(red[0])
                 s = Highlight.HighlightTiles(screen._tile_size,l[selection],
                                              120, (255, 0, 0))
                 red = [screen.AddHighlight(s[l[selection]]), l[selection]]
-
 
 if __name__ == '__main__':
     screen_height, screen_width = (640,640)
