@@ -1,6 +1,7 @@
 import pygame
 from os.path import join
 import util
+import Map
 
 class TextBox():
     def __init__(self, box_file, texts, height, width, pos, size=20):
@@ -158,6 +159,18 @@ class ChildBox(TextBox):
             string = 'Reduce the;time during;two turns'
         name = "TextBox_ExtraLarge.png"
         TextBox.__init__(self, name, [string], 128, 100, [(20, 10)], size=16)
+
+class TileData(TextBox):
+    def __init__(self, tile_pos, map_data, tile_size):
+        px_pos = (tile_pos[0]*tile_size, tile_pos[1]*tile_size)
+        name = str(Map.CheckProperties(px_pos, 'name', map_data, tile_size))
+        Def = str(Map.CheckProperties(px_pos, 'Def', map_data, tile_size))
+        Res = str(Map.CheckProperties(px_pos, 'Res', map_data, tile_size))
+        avoid = str(Map.CheckProperties(px_pos, 'Avoid', map_data, tile_size))
+        string = name +';def: ' + Def + ';res: ' + Res + ';avoid: ' + avoid
+        name = "TextBox_ExtraLarge.png"
+        TextBox.__init__(self, name, [string], 90, 70, [(15, 0)], size=15)
+
 
 def ListMenus():
     return set(['MainMenu', 'Skills', 'Status'])

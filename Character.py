@@ -87,6 +87,10 @@ class Character():
         elif pos_tile:
             self._pos_tile = pos_tile
             self._pos = (pos_tile[0]*tile_size, pos_tile[1]*tile_size)
+        else:
+            self._pos = None
+            self._pos_tile = None
+            return
         self.AddLifeBar(tile_size)
 
     def PhysicalReduction(self, dmg, element):

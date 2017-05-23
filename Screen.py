@@ -30,8 +30,9 @@ class Screen():
         self._status = False
         self._status_box = -1
         self._ini_list = False
-        self._childBox = False
+        self._childBox = []
         self._tile_effect = []
+        self._map_details = []
 
     def MoveCircle(self, pos = None, hide = False):
         if hide:
@@ -41,8 +42,9 @@ class Screen():
             self._objects[0][2] = 'show'
 
     def refresh(self):
-        circle, circle_pos, show = self._objects[0]
-        circle_pos = (circle_pos[0]-4, circle_pos[1])
+        if self._objects:
+            circle, circle_pos, show = self._objects[0]
+            circle_pos = (circle_pos[0]-4, circle_pos[1])
         for element in self._objects:
             if element:
                 ele, position, type_ele = element[:3]
@@ -69,7 +71,15 @@ class Screen():
                 pos = character._pos[0]+self._tile_size, character._pos[1]+self._tile_size
                 self._portrait = self.AddTextBox(TextBox.Portrait(character), pos)
                 print('Hovering on:', character, self._portrait)
-                return
+                break
+        for index in self._map_details:
+            self.RemoveObject(index)
+        self.AddTileDetails(mouse_pos)
+        return mouse_pos
+
+    def AddTileDetails(self, tile):
+        box = TextBox.TileData(tile,self._map_data, self._tile_size)
+        self._map_details = self.AddTextBox(box, (self._height-90,0))
 
     def RemoveObject(self, index):
         self._objects[index] = None

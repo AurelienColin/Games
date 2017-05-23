@@ -24,10 +24,12 @@ class Level():
                     playerVictory = False
         if playerVictory:
             print('You win')
+            self._screen._objects = []
             self._screen.refresh()
             sys.exit()
         if opponentVictory:
             print('Game Over')
+            self._screen._objects = []
             self._screen.refresh()
             sys.exit()
 
@@ -106,7 +108,7 @@ class Level_0(Level):
         screen._map_data = screen._objects[map_index][0].renderer.tmx_data
         Level.__init__(self, screen)
 
-        characters = [('Anna', None, 1, False, True),
+        characters = [('Anna', None, 1, False, True),('Henry', None, 1, False, True),
                       ('Henry', (3, 3), 2, False, True)]
         screen.IniChar(characters)
 
