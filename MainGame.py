@@ -24,6 +24,7 @@ import Highlight
 import util
 import Level
 import Effect
+from os.path import join
 from pygame.locals import *  # Import the event
 
 def IfDeplacement(character, key, screen):
@@ -70,9 +71,9 @@ def AimingLoop(current_character, screen, skill):
             if event.type == QUIT:  # The game is closed
                 pygame.quit()
                 sys.exit()
-            elif event.type == KEYDOWN or event.type == MOUSEBUTTONDOWN:
+            elif event.type == KEYDOWN:
                 change = True
-                if (event.type == MOUSEBUTTONDOWN or event.key == K_RETURN) and current_character._cara['PA'] > skill._cost:
+                if event.key == K_RETURN and current_character._cara['PA'] > skill._cost:
                     current_character.Attack(skill, red, screen, tile)
                     end = True
                     screen.UpdateStatus(current_character)
@@ -231,9 +232,9 @@ def PlacementLoop(ini_tiles, screen):
                 pygame.quit()
                 sys.exit()
 
-            elif event.type == KEYDOWN or event.type == MOUSEBUTTONDOWN:
+            elif event.type == KEYDOWN:
                 if menu_open:
-                    if (event.type == MOUSEBUTTONDOWN or event.key == K_RETURN):
+                    if event.key == K_RETURN:
                         characters[l[screen._status_box]] = screen._characters[screen._status_box]
                         screen._characters[screen._status_box].pos(screen._tile_size, pos_tile = l[selection])
                         screen._characters[screen._status_box]._index = screen.AddCharacter(screen._characters[screen._status_box], 'standing')
@@ -275,7 +276,7 @@ def PlacementLoop(ini_tiles, screen):
                         screen._status_box = -1
                         menu_open = False
                 else:
-                    if (event.type == MOUSEBUTTONDOWN or event.key == K_RETURN):
+                    if event.key == K_RETURN:
                         if l[selection] in [character._pos_tile for character in screen._characters]:
                             for character in screen._characters:
                                 if character._pos_tile == l[selection]:
@@ -314,6 +315,45 @@ def PlacementLoop(ini_tiles, screen):
                 s = Highlight.HighlightTiles(screen._tile_size,l[selection],
                                              120, (255, 0, 0))
                 red = [screen.AddHighlight(s[l[selection]]), l[selection]]
+
+
+def VNLoop(screen, lines):
+    on_screen = {}
+    mainClock = pygame.time.Clock()
+    for line in lines:
+        change = False
+        if ':' in line:  # This is a declaration
+            box = TextBox.Dialog(util.FormatText(line, 35))
+            pos = (int((screen._height-box._height)/2),screen._width-box._width)
+            current_dialog = screen.AddTextBox(box, pos)
+        else:  # A character enter or leave
+            character, action, pos = line.split()
+            change = True
+            if action == 'enter':
+                x, y = tuple([int(ele) for ele in pos.split(',')])
+                print('defor', x, y)
+                if x < 0:
+                    x = screen._height+x
+                if y < 0:
+                    y = screen._width+y
+                sprite = pygame.image.load(join('res', 'sprite', character))
+                print('after:', x, y)
+                on_screen[character] = screen.AddSprite(sprite, (x, y))
+            elif action == 'leave':
+                screen.RemoveObject(on_screen[character])
+        while change == False:
+            screen.refresh()
+            mainClock.tick(30)
+            for event in pygame.event.get():
+                if event.type == QUIT:  # The game is closed
+                    pygame.quit()
+                    sys.exit()
+                if event.type == KEYDOWN:
+                    if event.key == K_RETURN:
+                        change = True
+                        [screen.RemoveObject(index) for index in current_dialog]
+    [screen.RemoveObject(i) for i in current_dialog + list(on_screen.values())]
+    print('Dialog end')
 
 if __name__ == '__main__':
     screen_height, screen_width = (640,640)

@@ -31,3 +31,17 @@ def GetDirection(ini_tile, final_tile):
         else:
             direction = 2
     return direction
+
+def FormatText(text, l):
+    name, text = text.split(':')
+    lines, line = [], ''
+    for word in text.split():
+        if len(line + word)+1 < l:
+            line += word + ' '
+        else:
+            lines.append(line)
+            line = word + ' '
+    lines.append(line)
+    return name + ': ' + '; '.join(lines)
+
+

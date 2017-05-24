@@ -3,6 +3,7 @@ import Screen
 import pygame
 import sys
 from MainGame import *
+from os.path import join
 
 class Level():
     def __init__(self, screen):
@@ -49,6 +50,13 @@ class Level():
                 turn = self.NextTurn(turns, turn)
                 character = turns[turn]
             self.CheckVictoryCondition()
+
+    def ModeVN(self, filename):
+        fullname = join('res', 'script', filename)
+        file = open(fullname)
+        lines = file.readlines()
+        file.close()
+        VNLoop(self._screen, lines)
 
 
     def IniTurns(self):
@@ -108,6 +116,7 @@ class Level_0(Level):
         screen._map_data = screen._objects[map_index][0].renderer.tmx_data
         Level.__init__(self, screen)
 
+        self.ModeVN('level0.txt')
         characters = [('Anna', None, 1, False, True),('Henry', None, 1, False, True),
                       ('Henry', (3, 3), 2, False, True)]
         screen.IniChar(characters)

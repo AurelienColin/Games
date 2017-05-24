@@ -152,7 +152,7 @@ class Screen():
             if self._objects[menu_index[selection]][3] in Skill.ListSkills():
                 box = TextBox.SkillDetails(Skill.Skill.Initialization(self._objects[menu_index[selection]][3]))
             else:
-                box = TextBox.ChildBox(self, self._objects[menu_index[selection]][3])
+                box = TextBox.ChildBox(self._objects[menu_index[selection]][3])
             self._childBox = self.AddTextBox(box,(self._height-128, self._width-2*100))
         height, width, pos_x, pos_y = util.ObjToCoord(self._objects[menu_index[selection]])
         s = Highlight.Highlight(width, height, alpha, color, pos_x, pos_y)
