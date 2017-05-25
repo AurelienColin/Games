@@ -323,7 +323,7 @@ def VNLoop(screen, lines):
     for line in lines:
         change = False
         if ':' in line:  # This is a declaration
-            box = TextBox.Dialog(util.FormatText(line, 35))
+            box = TextBox.Dialog(util.FormatText(line, 42))
             pos = (int((screen._height-box._height)/2),screen._width-box._width)
             current_dialog = screen.AddTextBox(box, pos)
         else:  # A character enter or leave
@@ -336,7 +336,8 @@ def VNLoop(screen, lines):
                     x = screen._height+x
                 if y < 0:
                     y = screen._width+y
-                sprite = pygame.image.load(join('res', 'sprite', character))
+                sprite = pygame.image.load(join('res', 'sprite',
+                                                character.split('_')[0], character))
                 print('after:', x, y)
                 on_screen[character] = screen.AddSprite(sprite, (x, y))
             elif action == 'leave':

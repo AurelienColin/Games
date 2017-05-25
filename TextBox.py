@@ -4,14 +4,14 @@ import util
 import Map
 
 class TextBox():
-    def __init__(self, box_file, texts, height, width, pos, size=20):
+    def __init__(self, box_file, texts, width, height, pos, size=20):
         fullname = join('res', 'textbox', box_file)
         self._text = []
         self._string = []
         for j, text in enumerate(texts):
             text = text.split(';')
             self._string += [text[i] for i in range(len(text))]
-            self._text += [Text(text[i], (pos[j][0], pos[j][1]+i*(size+2)), 20) for i in range(len(text))]
+            self._text += [Text(text[i], (pos[j][0], pos[j][1]+i*(size+2)), size) for i in range(len(text))]
         self._height = height
         self._width = width
         self._imgs = False
@@ -50,7 +50,7 @@ class MainMenu(TextBox):
     def __init__(self):
         string = ["Aide;Skills;Objets;Status;Exit;End Turn"]
         name = "TextBox_ExtraLarge.png"
-        TextBox.__init__(self,name, string, 130, 170, [(30, 20)])
+        TextBox.__init__(self,name, string, 170, 130, [(30, 20)])
 
 class SkillMenu(TextBox):
     def __init__(self, character):
@@ -67,7 +67,7 @@ class Status(TextBox):
                 'PM: '+ str(character._cara['PM']) + '/' + str(character._cara['PM_max'])]
         string = [';'.join(data)]
         name = "TextBox_ExtraLarge.png"
-        TextBox.__init__(self, name, string, 128, 100, [(20, 10)], size =18)
+        TextBox.__init__(self, name, string, 100, 128, [(20, 10)], size =18)
 
     def Update(self, character):
         data = [str(character._cara['name']),
@@ -79,14 +79,15 @@ class Status(TextBox):
 
 class SkillDetails(TextBox):
     def __init__(self, skill):
-        data = [skill._name, 'Type: ' + skill._type, 'PA: ' + str(skill._cost), 'Dmg: ' + str(skill._damage)]
+        data = [skill._name, 'Type: ' + skill._type, 'PA: ' + str(skill._cost),
+                'Dmg: ' + str(skill._damage), 'Hit: ' + str(skill._hit)]
         string = [';'.join(data)]
         name = "TextBox_ExtraLarge.png"
-        TextBox.__init__(self, name, string, 128, 100, [(20, 10)], size = 15)
+        TextBox.__init__(self, name, string, 100, 128, [(20, 10)], size = 15)
 
 class Portrait(TextBox):
     def __init__(self, character):
-        size = 128, 230
+        size = 230, 128
         data = [str(character._cara['name']),
                 'PV: '+ str(character._cara['PV']) + '/' + str(character._cara['PV_max']),
                 'PA: '+ str(character._cara['PA']) + '/' + str(character._cara['PA_max']),
@@ -110,7 +111,7 @@ class IniList(TextBox):
                     k+=1
                 temp_turns[k] = temp_turns[i]
             i += 1
-        size = margin*min(cap, len(characters)*2)+10, 50
+        size = 50, margin*min(cap, len(characters)*2)+10
         name = "TextBox_LongSmall.png"
         TextBox.__init__(self, name, [''], size[0], size[1], [(0, 0)])
         self._imgs = []
@@ -124,15 +125,20 @@ class StatusBox(TextBox):
         character = screen._characters[screen._status_box]
         c = character._cara
         string = ['', '', '', '']
-        pos = [(140, 30), (180, 64), (20, 150), (140, 150)]
-        string[0] = 'Name: ' + str(c['name']) + ';' + 'PV: ' + str(c['PV']) + '/' + str(c['PV_max']) + ';PA:' + str(c['PA_max'])
+        size = 18
+        pos = [(140, 30), (185, 30+2*(size+2)), (20, 150), (140, 150)]
+        string[0] = 'Name: ' + str(c['name']) + ';' + 'PV: ' + str(c['PV']) \
+                    + '/' + str(c['PV_max']) + ';PA:' + str(c['PA_max'])
         string[1] = 'PM: ' + str(c['PM_max'])
-        string[2] = 'Str: ' + str(c['strength']) +';Mgc: ' + str(c['magic']) + ';Def: ' + str(c['defense']) + ';Res: ' + str(c['resistance']) + ';Spd: ' + str(c['speed'])
+        string[2] = 'Str: ' + str(c['strength']) +';Mgc: ' + str(c['magic']) \
+                    + ';Def: ' + str(c['defense']) + ';Res: ' \
+                    + str(c['resistance']) + ';Spd: ' + str(c['speed']) \
+                    + ';Hit: ' + str(c['hit']) + ';Avd: ' + str(c['avoid'])
         for skill in character._skills[:5]:
             string[3] +=skill._name + ';'
         string[3] = string[3][:-1]  # Remove the last ';'
         name = 'TextBox_ExtraLarge.png'
-        TextBox.__init__(self, name, string, 300, 300, pos, size=15)
+        TextBox.__init__(self, name, string, 300, 300, pos, size=size)
         self._imgs = [[character._portrait, (0, 0)]]
 
 class ChildBox(TextBox):
@@ -157,8 +163,12 @@ class ChildBox(TextBox):
             string = 'Decrease the;dmg done by;mgc. attacks'
         elif choice[:3] == 'Spd':
             string = 'Reduce the;time during;two turns'
+        elif choice[:3] == 'Hit':
+            string = 'Increase the;probability;of hit'
+        elif choice[:3] == 'Avd':
+            string = 'Decrease the;probability;of begin hit'
         name = "TextBox_ExtraLarge.png"
-        TextBox.__init__(self, name, [string], 128, 100, [(20, 10)], size=13)
+        TextBox.__init__(self, name, [string], 100, 128, [(20, 10)], size=20)
 
 class TileData(TextBox):
     def __init__(self, tile_pos, map_data, tile_size):
@@ -169,15 +179,15 @@ class TileData(TextBox):
         avoid = str(Map.CheckProperties(px_pos, 'Avoid', map_data, tile_size))
         string = name +';def: ' + Def + ';res: ' + Res + ';avoid: ' + avoid
         name = "TextBox_ExtraLarge.png"
-        TextBox.__init__(self, name, [string], 90, 70, [(15, 0)], size=13)
+        TextBox.__init__(self, name, [string], 75, 90, [(15, 3)], size=15)
 
 class Dialog(TextBox):
     def __init__(self, text):
         char_name, string = text.split(':')
 
         name = 'TextBox_Large.png'
-        TextBox.__init__(self, name, [char_name, string], 300, 100,
-                         [(15, 10), (20, 30)], size=15)
+        TextBox.__init__(self, name, [char_name, string], 100, 300,
+                         [(15, 10), (20, 30)], size=17)
 
 
 def ListMenus():

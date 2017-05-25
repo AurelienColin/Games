@@ -3,12 +3,14 @@ import Map
 import numpy as np
 import util
 import Effect
+import random
 
 class Skill():
     def __init__(self):
         self._char_effects = {}
         self._damage = 0
         self._heal = 0
+        self._hit = 0.8
         self._tile_effects = {}
         self._ele = 'neutral'
 
@@ -76,14 +78,17 @@ class Skill():
     def Affect(self, current_character, all_affected, tiles, screen):
         xp = 0
         for affected in all_affected:
+            cara = affected._cara
             if current_character._aiming == affected._pos_tile:
                 direction = util.GetDirection(affected._pos_tile, current_character._pos_tile)
             else:
                 direction = util.GetDirection(affected._pos_tile, current_character._aiming)
             if direction - affected._direction in [-2,2]:
                 dmg = self._damage * 1.5
+                affected._cara['avoid'] = int(affected._cara['avoid']*0.75)
             elif direction - affected._direction in [-3,-1,1,3]:
                 dmg = self._damage * 1.25
+                affected._cara['avoid'] = int(affected._cara['avoid']*0.5)
             else:
                 dmg = self._damage
             if self._type == 'magic':
@@ -94,10 +99,13 @@ class Skill():
                 dmg = affected.PhysicalReduction(dmg, self._ele)
             else:    # skill._type == 'heal'
                 dmg = -current_character.MagicalDmg(self._damage)
-            affected.Affect(dmg, screen)
-
-            for effect in self._char_effects:
-                xp += affected.Affect(effect, screen)
+            hit = current_character.Hit()/affected.Avoid()*self._hit
+            r = random.random()
+            affected._cara = cara
+            if r < hit:
+                affected.Affect(dmg, screen)
+                for effect in self._char_effects:
+                    xp += affected.Affect(effect, screen)
         for effect in self._tile_effects:
             for tile in tiles:
                 screen._tile_effect.append([tile, effect])

@@ -29,11 +29,15 @@ class Character():
         self._cara['PV'], self._cara['PV_max'] = 0, 0
         self._cara['PA'], self._cara['PA_max'] = 0, 0
         self._cara['PM'], self._cara['PM_max'] = 0, 0
+        self._cara['type'] = 'neutral'
         self._cara['speed'] = 1
         self._cara['magic'] = 1
         self._cara['strength'] = 1
         self._cara['defense'] = 1
         self._cara['resistance'] = 1
+        self._cara['hit'] = 1
+        self._cara['avoid'] = 1
+        self._cara['object'] = 1
         self._cara['effects'] = [False]
         self._cara['elementalRes'] = {'fire':0, 'water':0, 'earth':0,
                                       'wind':0, 'holy':0, 'unholy':0,
@@ -41,6 +45,18 @@ class Character():
 
 
     def Initialization(name, team, tile_size = None, pos_tile = False, ia = False, leader = False):
+        """
+        Input:
+        name - string: name of the character
+        team - int: 1 for the player, 2 for opponent
+        tile_size - optional int
+        pos_tile - optional tuple of int
+        ia - optional string: False if the character is controlled by the player
+        leader - optional boolean
+
+        Output:
+        self - character
+        """
         if name == 'Anna':
             self = Anna()
         elif name == 'Henry':
@@ -53,9 +69,18 @@ class Character():
         return self
 
     def AddSprite(self, begin, end=False):
+        """Make a sprite (animated or not) from a sheet
+
+        Input:
+        self - character
+        begin - int
+        end - int, false of the sprite isn't animated
+
+        Output:
+        obj - a sprite"""
         if not end:
             end = begin+1
-        fullname = join('res', 'sprite', str(self._sheet_name) + '.png')
+        fullname = join('res', 'sprite', self._cara['name'], str(self._sheet_name) + '.png')
         perso = pyganim.getImagesFromSpriteSheet(fullname,cols=self._cols,rows= self._rows)[begin:end]
         if end > begin+1:
             frames = list(zip(perso, [200]*(end-begin)))
@@ -66,6 +91,12 @@ class Character():
         return obj
 
     def AddLifeBar(self, tile_size):
+        """Add lifes bar (one black for the lost PV, one colored for the remaining one
+
+        Input:
+        self - character
+        tile_size - int: number of pixel of the tile side
+        """
         width = 2
         percentage = self._cara['PV']/self._cara['PV_max']
         height_life = tile_size*percentage
@@ -81,6 +112,13 @@ class Character():
         self._lifebar2 = Highlight.Highlight(height_void, width, 255, (0, 0, 0), self._pos[0]+height_life, self._pos[1])
 
     def pos(self, tile_size, pos_pixel = None, pos_tile = None):
+        """Update pos_pixel or pos_tile
+
+        Input:
+        self - character
+        tile_size - int: number of pixel of the tile side
+        pos_pixel - optional tuple of int
+        pos_tile - optional tuple of int"""
         if pos_pixel:
             self._pos = pos_pixel
             self._pos_tile = (pos_pixel[0]/tile_size, pos_pixel[1]/tile_size)
@@ -94,28 +132,47 @@ class Character():
         self.AddLifeBar(tile_size)
 
     def PhysicalReduction(self, dmg, element):
-        # Each defense point reduce the damages by 0.4%
+        """return a int, lower than 1"""
         random = uniform(0.9, 1.1)
         reduction = 1-util.StatCalculation(self._cara['defense'])
         return int(random*dmg*reduction*(1-self._cara['elementalRes'][element]))
 
     def MagicalReduction(self, dmg, element):
-        # Each resistance point reduce the damages by 0.4%
+        """return a int, lower than 1"""
         random = uniform(0.9, 1.1)
         reduction = 1-util.StatCalculation(self._cara['resistance'])
         return int(random*dmg*reduction*(1-self._cara['elementalRes'][element]))
 
     def PhysicalDmg(self, dmg):
+        """return a int, higher than 1"""
         random = uniform(0.9, 1.1)
         enhance = 1+util.StatCalculation(self._cara['strength'])
         return int(random*dmg*enhance)
 
     def MagicalDmg(self, dmg):
+        """return a int, higher than 1"""
         random = uniform(0.9, 1.1)
         enhance = 1+util.StatCalculation(self._cara['magic'])
         return int(random*dmg*enhance)
 
+    def Avoid(self):
+        """result high => probability to hit high"""
+        return 1+util.StatCalculation(self._cara['avoid'])
+
+    def Hit(self):
+        """result high => probability to hit low"""
+        return 1+util.StatCalculation(self._cara['hit'])
+
     def Affect(self,effect, screen):
+        """Return the xp resulting of the attack
+
+        Input:
+        self - character
+        effect - effect, could be debuff, buff, heal or dmg
+        screen - screen
+
+        Output:
+        xp - int: xp to add to the attacking character"""
         xp = 0
         if type(effect) == int:
             xp = abs(self._xp_on_damage*effect)
@@ -135,6 +192,17 @@ class Character():
         return xp
 
     def Attack(self, skill, tiles, screen, tile_target):
+        """Use an attack
+        Input:
+        self - character
+        skill - skill
+        tiles - list of tuple of two int, all the tiles affected
+        screen - screen
+        tile_target - tuple of two int, original target of the skill
+
+        Output
+        PA, xp, position are updated
+        skill is used"""
         affected = []
         for character in screen._characters:
             if character._pos_tile in tiles:
@@ -156,6 +224,13 @@ class Character():
 
 
     def passTurn(self):
+        """Finish the turn of the character
+
+        Input:
+        self - character
+
+        Output:
+        PA, PM, and effect are updated"""
         self._cara['PA'] = self._cara['PA_max']
         self._cara['PM'] = self._cara['PM_max']
         for i, effect in enumerate(self._cara['effects']):
@@ -169,6 +244,15 @@ class Character():
                     self._cara[effect._properties] = max(0, self._cara[effect._properties]-effect._power)
 
     def IA_Action(self, screen):
+        """Execute the ia
+
+        Onput:
+        self - character
+        screen - screen
+
+        Output:
+        character move and attack, screen and character are updated
+        """
         if self._ia == 'aggresif' or self._ia == 'defensif':
             reachable = self.getReachable(screen)
         elif self._ia == 'passif':
@@ -214,6 +298,17 @@ class Character():
             self.Attack(skill_target, tiles_target, screen, tile_target)
 
     def Move(self, screen, p, ini_pos, new_pos):
+        """Change the position of the character
+
+        Input:
+        self - character
+        screen - screen
+        p - int: cost of PM to go on the tile
+        ini_pos - tuple of two int: position of the initial tile
+        new_pos - tuple of two int: position of the final tile
+
+        Output:
+        character and screen are update"""
         if ini_pos[0] > new_pos[0]:
             diff = (-screen._tile_size, 0)
             animation = self._sprite['walking_left']
@@ -261,6 +356,17 @@ class Character():
 
 
     def getReachable(self, screen):
+        """Return the tile reachable with current number of PM
+        Input:
+        self - character
+        screen - screen
+
+        Output:
+        reachable -- A dict, [(xy)] = (d, path)
+            xy -- tuple of two int : the position of tile
+            d -- int, number of PM used to go from current to xy
+            path -- list of tuple of two int : path to take from current to xy
+        """
         queue = {}
         queue[(self._pos_tile[0], self._pos_tile[1])] = (0, [])
         reachable = {}
@@ -307,7 +413,7 @@ class Anna(Character):
         self._sprite['static_down'] = self.AddSprite(48)
         self._sprite['walking_up'] =  self.AddSprite(60,64)
         self._sprite['static_up'] = self.AddSprite(60)
-        self._portrait = pygame.image.load(join('res', 'sprite', 'Anna_portrait.png'))
+        self._portrait = pygame.image.load(join('res', 'sprite', self._cara['name'], 'Anna_portrait.png'))
         if save:
             pass
         else:
@@ -338,7 +444,7 @@ class Henry(Character):
         self._sprite['static_down'] =  self.AddSprite(436)
         self._sprite['walking_up'] =  self.AddSprite(448,452)
         self._sprite['static_up'] =  self.AddSprite(448)
-        self._portrait = pygame.image.load(join('res', 'sprite', 'Henry_portrait.png'))
+        self._portrait = pygame.image.load(join('res', 'sprite', self._cara['name'], 'Henry_portrait.png'))
         if save:
             pass
         else:
