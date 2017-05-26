@@ -76,3 +76,15 @@ def FormatText(text, l):
     return name + ': ' + '; '.join(lines)
 
 
+def WeakAgainst(t_ini):
+    """t_ini is weak against result[0]
+       t_ini is strong against result[1]"""
+    if t_ini == 'water':
+        return ['earth', 'fire']
+    elif t_ini == 'earth':
+        return ['wind', 'water']
+    elif t_ini == 'wind':
+        return ['fire', 'earth']
+    elif t_ini == 'fire':
+        return ['water', 'wind']
+

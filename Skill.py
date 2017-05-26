@@ -15,6 +15,12 @@ class Skill():
         self._ele = 'neutral'
 
     def Initialization(name):
+        """
+        Input:
+        name - string
+
+        Output:
+        self - skill"""
         if name == 'Execution':
             self = Execution()
         elif name == 'Vertical':
@@ -28,6 +34,16 @@ class Skill():
         return self
 
     def Aim(self, character, screen):
+        """Return the tiles aimed by the skill
+        Input:
+        self - skill
+        character - character: the one using the skill
+        screen - screen
+
+        Output:
+        blue - dictionary
+            key - tuple of two int
+            value - highlight"""
         center = (int(character._pos[0]/screen._tile_size),
                   int(character._pos[1]/screen._tile_size))
 
@@ -39,6 +55,15 @@ class Skill():
         return blue
 
     def AOE(self, tile_pos, character, screen):
+        """Return the tiles included in the AOE
+        Input:
+        self - skill
+        tile_pos - tuple of two int: center of the AOE
+        character - character using the skill
+        screen - screen
+
+        Output:
+        final_tiles - list of tuple of two int"""
         tiles = [tile_pos]
         if self._size == 1:
             pass
@@ -76,9 +101,41 @@ class Skill():
         return final_tiles
 
     def Affect(self, current_character, all_affected, tiles, screen):
+        """Use the skill and apply it's effect on the targets
+        Input:
+        self - skill
+        current_character - character
+        all_affected - list of character
+        tiles - list of tuple of two int (target of the skill)
+        screen - screen
+
+        Output:
+        xp - int: xp earn from the attack
+        The effects are applied on the targets (character or tile)"""
         xp = 0
         for affected in all_affected:
             cara = affected._cara
+            w, s = util.WeakAgainst(cara['type'])
+            tile_type = Map.CheckProperties(affected._pos_tile, 'type',
+                                            screen._map_data, screen._tile_size)
+            if tile_type == w:
+                affected._cara['def'] -= 56
+                affected._cara['avoid'] -= 56
+                affected._cara['speed'] -= 56
+                affected._cara['resistance'] -= 56
+                affected._cara['elementalRes'][w] -= 56
+            elif tile_type == cara['type']:
+                affected._cara['def'] += 56
+                affected._cara['avoid'] += 56
+                affected._cara['speed'] += 56
+                affected._cara['resistance'] += 56
+                affected._cara['elementalRes'][w] += 56
+            else:
+                w, s = util.WeakAgainst(tile_type)
+                affected._cara['elementalRes'][w] -= 23
+                affected._cara['elementalRes'][s] += 23
+
+
             if current_character._aiming == affected._pos_tile:
                 direction = util.GetDirection(affected._pos_tile, current_character._pos_tile)
             else:
@@ -112,6 +169,15 @@ class Skill():
         return xp
 
     def GetAimable(self, pos, screen, current_character):
+        """
+        Input:
+        self - skill
+        pos - tuple of two int: origin of the attack
+        screen - screen
+        current_character - character using the attack
+
+        Output:
+        list of tuple of two int"""
         map_data, tile_size = screen._map_data, screen._tile_size
         aimable = set()
         scope = self._range

@@ -28,6 +28,13 @@ from os.path import join
 from pygame.locals import *  # Import the event
 
 def IfDeplacement(character, key, screen):
+    """Move a character on the screen, after checking if the move is allowed
+
+    Input:
+    character - character
+    key - K_DOWN, K_UP, K_LEFT or K_RIGHT
+    screen - screen
+    """
     position = character._pos_tile
     tile_size = screen._tile_size
     if key == K_DOWN and position[1] < screen._height//tile_size:
@@ -54,6 +61,13 @@ def IfDeplacement(character, key, screen):
     return
 
 def AimingLoop(current_character, screen, skill):
+    """Action Loop: current_character choose a target for it's skill or return
+    current_character - character
+    screen - screen
+    skill - skill
+
+    Output
+    boolean - True if a skill is used, else False"""
     blue = skill.Aim(current_character, screen)
     alpha = 80
     color = (255, 0, 0)
@@ -112,6 +126,14 @@ def AimingLoop(current_character, screen, skill):
                 screen.AddTileDetails(tile)
 
 def MenusLoop(menu, current_character, screen):
+    """Action Loop: current_character navigate in the menus
+    menu - string: name of the menu entered
+    current_character - character
+    screen - screen
+
+    Output
+    None if a skill is used
+    'Exit' or 'End Turn': reason to quit the menus"""
     skills = Skill.ListSkills()
     implemented_menu = TextBox.ListMenus()
     menus = [menu]
@@ -182,6 +204,9 @@ def MenusLoop(menu, current_character, screen):
                         return choice
 
 def MovementLoop(current_character, screen):
+    """Action Loop: current_character move on the map
+    current_character - character
+    screen - screen"""
     mainClock = pygame.time.Clock()
     while True:
         screen.refresh()
@@ -203,6 +228,9 @@ def MovementLoop(current_character, screen):
                 screen.onHover(event.pos)
 
 def PlacementLoop(ini_tiles, screen):
+    """Action Loop: the player pos it's character on the map
+    ini_tiles - list of tuple of two int
+    screen - screen"""
     highlighted = Highlight.HighlightTiles(screen._tile_size, ini_tiles,60, (0, 0,255))
     blue, red = {}, [False, False]
     for pos in highlighted:
@@ -318,6 +346,9 @@ def PlacementLoop(ini_tiles, screen):
 
 
 def VNLoop(screen, lines):
+    """Action Loop: visual novel part
+    screen - screen
+    lines - list of string: lines of the script"""
     on_screen = {}
     mainClock = pygame.time.Clock()
     for line in lines:

@@ -39,9 +39,9 @@ class Character():
         self._cara['avoid'] = 1
         self._cara['object'] = 1
         self._cara['effects'] = [False]
-        self._cara['elementalRes'] = {'fire':0, 'water':0, 'earth':0,
-                                      'wind':0, 'holy':0, 'unholy':0,
-                                      'neutral':0}
+        self._cara['elementalRes'] = {'fire':1, 'water':1, 'earth':1,
+                                      'wind':1, 'holy':1, 'unholy':1,
+                                      'neutral':1}
 
 
     def Initialization(name, team, tile_size = None, pos_tile = False, ia = False, leader = False):
@@ -135,13 +135,13 @@ class Character():
         """return a int, lower than 1"""
         random = uniform(0.9, 1.1)
         reduction = 1-util.StatCalculation(self._cara['defense'])
-        return int(random*dmg*reduction*(1-self._cara['elementalRes'][element]))
+        return int(random*dmg*reduction*(1-util.StatCalculation(self._cara['elementalRes'][element])))
 
     def MagicalReduction(self, dmg, element):
         """return a int, lower than 1"""
         random = uniform(0.9, 1.1)
         reduction = 1-util.StatCalculation(self._cara['resistance'])
-        return int(random*dmg*reduction*(1-self._cara['elementalRes'][element]))
+        return int(random*dmg*reduction*(1-util.StatCalculation(self._cara['elementalRes'][element])))
 
     def PhysicalDmg(self, dmg):
         """return a int, higher than 1"""
@@ -204,9 +204,25 @@ class Character():
         PA, xp, position are updated
         skill is used"""
         affected = []
+        cara = self._cara
+        w, s = util.WeakAgainst(cara['type'])
+        tile_type = Map.CheckProperties(self._pos_tile, 'type',
+                                        screen._map_data, screen._tile_size)
+        if tile_type == w:
+            affected._cara['magic'] -= 56
+            affected._cara['strength'] -= 56
+            affected._cara['speed'] -= 56
+            affected._cara['hit'] -= 56
+        elif tile_type == cara['type']:
+            affected._cara['magic'] += 56
+            affected._cara['strength'] += 56
+            affected._cara['speed'] += 56
+            affected._cara['hit'] += 56
         for character in screen._characters:
             if character._pos_tile in tiles:
                 affected.append(character)
+
+        self._cara = cara
         self._xp += skill.Affect(self, affected, tiles, screen)
         self._cara['PA'] -= skill._cost
         direction = util.GetDirection(self._pos_tile, tile_target)
