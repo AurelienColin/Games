@@ -24,7 +24,7 @@ def StatCalculation(value):
 
     Output:
     return int"""
-    return 1-pow(0.996, value)
+    return pow(0.996, value)
 
 def GetDirection(ini_tile, final_tile):
     """0 for up, 1 for left, 2 for down, 3 for right

@@ -156,13 +156,17 @@ class Skill():
                 dmg = affected.PhysicalReduction(dmg, self._ele)
             else:    # skill._type == 'heal'
                 dmg = -current_character.MagicalDmg(self._damage)
-            hit = current_character.Hit()/affected.Avoid()*self._hit
+            hit = affected.getCara('avoid')/current_character.getCara('hit')*self._hit
             r = random.random()
             affected._cara = cara
             if r < hit:
                 affected.Affect(dmg, screen)
                 for effect in self._char_effects:
-                    xp += affected.Affect(effect, screen)
+                    r = ['PA', 'PM']
+                    if effect._properties in r and random.random() < affected.getCara('res'+effect._properties):
+                        xp += affected.Affect(effect, screen)
+                    else:
+                        xp += affected.Affect(effect, screen)
         for effect in self._tile_effects:
             for tile in tiles:
                 screen._tile_effect.append([tile, effect])

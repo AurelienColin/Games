@@ -39,6 +39,8 @@ class Character():
         self._cara['avoid'] = 1
         self._cara['object'] = 1
         self._cara['effects'] = [False]
+        self._cara['resPA'] = 1
+        self._cara['resPM'] = 1
         self._cara['elementalRes'] = {'fire':1, 'water':1, 'earth':1,
                                       'wind':1, 'holy':1, 'unholy':1,
                                       'neutral':1}
@@ -134,34 +136,29 @@ class Character():
     def PhysicalReduction(self, dmg, element):
         """return a int, lower than 1"""
         random = uniform(0.9, 1.1)
-        reduction = 1-util.StatCalculation(self._cara['defense'])
-        return int(random*dmg*reduction*(1-util.StatCalculation(self._cara['elementalRes'][element])))
+        reduction = util.StatCalculation(self._cara['defense'])
+        return int(random*dmg*reduction*(util.StatCalculation(self._cara['elementalRes'][element])))
 
     def MagicalReduction(self, dmg, element):
         """return a int, lower than 1"""
         random = uniform(0.9, 1.1)
-        reduction = 1-util.StatCalculation(self._cara['resistance'])
-        return int(random*dmg*reduction*(1-util.StatCalculation(self._cara['elementalRes'][element])))
+        reduction = util.StatCalculation(self._cara['resistance'])
+        return int(random*dmg*reduction*(util.StatCalculation(self._cara['elementalRes'][element])))
 
     def PhysicalDmg(self, dmg):
         """return a int, higher than 1"""
         random = uniform(0.9, 1.1)
-        enhance = 1+util.StatCalculation(self._cara['strength'])
-        return int(random*dmg*enhance)
+        enhance = util.StatCalculation(self._cara['strength'])
+        return int(random*dmg/enhance)
 
     def MagicalDmg(self, dmg):
         """return a int, higher than 1"""
         random = uniform(0.9, 1.1)
-        enhance = 1+util.StatCalculation(self._cara['magic'])
-        return int(random*dmg*enhance)
+        enhance = util.StatCalculation(self._cara['magic'])
+        return int(random*dmg/enhance)
 
-    def Avoid(self):
-        """result high => probability to hit high"""
-        return 1+util.StatCalculation(self._cara['avoid'])
-
-    def Hit(self):
-        """result high => probability to hit low"""
-        return 1+util.StatCalculation(self._cara['hit'])
+    def getCara(self, p):
+        return util.StatCalculation(self._cara['p'])
 
     def Affect(self,effect, screen):
         """Return the xp resulting of the attack
