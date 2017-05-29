@@ -78,24 +78,33 @@ class Status(TextBox):
         self._string = text.split(';')
 
 class SkillDetails(TextBox):
-    def __init__(self, skill):
+    def __init__(self, skill, character):
+        if skill._type == 'magic':
+            dmg = character.MagicalDmg(skill._damage)
+        elif skill._type == 'physic':
+            dmg = character.PhysicalDmg(skill._damage)
+        hit = str(int(skill._hit*character.getCara('hit')*100))
         data = [skill._name, 'Type: ' + skill._type, 'PA: ' + str(skill._cost),
-                'Dmg: ' + str(skill._damage), 'Hit: ' + str(skill._hit)]
+                'Dmg: ' + str(int(dmg)), 'Hit: ' + hit]
         string = [';'.join(data)]
         name = "TextBox_ExtraLarge.png"
         TextBox.__init__(self, name, string, 100, 128, [(20, 10)], size = 15)
 
 class Portrait(TextBox):
-    def __init__(self, character):
-        size = 230, 128
-        data = [str(character._cara['name']),
-                'PV: '+ str(character._cara['PV']) + '/' + str(character._cara['PV_max']),
-                'PA: '+ str(character._cara['PA']) + '/' + str(character._cara['PA_max']),
-                'PM: '+ str(character._cara['PM']) + '/' + str(character._cara['PM_max'])]
-        string = [';'.join(data)]
+    def __init__(self, chara):
+        size = 230, 200
+        u = util.StatToStr
+        data1 = [str(chara._cara['name']),
+                'PV: '+ str(chara._cara['PV']) + '/' + str(chara._cara['PV_max']),
+                'PA: '+ str(chara._cara['PA']) + '/' + str(chara._cara['PA_max']),
+                'PM: '+ str(chara._cara['PM']) + '/' + str(chara._cara['PM_max'])]
+        data2 = ['Str: ' + u(chara._cara['strength']), 'Mgc: ' + u(chara._cara['magic']),
+                 'Def: ' + u(chara._cara['defense']), 'Res: ' + u(chara._cara['resistance']),
+                 'Hit: ' + u(chara._cara['hit']), 'Res: ' + u(chara._cara['avoid'])]
+        string = [';'.join(data1), ';'.join(data2)]
         name = "TextBox_ExtraLarge.png"
-        TextBox.__init__(self, name, string, size[0], size[1], [(20, 10)], size = 18)
-        self._imgs = [[character._portrait, (0, size[1]-128-12)]]
+        TextBox.__init__(self, name, string, size[0], size[1], [(20, 10), (130, 10+18+2)], size = 18)
+        self._imgs = [[chara._portrait, (0, size[0]-128-12)]]
 
 class IniList(TextBox):
     def __init__(self, characters, turns, turn):
@@ -124,16 +133,17 @@ class StatusBox(TextBox):
     def __init__(self, screen):
         character = screen._characters[screen._status_box]
         c = character._cara
+        u = util.StatToStr
         string = ['', '', '', '']
         size = 18
-        pos = [(140, 30), (185, 30+2*(size+2)), (20, 150), (140, 150)]
+        pos = [(140, 30), (185, 30+2*(size+2)), (20, 140), (140, 140)]
         string[0] = 'Name: ' + str(c['name']) + ';' + 'PV: ' + str(c['PV']) \
                     + '/' + str(c['PV_max']) + ';PA:' + str(c['PA_max'])
         string[1] = 'PM: ' + str(c['PM_max'])
-        string[2] = 'Str: ' + str(c['strength']) +';Mgc: ' + str(c['magic']) \
-                    + ';Def: ' + str(c['defense']) + ';Res: ' \
-                    + str(c['resistance']) + ';Spd: ' + str(c['speed']) \
-                    + ';Hit: ' + str(c['hit']) + ';Avd: ' + str(c['avoid'])
+        string[2] = 'Str: ' + str(u(c['strength'])) +';Mgc: ' + str(u(c['magic'])) \
+                    + ';Def: ' + str(u(c['defense'])) + ';Res: ' \
+                    + str(u(c['resistance'])) + ';Spd: ' + str(u(c['speed'])) \
+                    + ';Hit: ' + str(u(c['hit'])) + ';Avd: ' + str(u(c['avoid']))
         for skill in character._skills[:5]:
             string[3] +=skill._name + ';'
         string[3] = string[3][:-1]  # Remove the last ';'

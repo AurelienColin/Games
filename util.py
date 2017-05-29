@@ -26,6 +26,15 @@ def StatCalculation(value):
     return int"""
     return pow(0.996, value)
 
+def StatToStr(value):
+    """Return the string representation
+    Input:
+    value - int
+
+    Output:
+    return str(int(float*100))"""
+    return str(int((1-pow(0.996, value))*100))
+
 def GetDirection(ini_tile, final_tile):
     """0 for up, 1 for left, 2 for down, 3 for right
     Input:
@@ -87,4 +96,6 @@ def WeakAgainst(t_ini):
         return ['fire', 'earth']
     elif t_ini == 'fire':
         return ['water', 'wind']
+    else:
+        return [None, None]
 

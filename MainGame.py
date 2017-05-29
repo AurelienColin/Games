@@ -76,7 +76,7 @@ def AimingLoop(current_character, screen, skill):
     change = True
     end = False
     mainClock = pygame.time.Clock()
-    skillDetails = screen.AddTextBox(TextBox.SkillDetails(skill),
+    skillDetails = screen.AddTextBox(TextBox.SkillDetails(skill, current_character),
                                      (screen._height-128,screen._width-2*100))
     while True:
         screen.refresh()

@@ -150,7 +150,8 @@ class Screen():
                 for index in self._childBox:
                     self.RemoveObject(index)
             if self._objects[menu_index[selection]][3] in Skill.ListSkills():
-                box = TextBox.SkillDetails(Skill.Skill.Initialization(self._objects[menu_index[selection]][3]))
+                box = TextBox.SkillDetails(Skill.Skill.Initialization(self._objects[menu_index[selection]][3]),
+                                           self._characters[self._status_box])
             else:
                 box = TextBox.ChildBox(self._objects[menu_index[selection]][3])
             self._childBox = self.AddTextBox(box,(self._height-128, self._width-2*100))

@@ -132,8 +132,9 @@ class Skill():
                 affected._cara['elementalRes'][w] += 56
             else:
                 w, s = util.WeakAgainst(tile_type)
-                affected._cara['elementalRes'][w] -= 23
-                affected._cara['elementalRes'][s] += 23
+                if w:
+                    affected._cara['elementalRes'][w] -= 23
+                    affected._cara['elementalRes'][s] += 23
 
 
             if current_character._aiming == affected._pos_tile:

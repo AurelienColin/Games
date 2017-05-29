@@ -158,7 +158,7 @@ class Character():
         return int(random*dmg/enhance)
 
     def getCara(self, p):
-        return util.StatCalculation(self._cara['p'])
+        return util.StatCalculation(self._cara[p])
 
     def Affect(self,effect, screen):
         """Return the xp resulting of the attack
@@ -205,16 +205,17 @@ class Character():
         w, s = util.WeakAgainst(cara['type'])
         tile_type = Map.CheckProperties(self._pos_tile, 'type',
                                         screen._map_data, screen._tile_size)
-        if tile_type == w:
-            affected._cara['magic'] -= 56
-            affected._cara['strength'] -= 56
-            affected._cara['speed'] -= 56
-            affected._cara['hit'] -= 56
-        elif tile_type == cara['type']:
-            affected._cara['magic'] += 56
-            affected._cara['strength'] += 56
-            affected._cara['speed'] += 56
-            affected._cara['hit'] += 56
+        if w:
+            if tile_type == w:
+                affected._cara['magic'] -= 56
+                affected._cara['strength'] -= 56
+                affected._cara['speed'] -= 56
+                affected._cara['hit'] -= 56
+            elif tile_type == cara['type']:
+                affected._cara['magic'] += 56
+                affected._cara['strength'] += 56
+                affected._cara['speed'] += 56
+                affected._cara['hit'] += 56
         for character in screen._characters:
             if character._pos_tile in tiles:
                 affected.append(character)
@@ -435,6 +436,7 @@ class Anna(Character):
             self._cara['PV'], self._cara['PV_max'] = 100, 100
             self._cara['PA'], self._cara['PA_max'] = 100, 100
             self._cara['PM'], self._cara['PM_max'] = 100, 100
+            self._cara['strength'] = 50
             self._cara['speed'] = 50
 
 class Henry(Character):
@@ -466,4 +468,5 @@ class Henry(Character):
             self._cara['PV'], self._cara['PV_max'] = 100, 100
             self._cara['PA'], self._cara['PA_max'] = 100, 100
             self._cara['PM'], self._cara['PM_max'] = 100, 100
+            self._cara['defense'] = 30
             self._cara['speed'] = 80

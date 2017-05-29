@@ -11,6 +11,11 @@ class Level():
         self._screen = screen
 
     def CheckVictoryCondition(self):
+        """Check if a victory is fulfilled
+        Currently implemented : destroy, kill leaders
+
+        Output:
+        sys.exit if a condition is fulfilled"""
         playerVictory, opponentVictory = True, True
         for character in self._screen._characters:
             if character._team == 1 and character._leader and not character._dead:
@@ -35,6 +40,7 @@ class Level():
             sys.exit()
 
     def ModeTRPG(self):
+        """Launch action loop for a tactical RPG"""
         turns, turn = self.IniTurns()
         character = turns[turn]
 
@@ -52,6 +58,7 @@ class Level():
             self.CheckVictoryCondition()
 
     def ModeVN(self, filename):
+        """Launch action loop for a visual novel"""
         fullname = join('res', 'script', filename)
         file = open(fullname)
         lines = file.readlines()
@@ -60,6 +67,12 @@ class Level():
 
 
     def IniTurns(self):
+        """Initialization of turns
+
+        Output:
+        turns - a dictionary
+            key - int: speed factor of the character
+            value - character"""
         self._screen._characters.sort(key=lambda x: x._cara['speed'], reverse=True)
         turns = {}
         for character in self._screen._characters:
@@ -79,6 +92,10 @@ class Level():
         return turns, turn
 
     def NextTurn(self, turns, turn):
+        """Update turns
+
+        Output:
+        turns - character: next character to play"""
         if not turns[turn]._dead:
             speed = turn + int(util.StatCalculation(turns[turn]._cara['speed'])*100)
             while speed in turns:
