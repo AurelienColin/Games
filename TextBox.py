@@ -4,14 +4,15 @@ import util
 import Map
 
 class TextBox():
-    def __init__(self, box_file, texts, width, height, pos, size=20):
+    def __init__(self, box_file, texts, width, height, pos, size=20, color=(0,0,0)):
         fullname = join('res', 'textbox', box_file)
         self._text = []
         self._string = []
         for j, text in enumerate(texts):
             text = text.split(';')
             self._string += [text[i] for i in range(len(text))]
-            self._text += [Text(text[i], (pos[j][0], pos[j][1]+i*(size+2)), size) for i in range(len(text))]
+            self._text += [Text(text[i], (pos[j][0], pos[j][1]+i*(size+2)),
+                                size, color=color) for i in range(len(text))]
         self._height = height
         self._width = width
         self._imgs = False
@@ -40,10 +41,10 @@ class TextBox():
             self._text += [Text(text[i], (pos[j][0], pos[j][1]+i*size), 20) for i in range(len(text))]
 
 class Text():
-    def __init__(self, text, pos, size):
+    def __init__(self, text, pos, size, color=(0,0,0)):
         font = pygame.font.SysFont('freesans', size)
         self._text = text
-        self._string = font.render(text, True, (0,0,0))
+        self._string = font.render(text, True, color)
         self._pos = pos
 
 class MainMenu(TextBox):
@@ -100,7 +101,8 @@ class Portrait(TextBox):
                 'PM: '+ str(chara._cara['PM']) + '/' + str(chara._cara['PM_max'])]
         data2 = ['Str: ' + u(chara._cara['strength']), 'Mgc: ' + u(chara._cara['magic']),
                  'Def: ' + u(chara._cara['defense']), 'Res: ' + u(chara._cara['resistance']),
-                 'Hit: ' + u(chara._cara['hit']), 'Res: ' + u(chara._cara['avoid'])]
+                 'Hit: ' + u(chara._cara['hit']), 'Res: ' + u(chara._cara['avoid']),
+                ' ;Lvl: ' + str(chara._cara['level'])]
         string = [';'.join(data1), ';'.join(data2)]
         name = "TextBox_ExtraLarge.png"
         TextBox.__init__(self, name, string, size[0], size[1], [(20, 10), (130, 10+18+2)], size = 18)
@@ -137,8 +139,9 @@ class StatusBox(TextBox):
         string = ['', '', '', '']
         size = 18
         pos = [(140, 30), (185, 30+2*(size+2)), (20, 140), (140, 140)]
-        string[0] = 'Name: ' + str(c['name']) + ';' + 'PV: ' + str(c['PV']) \
-                    + '/' + str(c['PV_max']) + ';PA:' + str(c['PA_max'])
+        string[0] = 'Name: ' + str(c['name'])+ ';' + 'PV: ' + str(c['PV']) \
+                    + '/' + str(c['PV_max']) + ';PA:' + str(c['PA_max']) \
+                    +';Lvl: ' + str(u(c['level']))
         string[1] = 'PM: ' + str(c['PM_max'])
         string[2] = 'Str: ' + str(u(c['strength'])) +';Mgc: ' + str(u(c['magic'])) \
                     + ';Def: ' + str(u(c['defense'])) + ';Res: ' \
@@ -157,6 +160,8 @@ class ChildBox(TextBox):
         if choice[:4] == 'Name':
             if choice[6:] == 'Anna':
                 string = 'Cute girl'
+        elif choice[:3] == 'Lvl':
+            string = 'Level of;the character'
         elif choice[:2] == 'PV':
             string = 'Quantity of;life remaining'
         elif choice[:2] == 'PA':
@@ -194,11 +199,28 @@ class TileData(TextBox):
 class Dialog(TextBox):
     def __init__(self, text):
         char_name, string = text.split(':')
-
         name = 'TextBox_Large.png'
         TextBox.__init__(self, name, [char_name, string], 100, 300,
                          [(15, 10), (20, 30)], size=17)
 
+class LevelUp(TextBox):
+    def __init__(self, character):
+        c = character._cara
+        name = 'Level_up.png'
+        cname = c['name']
+        title = 'LEVEL UP !'
+        lvl = 'Lvl: '+str(c['level']) + ' + 1'
+        PV = 'PV : ' + str(c['PV_max']) + ' + ' + str(c['growth']['PV'])
+        Spd = 'Spd : ' + str(c['speed']) + ' + ' + str(c['growth']['speed'])
+        Mgc = 'Mgc : ' + str(c['magic']) + ' + ' + str(c['growth']['magic'])
+        Def = 'Def : ' + str(c['defense']) + ' + ' + str(c['growth']['defense'])
+        Str = 'Str : ' + str(c['strength']) + ' + ' + str(c['growth']['strength'])
+        Res = 'Res : ' + str(c['resistance']) + ' + ' + str(c['growth']['resistance'])
+        string=[cname, lvl, PV, Spd, Str, Def, Mgc, Res, title]
+        pos = [(45,29), (190,29), (45,62), (190,62), (45, 93), (190,93),
+               (45,126), (190,126), (120, 8)]
+        TextBox.__init__(self, name, string, 176, 296, pos, size=13,
+                         color=(255,255,255))
 
 def ListMenus():
     return set(['MainMenu', 'Skills', 'Status'])

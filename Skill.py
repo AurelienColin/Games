@@ -161,7 +161,7 @@ class Skill():
             r = random.random()
             affected._cara = cara
             if r < hit:
-                affected.Affect(dmg, screen)
+                xp += affected.Affect(dmg, screen)
                 for effect in self._char_effects:
                     r = ['PA', 'PM']
                     if effect._properties in r and random.random() < affected.getCara('res'+effect._properties):

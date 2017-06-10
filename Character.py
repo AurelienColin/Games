@@ -5,8 +5,10 @@ import Skill
 import pygame
 import util
 import Map
+import TextBox
 
 from random import uniform
+from pygame.locals import *  # Import the event
 
 class Character():
     def __init__(self):
@@ -18,8 +20,8 @@ class Character():
         self._pos = None
         self._pos_tile = None
         self._index = None
-        self._xp_on_damage = 0
-        self._xp_on_kill = 0
+        self._xp_on_damage = 1
+        self._xp_on_kill = 100
         self._xp = 0
         self._dead = False
         self._team = 0
@@ -29,12 +31,16 @@ class Character():
         self._cara['PV'], self._cara['PV_max'] = 0, 0
         self._cara['PA'], self._cara['PA_max'] = 0, 0
         self._cara['PM'], self._cara['PM_max'] = 0, 0
+        self._cara['level'] = 1
+        self._cara['xp'] = 0
         self._cara['type'] = 'neutral'
         self._cara['speed'] = 1
         self._cara['magic'] = 1
         self._cara['strength'] = 1
         self._cara['defense'] = 1
         self._cara['resistance'] = 1
+        self._cara['growth']= {'PV':5, 'strength':1, 'defense':1, 'speed':1,
+                               'magic':1, 'resistance':1}
         self._cara['hit'] = 1
         self._cara['avoid'] = 1
         self._cara['object'] = 1
@@ -188,6 +194,39 @@ class Character():
             screen._objects[self._index[2]][0] = self._lifebar2._content
         return xp
 
+    def AddXP(self, xp, screen):
+        print('At the begining:', self._cara['xp'], '+', xp)
+
+        self._cara['xp'] += xp
+        while self._cara['xp'] > 100:
+            self._cara['xp'] = self._cara['xp']-100
+            self.LevelUp(screen)
+
+        print('At the end:', self._cara['xp'])
+
+    def LevelUp(self, screen):
+        pos = (int((screen._height-288)/2), int((screen._width-174)/2))
+        index = screen.AddTextBox(TextBox.LevelUp(self), pos)
+        loop = True
+        mainClock = pygame.time.Clock()
+        while loop:
+            screen.refresh()
+            mainClock.tick(30)
+            for event in pygame.event.get():
+                if event.type == KEYDOWN:
+                    loop = False
+        for i in index:
+            screen.RemoveObject(i)
+        self._cara['level'] += 1
+        self._cara['PV_max'] += self._cara['growth']['PV']
+        self._cara['PV'] += self._cara['growth']['PV']
+        self._cara['strength'] += self._cara['growth']['strength']
+        self._cara['defense'] += self._cara['growth']['defense']
+        self._cara['magic'] += self._cara['growth']['magic']
+        self._cara['resistance'] += self._cara['growth']['resistance']
+        self._cara['speed'] += self._cara['growth']['speed']
+        return
+
     def Attack(self, skill, tiles, screen, tile_target):
         """Use an attack
         Input:
@@ -221,7 +260,7 @@ class Character():
                 affected.append(character)
 
         self._cara = cara
-        self._xp += skill.Affect(self, affected, tiles, screen)
+        self.AddXP(skill.Affect(self, affected, tiles, screen), screen)
         self._cara['PA'] -= skill._cost
         direction = util.GetDirection(self._pos_tile, tile_target)
         if direction == 0:
@@ -437,7 +476,8 @@ class Anna(Character):
             self._cara['PA'], self._cara['PA_max'] = 100, 100
             self._cara['PM'], self._cara['PM_max'] = 100, 100
             self._cara['strength'] = 50
-            self._cara['speed'] = 50
+            self._cara['speed'] = 100
+            self._cara['xp'] = 99
 
 class Henry(Character):
     def __init__(self, save=None):
