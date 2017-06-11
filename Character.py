@@ -39,8 +39,8 @@ class Character():
         self._cara['strength'] = 1
         self._cara['defense'] = 1
         self._cara['resistance'] = 1
-        self._cara['growth']= {'PV':5, 'strength':1, 'defense':1, 'speed':1,
-                               'magic':1, 'resistance':1}
+        self._cara['growth']= {'PV':5, 'strength':5, 'defense':5, 'speed':5,
+                               'magic':5, 'resistance':5}
         self._cara['hit'] = 1
         self._cara['avoid'] = 1
         self._cara['object'] = 1

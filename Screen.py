@@ -85,7 +85,12 @@ class Screen():
         self._objects[index] = None
 
     def AddSprite(self, sprite, pos):
-        self._objects.append([sprite, pos, 'sprite'])
+        if str(type(sprite))=="<class 'pyganim.PygAnimation'>":
+            self._objects.append([sprite, pos, 'character'])
+            print(sprite)
+        else:
+            self._objects.append([sprite, pos, 'sprite'])
+        print('add sprite at:', pos)
         return len(self._objects)-1
 
     def AddCharacter(self, character, key):

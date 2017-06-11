@@ -4,6 +4,9 @@ import numpy as np
 import util
 import Effect
 import random
+from os.path import join
+import pyganim
+import pygame
 
 class Skill():
     def __init__(self):
@@ -13,6 +16,7 @@ class Skill():
         self._hit = 0.8
         self._tile_effects = {}
         self._ele = 'neutral'
+        self._sprite = self.AddSprite('fire_4', 1, 11, 0, 10)
 
     def Initialization(name):
         """
@@ -32,6 +36,21 @@ class Skill():
         else:
             self = None
         return self
+
+    def AddSprite(self, name, rows, cols, begin, end):
+        """Make a sprite (animated or not) from a sheet
+
+        Output:
+        obj - a sprite"""
+        fullname = join('res', 'sprite', 'effect', name + '.png')
+        perso = pyganim.getImagesFromSpriteSheet(fullname,cols=cols,rows=rows)[begin:end]
+        if end > begin+1:
+            frames = list(zip(perso, [100]*(end-begin)))
+            obj = pyganim.PygAnimation(frames)
+            obj.play()
+        else:
+            obj = perso[0]
+        return obj
 
     def Aim(self, character, screen):
         """Return the tiles aimed by the skill
@@ -113,7 +132,8 @@ class Skill():
         xp - int: xp earn from the attack
         The effects are applied on the targets (character or tile)"""
         xp = 0
-        for affected in all_affected:
+        animation_tiles = []
+        for i, affected in enumerate(all_affected):
             cara = affected._cara
             w, s = util.WeakAgainst(cara['type'])
             tile_type = Map.CheckProperties(affected._pos_tile, 'type',
@@ -161,6 +181,7 @@ class Skill():
             r = random.random()
             affected._cara = cara
             if r < hit:
+                animation_tiles.append(affected._pos_tile)
                 xp += affected.Affect(dmg, screen)
                 for effect in self._char_effects:
                     r = ['PA', 'PM']
@@ -171,6 +192,19 @@ class Skill():
         for effect in self._tile_effects:
             for tile in tiles:
                 screen._tile_effect.append([tile, effect])
+        animations = []
+        print('launch animation to:', animation_tiles)
+        for tile in animation_tiles:
+            pos = tuple(x*screen._tile_size for x in tile)
+            print('indeed:', pos)
+            animations.append(screen.AddSprite(self._sprite, pos))
+        if animations != []:
+            mainClock = pygame.time.Clock()
+            for i in range(25):
+                screen.refresh()
+                mainClock.tick(100)
+            [screen.RemoveObject(index) for index in animations]
+
         return xp
 
     def GetAimable(self, pos, screen, current_character):

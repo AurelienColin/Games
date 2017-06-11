@@ -101,7 +101,7 @@ class Portrait(TextBox):
                 'PM: '+ str(chara._cara['PM']) + '/' + str(chara._cara['PM_max'])]
         data2 = ['Str: ' + u(chara._cara['strength']), 'Mgc: ' + u(chara._cara['magic']),
                  'Def: ' + u(chara._cara['defense']), 'Res: ' + u(chara._cara['resistance']),
-                 'Hit: ' + u(chara._cara['hit']), 'Res: ' + u(chara._cara['avoid']),
+                 'Hit: ' + u(chara._cara['hit']), 'Avd: ' + u(chara._cara['avoid']),
                 ' ;Lvl: ' + str(chara._cara['level'])]
         string = [';'.join(data1), ';'.join(data2)]
         name = "TextBox_ExtraLarge.png"
