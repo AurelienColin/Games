@@ -33,6 +33,7 @@ class Screen():
         self._childBox = []
         self._tile_effect = []
         self._map_details = []
+        self._previous = []
 
     def MoveCircle(self, pos = None, hide = False):
         if hide:
@@ -41,7 +42,10 @@ class Screen():
             self._objects[0][1] = pos
             self._objects[0][2] = 'show'
 
-    def refresh(self):
+    def refresh(self, force = False):
+        if not force and self._previous == self._objects:
+            return
+        self._previous = list(self._objects)  # list() used to disting previous hand object
         if self._objects:
             circle, circle_pos, show = self._objects[0]
             circle_pos = (circle_pos[0]-4, circle_pos[1])
@@ -49,6 +53,7 @@ class Screen():
             if element:
                 ele, position, type_ele = element[:3]
                 if type_ele == 'tiled_map':
+                    # We add the circle after the map (and before anything else)
                     ele.draw(self._display)
                     if show != 'hide':
                         self._display.blit(circle, circle_pos)

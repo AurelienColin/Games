@@ -401,7 +401,7 @@ class Character():
             screen._objects[self._index[1]][1] = self._lifebar1._pos
             screen._objects[self._index[2]][1] = self._lifebar2._pos
             screen.MoveCircle(pos = self._pos)
-            screen.refresh()
+            screen.refresh(force = True)
         screen._objects[self._index[0]][0] = static
         screen._objects[self._index[0]][2] = 'sprite'
         print('final pos:', self._pos, self._pos[0]/screen._tile_size, self._pos[1]/screen._tile_size)
