@@ -6,6 +6,7 @@ import pygame
 import util
 import Map
 import TextBox
+import sys
 
 from random import uniform
 from pygame.locals import *  # Import the event
@@ -213,6 +214,9 @@ class Character():
             screen.refresh()
             mainClock.tick(30)
             for event in pygame.event.get():
+                if event.type == QUIT:  # The game is closed
+                    pygame.quit()
+                    sys.exit()
                 if event.type == KEYDOWN:
                     loop = False
         for i in index:

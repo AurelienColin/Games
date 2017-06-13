@@ -43,12 +43,12 @@ class Screen():
             self._objects[0][2] = 'show'
 
     def refresh(self, force = False):
-        if not force and self._previous == self._objects:
-            return
-        self._previous = list(self._objects)  # list() used to disting previous hand object
-        if self._objects:
-            circle, circle_pos, show = self._objects[0]
-            circle_pos = (circle_pos[0]-4, circle_pos[1])
+        if not force:
+            if self._previous == self._objects:
+                return
+            self._previous = list(self._objects)  # list() used to disting previous hand object
+        circle, circle_pos, show = self._objects[0]
+        circle_pos = (circle_pos[0]-4, circle_pos[1])
         for element in self._objects:
             if element:
                 ele, position, type_ele = element[:3]
