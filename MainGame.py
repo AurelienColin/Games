@@ -358,21 +358,24 @@ def VNLoop(screen, lines):
             pos = (int((screen._height-box._height)/2),screen._width-box._width)
             current_dialog = screen.AddTextBox(box, pos)
         else:  # A character enter or leave
-            character, action, pos = line.split()
             change = True
-            if action == 'enter':
+            line = line.split()
+            if line[0] == 'enter':
+                character, file, transf, pos = line[1:]
                 x, y = tuple([int(ele) for ele in pos.split(',')])
-                print('defor', x, y)
                 if x < 0:
                     x = screen._height+x
                 if y < 0:
                     y = screen._width+y
-                sprite = pygame.image.load(join('res', 'sprite',
-                                                character.split('_')[0], character))
-                print('after:', x, y)
+                img = pygame.image.load(join('res', 'sprite',
+                                        file.split('_')[0], file))
+                if transf == 'sym':
+                    sprite = pygame.transform.flip(img, True, False)
+                else:
+                    sprite = img
                 on_screen[character] = screen.AddSprite(sprite, (x, y))
-            elif action == 'leave':
-                screen.RemoveObject(on_screen[character])
+            elif line[0] == 'leave':
+                screen.RemoveObject(on_screen[line[1]])
         while change == False:
             screen.refresh()
             mainClock.tick(30)

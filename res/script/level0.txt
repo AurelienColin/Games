@@ -1,6 +1,6 @@
-Anna_fullL.png enter 0,-256
+enter Anna Anna_fullL.png raw 0,-256
 Anna: Sir, won't you give up and put down your weapon?
-Henry_fullR.png enter -256,-256
+enter Henry Henry_fullL.png sym -256,-256
 Henry: Anna, you were once my most faithful retainers. Now, the leader of the traitors...
 Anna: You betrayed your kingdom, using this despicable magic.
 Henry: And by this magic, I will attain my goal.
@@ -8,8 +8,8 @@ Anna: No one had ever achieve such a feat. No one will ever be able to...
 Henry: I have time. Even if it takes me decades, centuries or millenaries, I won't give up.
 Anna: No. Your reign end today.
 Henry: This will be decided on the battlefied. Show me the strength of your resolution.
-Henry_fullR.png leave room
+leave Henry
 Anna: I never wanted to harm you, my king.
 Anna: I only wanted...
-Anna_fullL.png leave room
+leave Anna
 Narator: Why do we fight?
