@@ -6,7 +6,7 @@ class Highlight():
         s.fill(color)
         s.set_alpha(alpha)
         self._content = s
-        self._pos = pos_x, pos_y
+        self._pixel = pos_x, pos_y
 
 def HighlightTiles(tile_size, tiles, alpha, color):
     highlighted = {}

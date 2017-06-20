@@ -1,3 +1,7 @@
+import os
+import json
+import Character
+import Skill
 
 def ObjToCoord(obj):
     """From an object, retourn it's coordinates
@@ -98,4 +102,29 @@ def WeakAgainst(t_ini):
         return ['water', 'wind']
     else:
         return [None, None]
+
+def ReadJSON(folder, file):
+    """Input:
+    folder - a string
+    file - string: the name of .json contening the object
+
+    Output:
+    object - Could be a skill or a character"""
+    with open(os.path.join('json', folder, file+'.json'), 'r') as file:
+        data = json.load(file)
+        if 'skill' in data.keys():
+            return Skill.Skill.FromJSON(data['skill'])
+        elif 'character' in data.keys():
+            return Character.Character.FromJSON(data['character'])
+
+def WriteJSON(data, file):
+    """Input:
+    data - dictionary
+    file - string
+
+    Output:
+    Nothing, but a .json is written"""
+    folder = list(data.keys())[0] # Only one key aniway
+    with open(os.path.join('json', folder, file+'.json'), 'w') as file:
+        json.dump(data, file, sort_keys=True, indent=4)
 

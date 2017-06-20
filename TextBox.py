@@ -45,7 +45,7 @@ class Text():
         font = pygame.font.SysFont('freesans', size)
         self._text = text
         self._string = font.render(text, True, color)
-        self._pos = pos
+        self._pixel = pos
 
 class MainMenu(TextBox):
     def __init__(self):
@@ -106,7 +106,7 @@ class Portrait(TextBox):
         string = [';'.join(data1), ';'.join(data2)]
         name = "TextBox_ExtraLarge.png"
         TextBox.__init__(self, name, string, size[0], size[1], [(20, 10), (130, 10+18+2)], size = 18)
-        self._imgs = [[chara._portrait, (0, size[0]-128-12)]]
+        self._imgs = [[chara._sprite['portrait'], (0, size[0]-128-12)]]
 
 class IniList(TextBox):
     def __init__(self, characters, turns, turn):
@@ -152,7 +152,7 @@ class StatusBox(TextBox):
         string[3] = string[3][:-1]  # Remove the last ';'
         name = 'TextBox_ExtraLarge.png'
         TextBox.__init__(self, name, string, 300, 300, pos, size=size)
-        self._imgs = [[character._portrait, (0, 0)]]
+        self._imgs = [[character._sprite['portrait'], (0, 0)]]
 
 class ChildBox(TextBox):
     def __init__(self, choice):

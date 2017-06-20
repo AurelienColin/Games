@@ -12,28 +12,22 @@ from random import uniform
 from pygame.locals import *  # Import the event
 
 class Character():
-    def __init__(self):
-        self._sprite = {}
-        self._cara = {}
-        self._index = None
-        self._lifebar1 = None
-        self._lifebar2 = None
-        self._pos = None
-        self._pos_tile = None
-        self._index = None
-        self._xp_on_damage = 1
-        self._xp_on_kill = 100
-        self._xp = 0
+    def __init__(self,team = 0, tile_size = None, pos_tile = False, ia = False, leader = False):
+        self._sprite, self._cara = {}, {}
+        self._index, self._lifebar1, self._lifebar2 = None, None, None
+        self._ia, self._leader, self._team = ia, leader, team
         self._dead = False
-        self._team = 0
         self._direction = 2
+        if pos_tile:
+            self.UpdatePos(tile_size, pos_tile = pos_tile)
+        else:
+            self._tile, self._px = None, None
 
         self._skills = []
         self._cara['PV'], self._cara['PV_max'] = 0, 0
         self._cara['PA'], self._cara['PA_max'] = 0, 0
         self._cara['PM'], self._cara['PM_max'] = 0, 0
         self._cara['level'] = 1
-        self._cara['xp'] = 0
         self._cara['type'] = 'neutral'
         self._cara['speed'] = 1
         self._cara['magic'] = 1
@@ -51,6 +45,37 @@ class Character():
         self._cara['elementalRes'] = {'fire':1, 'water':1, 'earth':1,
                                       'wind':1, 'holy':1, 'unholy':1,
                                       'neutral':1}
+
+        self._cara['xp']={'current':0,'on_damage':1, 'on_kill':100}
+
+    def ToJSON(self):
+        """Write the character in a .json
+        Input :
+        self - a character
+
+        Output :
+        Nothing, but a .json est written"""
+        skills = [skill._name for skill in self._skills]
+        temp = {'cara':self._cara, 'sprite':self._sprite['values'],
+                'skill':skills, 'sheet':self._sheet_name}
+        util.WriteJSON({'character':temp}, self._cara['name'])
+
+    def CreateSprite(self):
+        """From ._sprite['values'] get all sprites
+        Input:
+        self - a character
+
+        Output:
+        Nothing, but ._sprite is update"""
+        for key, value in self._sprite['values'].items():
+            print(key, value)
+            if key == 'portrait':
+                self._sprite[key] = pygame.image.load(value)
+            elif len(value) == 2:
+                self._sprite[key] = self.AddSprite(value[0], value[1])
+            else:
+                self._sprite[key] = self.AddSprite(value[0])
+
 
 
     def Initialization(name, team, tile_size = None, pos_tile = False, ia = False, leader = False):
@@ -74,7 +99,7 @@ class Character():
         self._leader = leader
         self._team = team
         if pos_tile:
-            self.pos(tile_size, pos_tile = pos_tile)
+            self.UpdatePos(tile_size, pos_tile = pos_tile)
         return self
 
     def AddSprite(self, begin, end=False):
@@ -87,6 +112,7 @@ class Character():
 
         Output:
         obj - a sprite"""
+        print('AddSpriteCharacter:', begin, end)
         if not end:
             end = begin+1
         fullname = join('res', 'sprite', self._cara['name'], str(self._sheet_name) + '.png')
@@ -117,10 +143,10 @@ class Character():
             R = 255*(1-percentage)*2
             G = 255
         B = 0
-        self._lifebar1 = Highlight.Highlight(height_life, width, 255, (R, G, B), self._pos[0], self._pos[1])
-        self._lifebar2 = Highlight.Highlight(height_void, width, 255, (0, 0, 0), self._pos[0]+height_life, self._pos[1])
+        self._lifebar1 = Highlight.Highlight(height_life, width, 255, (R, G, B), self._pixel[0], self._pixel[1])
+        self._lifebar2 = Highlight.Highlight(height_void, width, 255, (0, 0, 0), self._pixel[0]+height_life, self._pixel[1])
 
-    def pos(self, tile_size, pos_pixel = None, pos_tile = None):
+    def UpdatePos(self, tile_size, pos_pixel = None, pos_tile = None):
         """Update pos_pixel or pos_tile
 
         Input:
@@ -129,14 +155,14 @@ class Character():
         pos_pixel - optional tuple of int
         pos_tile - optional tuple of int"""
         if pos_pixel:
-            self._pos = pos_pixel
-            self._pos_tile = (pos_pixel[0]/tile_size, pos_pixel[1]/tile_size)
+            self._pixel = pos_pixel
+            self._tile = (pos_pixel[0]/tile_size, pos_pixel[1]/tile_size)
         elif pos_tile:
-            self._pos_tile = pos_tile
-            self._pos = (pos_tile[0]*tile_size, pos_tile[1]*tile_size)
+            self._tile = pos_tile
+            self._pixel = (pos_tile[0]*tile_size, pos_tile[1]*tile_size)
         else:
-            self._pos = None
-            self._pos_tile = None
+            self._pixel = None
+            self._tile = None
             return
         self.AddLifeBar(tile_size)
 
@@ -179,14 +205,14 @@ class Character():
         xp - int: xp to add to the attacking character"""
         xp = 0
         if type(effect) == int:
-            xp = abs(self._xp_on_damage*effect)
+            xp = abs(self._cara['xp']['on_damage']*effect)
             self._cara['PV'] = min(self._cara['PV_max'], max(0,self._cara['PV']-effect))
         else:# It's a debuff, a buff, or anything else
             self._cara['effects'].append(effect)
             self._cara[effect._properties] = max(0, self._cara[effect._properties]-effect._power)
         if self._cara['PV'] == 0:
             self._dead = True
-            xp += self._xp_on_kill
+            xp += self._cara['xp']['on_kill']
             for i in self._index:
                 screen.RemoveObject(i)
         else:
@@ -196,14 +222,14 @@ class Character():
         return xp
 
     def AddXP(self, xp, screen):
-        print('At the begining:', self._cara['xp'], '+', xp)
+        print('At the begining:', self._cara['xp']['current'], '+', xp)
 
-        self._cara['xp'] += xp
-        while self._cara['xp'] > 100:
-            self._cara['xp'] = self._cara['xp']-100
+        self._cara['xp']['current'] += xp
+        while self._cara['xp']['current'] > 100:
+            self._cara['xp']['current'] = self._cara['xp']['current']-100
             self.LevelUp(screen)
 
-        print('At the end:', self._cara['xp'])
+        print('At the end:', self._cara['xp']['current'])
 
     def LevelUp(self, screen):
         pos = (int((screen._height-288)/2), int((screen._width-174)/2))
@@ -246,7 +272,7 @@ class Character():
         affected = []
         cara = self._cara
         w, s = util.WeakAgainst(cara['type'])
-        tile_type = Map.CheckProperties(self._pos_tile, 'type',
+        tile_type = Map.CheckProperties(self._tile, 'type',
                                         screen._map_data, screen._tile_size)
         if w:
             if tile_type == w:
@@ -260,13 +286,13 @@ class Character():
                 affected._cara['speed'] += 56
                 affected._cara['hit'] += 56
         for character in screen._characters:
-            if character._pos_tile in tiles:
+            if character._tile in tiles:
                 affected.append(character)
 
         self._cara = cara
         self.AddXP(skill.Affect(self, affected, tiles, screen), screen)
         self._cara['PA'] -= skill._cost
-        direction = util.GetDirection(self._pos_tile, tile_target)
+        direction = util.GetDirection(self._tile, tile_target)
         if direction == 0:
             static = self._sprite['static_up']
         elif direction == 1:
@@ -313,7 +339,7 @@ class Character():
         if self._ia == 'aggresif' or self._ia == 'defensif':
             reachable = self.getReachable(screen)
         elif self._ia == 'passif':
-            reachable = {(self._pos_tile):(0, [])}
+            reachable = {(self._tile):(0, [])}
             pass
         max_dmgs = 0
         path, skill_target, tiles_target = False, False, False
@@ -327,7 +353,7 @@ class Character():
                     if tile in final_tiles:
                         affected.append(self)
                     for target_character in screen._characters:
-                        if target_character._pos_tile in final_tiles and target_character != self:
+                        if target_character._tile in final_tiles and target_character != self:
                             affected.append(target_character)
                     for target_character in affected:
                             if skill._type == 'magic':
@@ -349,7 +375,7 @@ class Character():
                         max_dmgs = dmgs
         if path:
             for tile in path[1:]:
-                self.Move(screen, 0, self._pos_tile, tile)
+                self.Move(screen, 0, self._tile, tile)
             self._cara['PM'] -= d
         if skill_target and tiles_target:
             self.Attack(skill_target, tiles_target, screen, tile_target)
@@ -389,26 +415,26 @@ class Character():
         else :
             return
         self._cara['PM'] -= p
-        pix_pos = self._pos
-        ini_bar1 = self._lifebar1._pos
-        ini_bar2 = self._lifebar2._pos
+        pix_pos = self._pixel
+        ini_bar1 = self._lifebar1._pixel
+        ini_bar2 = self._lifebar2._pixel
         screen._objects[self._index[0]][0] = animation
         screen._objects[self._index[0]][2] = 'character'
         n = screen._animation_length
         for i in range(n+1):
             temp_pos = int(diff[0]*i/n), int(diff[1]*i/n)
             full_temp_pos = pix_pos[0]+temp_pos[0], pix_pos[1]+temp_pos[1]
-            self._lifebar1._pos = (ini_bar1[0] + temp_pos[0], ini_bar1[1] + temp_pos[1])
-            self._lifebar2._pos = (ini_bar2[0] + temp_pos[0], ini_bar2[1] + temp_pos[1])
-            self.pos(screen._tile_size, pos_pixel = full_temp_pos)
-            screen._objects[self._index[0]][1] = self._pos
-            screen._objects[self._index[1]][1] = self._lifebar1._pos
-            screen._objects[self._index[2]][1] = self._lifebar2._pos
-            screen.MoveCircle(pos = self._pos)
+            self._lifebar1._pixel = (ini_bar1[0] + temp_pos[0], ini_bar1[1] + temp_pos[1])
+            self._lifebar2._pixel = (ini_bar2[0] + temp_pos[0], ini_bar2[1] + temp_pos[1])
+            self.UpdatePos(screen._tile_size, pos_pixel = full_temp_pos)
+            screen._objects[self._index[0]][1] = self._pixel
+            screen._objects[self._index[1]][1] = self._lifebar1._pixel
+            screen._objects[self._index[2]][1] = self._lifebar2._pixel
+            screen.MoveCircle(pos = self._pixel)
             screen.refresh(force = True)
         screen._objects[self._index[0]][0] = static
         screen._objects[self._index[0]][2] = 'sprite'
-        print('final pos:', self._pos, self._pos[0]/screen._tile_size, self._pos[1]/screen._tile_size)
+        print('final pos:', self._pixel, self._pixel[0]/screen._tile_size, self._pixel[1]/screen._tile_size)
         screen.UpdateStatus(self)
 
 
@@ -425,7 +451,7 @@ class Character():
             path -- list of tuple of two int : path to take from current to xy
         """
         queue = {}
-        queue[(self._pos_tile[0], self._pos_tile[1])] = (0, [])
+        queue[(self._tile[0], self._tile[1])] = (0, [])
         reachable = {}
         tile_size = screen._tile_size
         transparent = True
@@ -459,18 +485,14 @@ class Anna(Character):
         self._cara['name'] = 'Anna'
         self._cara['sex'] = 'f'
         self._rows, self._cols = 144, 12
-        self._sprite['standing'] = self.AddSprite(0,4)
-        self._sprite['static'] = self.AddSprite(0)
-        self._sprite['attacking'] =  self.AddSprite(12,16)
-        self._sprite['walking_left'] =  self.AddSprite(24,28)
-        self._sprite['static_left'] = self.AddSprite(24)
-        self._sprite['walking_right'] =  self.AddSprite(36,40)
-        self._sprite['static_right'] = self.AddSprite(36)
-        self._sprite['walking_down'] =  self.AddSprite(48,52)
-        self._sprite['static_down'] = self.AddSprite(48)
-        self._sprite['walking_up'] =  self.AddSprite(60,64)
-        self._sprite['static_up'] = self.AddSprite(60)
-        self._portrait = pygame.image.load(join('res', 'sprite', self._cara['name'], 'Anna_portrait.png'))
+        portrait = join('res', 'sprite', self._cara['name'], 'Anna_portrait.png')
+        self._sprite['values'] = {'standing':(0,4), 'static':(0,),
+                                 'attacking':(12,16), 'walking_left':(24,28),
+                                 'static_left':(24,), 'walking_right':(36,40),
+                                'static_right':(36,), 'walking_down':(48,52),
+                                'static_down':(48,), 'walking_up':(60,64),
+                                'static_up':(60,), 'portrait':portrait}
+        self.CreateSprite()
         if save:
             pass
         else:
@@ -481,7 +503,8 @@ class Anna(Character):
             self._cara['PM'], self._cara['PM_max'] = 100, 100
             self._cara['strength'] = 50
             self._cara['speed'] = 100
-            self._cara['xp'] = 99
+            self._cara['xp']['current'] = 99
+        self.ToJSON()
 
 class Henry(Character):
     def __init__(self, save=None):
@@ -492,18 +515,14 @@ class Henry(Character):
         self._cara['name'] = 'Henry'
         self._cara['sex'] = 'm'
         self._rows, self._cols = 80, 12
-        self._sprite['standing'] = self.AddSprite(388,392)
-        self._sprite['static'] = self.AddSprite(388)
-        self._sprite['attacking'] =  self.AddSprite(400,404)
-        self._sprite['walking_left'] =  self.AddSprite(412,416)
-        self._sprite['static_left'] =  self.AddSprite(412)
-        self._sprite['walking_right'] =  self.AddSprite(424,428)
-        self._sprite['static_right'] =  self.AddSprite(424)
-        self._sprite['walking_down'] =  self.AddSprite(436,440)
-        self._sprite['static_down'] =  self.AddSprite(436)
-        self._sprite['walking_up'] =  self.AddSprite(448,452)
-        self._sprite['static_up'] =  self.AddSprite(448)
-        self._portrait = pygame.image.load(join('res', 'sprite', self._cara['name'], 'Henry_portrait.png'))
+        portrait = join('res', 'sprite', self._cara['name'], 'Henry_portrait.png')
+        self._sprite['values'] = {'standing':(388,392), 'static':(388,),
+                                 'attacking':(400,404), 'walking_left':(412,416),
+                                 'static_left':(412,), 'walking_right':(424,428),
+                                'static_right':(424,), 'walking_down':(436,440),
+                                'static_down':(436,), 'walking_up':(448,452),
+                                'static_up':(448,), 'portrait':portrait}
+        self.CreateSprite()
         if save:
             pass
         else:
@@ -514,3 +533,5 @@ class Henry(Character):
             self._cara['PM'], self._cara['PM_max'] = 100, 100
             self._cara['defense'] = 30
             self._cara['speed'] = 80
+
+        self.ToJSON()

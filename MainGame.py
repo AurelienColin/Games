@@ -1,17 +1,4 @@
 """
-This is tested on pygame 1.9 and python 2.7 and 3.3+.
-Leif Theden "bitcraft", 2012-2014
-
-Rendering demo for the TMXLoader.
-
-Typically this is run to verify that any code changes do do break the loader.
-Tests all Tiled features -except- terrains and object rotation.
-
-If you are not familiar with python classes, you might want to check the
-'tutorial' app.
-
-Missing tests:
-- object rotation
 """
 import sys
 import pygame
@@ -35,7 +22,7 @@ def IfDeplacement(character, key, screen):
     key - K_DOWN, K_UP, K_LEFT or K_RIGHT
     screen - screen
     """
-    position = character._pos_tile
+    position = character._tile
     tile_size = screen._tile_size
     if key == K_DOWN and position[1] < screen._height//tile_size:
         new_pos = (position[0], position[1]+1)
@@ -51,13 +38,13 @@ def IfDeplacement(character, key, screen):
     px_pos = new_pos[0]*screen._tile_size, new_pos[1]*screen._tile_size
     change = True
     for other_char in screen._characters:
-        if not other_char._dead and other_char._pos == px_pos and character != other_char:
+        if not other_char._dead and other_char._pixel == px_pos and character != other_char:
             change = False
     p = int(Map.CheckProperties(px_pos, 'slowness', screen._map_data, tile_size))
     if p == -1 or p > character._cara['PM']:
         change = False
     if change:
-        character.Move(screen, p, character._pos_tile, new_pos)
+        character.Move(screen, p, character._tile, new_pos)
     return
 
 def AimingLoop(current_character, screen, skill):
@@ -72,7 +59,7 @@ def AimingLoop(current_character, screen, skill):
     alpha = 80
     color = (255, 0, 0)
     red = {}
-    tile = current_character._pos_tile
+    tile = current_character._tile
     change = True
     end = False
     mainClock = pygame.time.Clock()
@@ -264,7 +251,7 @@ def PlacementLoop(ini_tiles, screen):
                 if menu_open:
                     if event.key == K_RETURN:
                         characters[l[screen._status_box]] = screen._characters[screen._status_box]
-                        screen._characters[screen._status_box].pos(screen._tile_size, pos_tile = l[selection])
+                        screen._characters[screen._status_box].UpdatePos(screen._tile_size, pos_tile = l[selection])
                         screen._characters[screen._status_box]._index = screen.AddCharacter(screen._characters[screen._status_box], 'standing')
                         change = True
                         for i, character in enumerate(available):
@@ -305,11 +292,11 @@ def PlacementLoop(ini_tiles, screen):
                         menu_open = False
                 else:
                     if event.key == K_RETURN:
-                        if l[selection] in [character._pos_tile for character in screen._characters]:
+                        if l[selection] in [character._tile for character in screen._characters]:
                             for character in screen._characters:
-                                if character._pos_tile == l[selection]:
+                                if character._tile == l[selection]:
                                     available.append(character)
-                                    character.pos(screen._tile_size)
+                                    character.UpdatePos(screen._tile_size)
                                     for index in character._index:
                                         screen.RemoveObject(index)
                         else:

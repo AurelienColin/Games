@@ -72,8 +72,8 @@ class Screen():
                 self.RemoveObject(i)
         mouse_pos = (pos[0]//self._tile_size, pos[1]//self._tile_size)
         for character in self._characters:
-            if mouse_pos == character._pos_tile and not character._dead:
-                pos = character._pos[0]+self._tile_size, character._pos[1]+self._tile_size
+            if mouse_pos == character._tile and not character._dead:
+                pos = character._pixel[0]+self._tile_size, character._pixel[1]+self._tile_size
                 self._portrait = self.AddTextBox(TextBox.Portrait(character), pos)
                 print('Hovering on:', character, self._portrait)
                 break
@@ -101,7 +101,7 @@ class Screen():
     def AddCharacter(self, character, key):
         """The len is returned to know where is the sprite"""
         sprite = character._sprite[key]
-        self._objects.append([sprite, character._pos, 'character'])
+        self._objects.append([sprite, character._pixel, 'character'])
         bar1_index = self.AddHighlight(character._lifebar1)
         bar2_index = self.AddHighlight(character._lifebar2)
         return bar1_index-1, bar1_index, bar2_index
@@ -119,11 +119,11 @@ class Screen():
             for img in box._imgs:
                 self._objects.append([img[0], (pos[0]+img[1][0], pos[1]+img[1][1]), 'sprite'])
         for i, text in enumerate(box._text):
-            self._objects.append([text._string, (text._pos[0] + pos[0], text._pos[1] + pos[1]), 'text', text._text])
+            self._objects.append([text._string, (text._pixel[0] + pos[0], text._pixel[1] + pos[1]), 'text', text._text])
         return [i for i in range(prec-1, len(self._objects))]
 
     def AddHighlight(self, s):
-        self._objects.append([s._content, (s._pos[0], s._pos[1]), 'highlight'])
+        self._objects.append([s._content, (s._pixel[0], s._pixel[1]), 'highlight'])
         return len(self._objects)-1
 
     def UpdateStatus(self, character, pos=False):

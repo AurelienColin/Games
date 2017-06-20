@@ -82,7 +82,7 @@ class Level():
             turns[speed] = character
         turn = min(turns)
 
-        self._screen.MoveCircle(pos = turns[turn]._pos)
+        self._screen.MoveCircle(pos = turns[turn]._pixel)
         self._screen.UpdateStatus(turns[turn], (self._screen._height-128, self._screen._width-100))
         self._screen.UpdateIniList(turns, turn)
         if turns[turn]._ia:
@@ -110,7 +110,7 @@ class Level():
             if pos_effect:
                 pos, effect = pos_effect
                 char_effect = Effect.Effect(effect._properties, effect._power, 1)
-                if turns[turn]._pos_tile == pos:
+                if turns[turn]._tile == pos:
                         turns[turn].Affect(char_effect, self._screen)
                         break
                 if effect._since != effect._duration:
@@ -118,7 +118,7 @@ class Level():
                 else:
                     self._screen._tile_effect.pop(i)
 
-        self._screen.MoveCircle(pos = turns[turn]._pos)
+        self._screen.MoveCircle(pos = turns[turn]._pixel)
         self._screen.UpdateStatus(turns[turn])
         self._screen.UpdateIniList(turns, turn)
         if turns[turn]._ia:

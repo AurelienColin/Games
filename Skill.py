@@ -63,8 +63,8 @@ class Skill():
         blue - dictionary
             key - tuple of two int
             value - highlight"""
-        center = (int(character._pos[0]/screen._tile_size),
-                  int(character._pos[1]/screen._tile_size))
+        center = (int(character._pixel[0]/screen._tile_size),
+                  int(character._pixel[1]/screen._tile_size))
 
         aimable = self.GetAimable(center,screen, character)
         highlighted = Highlight.HighlightTiles(screen._tile_size, aimable,60, (0, 0,255))
@@ -96,20 +96,20 @@ class Skill():
                     tiles.append([tile_pos[0]+i, tile_pos[1]+j])
                     j+=1
         elif self._AOE == 'parallel':
-            if tile_pos[0] != character._pos_tile[0]:
+            if tile_pos[0] != character._tile[0]:
                 for i in range(self._size):
                     tiles.append([tile_pos[0], tile_pos[1]+i])
                     tiles.append([tile_pos[0], tile_pos[1]-i])
-            elif tile_pos[1] != character._pos_tile[1]:
+            elif tile_pos[1] != character._tile[1]:
                 for i in range(self._size):
                     tiles.append([tile_pos[0]+i, tile_pos[1]])
                     tiles.append([tile_pos[0]-i, tile_pos[1]])
         elif self._AOE == 'orthogonal':
-            if tile_pos[0] != character._pos_tile[0]:
+            if tile_pos[0] != character._tile[0]:
                 for i in range(self._size):
                     tiles.append([tile_pos[0]-i, tile_pos[1]])
                     tiles.append([tile_pos[0]+i, tile_pos[1]])
-            elif tile_pos[1] != character._pos_tile[1]:
+            elif tile_pos[1] != character._tile[1]:
                 for i in range(self._size):
                     tiles.append([tile_pos[0], tile_pos[1]+i])
                     tiles.append([tile_pos[0], tile_pos[1]-i])
@@ -136,7 +136,7 @@ class Skill():
         for i, affected in enumerate(all_affected):
             cara = affected._cara
             w, s = util.WeakAgainst(cara['type'])
-            tile_type = Map.CheckProperties(affected._pos_tile, 'type',
+            tile_type = Map.CheckProperties(affected._tile, 'type',
                                             screen._map_data, screen._tile_size)
             if tile_type == w:
                 affected._cara['def'] -= 56
@@ -157,10 +157,10 @@ class Skill():
                     affected._cara['elementalRes'][s] += 23
 
 
-            if current_character._aiming == affected._pos_tile:
-                direction = util.GetDirection(affected._pos_tile, current_character._pos_tile)
+            if current_character._aiming == affected._tile:
+                direction = util.GetDirection(affected._tile, current_character._tile)
             else:
-                direction = util.GetDirection(affected._pos_tile, current_character._aiming)
+                direction = util.GetDirection(affected._tile, current_character._aiming)
             if direction - affected._direction in [-2,2]:
                 dmg = self._damage * 1.5
                 affected._cara['avoid'] = int(affected._cara['avoid']*0.75)
@@ -181,7 +181,7 @@ class Skill():
             r = random.random()
             affected._cara = cara
             if r < hit:
-                animation_tiles.append(affected._pos_tile)
+                animation_tiles.append(affected._tile)
                 xp += affected.Affect(dmg, screen)
                 for effect in self._char_effects:
                     r = ['PA', 'PM']
@@ -249,7 +249,7 @@ class Skill():
                     for x_c, y_c in tile_range:
                         if not self._perce:
                             for character in screen._characters:
-                                if character._pos_tile == (x_c, y_c) and character._team != current_character._team:
+                                if character._tile == (x_c, y_c) and character._team != current_character._team:
                                     transparent = False
                                     break
                         if Map.CheckProperties((x_c*tile_size, y_c*tile_size), p, map_data, tile_size) != '1':
