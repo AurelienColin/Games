@@ -1,0 +1,100 @@
+{
+    "character": {
+        "cara": {
+            "PA": 100,
+            "PA_max": 100,
+            "PM": 100,
+            "PM_max": 100,
+            "PV": 100,
+            "PV_max": 100,
+            "avoid": 1,
+            "defense": 30,
+            "effects": [
+                false
+            ],
+            "elementalRes": {
+                "earth": 1,
+                "fire": 1,
+                "holy": 1,
+                "neutral": 1,
+                "unholy": 1,
+                "water": 1,
+                "wind": 1
+            },
+            "growth": {
+                "PV": 5,
+                "defense": 5,
+                "magic": 5,
+                "resistance": 5,
+                "speed": 5,
+                "strength": 5
+            },
+            "hit": 1,
+            "level": 1,
+            "magic": 1,
+            "name": "Henry",
+            "object": 1,
+            "resPA": 1,
+            "resPM": 1,
+            "resistance": 1,
+            "sex": "m",
+            "speed": 80,
+            "strength": 1,
+            "type": "neutral",
+            "xp": {
+                "current": 0,
+                "on_damage": 1,
+                "on_kill": 100
+            }
+        },
+        "sheet": "Henry_sheet",
+        "skill": [
+            "Apocalypse",
+            "Horizontal"
+        ],
+        "sprite": {
+            "attacking": [
+                400,
+                404
+            ],
+            "cols": 12,
+            "portrait": "res\\sprite\\Henry\\Henry_portrait.png",
+            "rows": 80,
+            "standing": [
+                388,
+                392
+            ],
+            "static": [
+                388
+            ],
+            "static_down": [
+                436
+            ],
+            "static_left": [
+                412
+            ],
+            "static_right": [
+                424
+            ],
+            "static_up": [
+                448
+            ],
+            "walking_down": [
+                436,
+                440
+            ],
+            "walking_left": [
+                412,
+                416
+            ],
+            "walking_right": [
+                424,
+                428
+            ],
+            "walking_up": [
+                448,
+                452
+            ]
+        }
+    }
+}

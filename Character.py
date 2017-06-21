@@ -7,46 +7,31 @@ import util
 import Map
 import TextBox
 import sys
-
+import json
+import os
 from random import uniform
 from pygame.locals import *  # Import the event
 
 class Character():
-    def __init__(self,team = 0, tile_size = None, pos_tile = False, ia = False, leader = False):
-        self._sprite, self._cara = {}, {}
+    def __init__(self, file,team = 0, tile_size = None, pos_tile = False, ia = False, leader = False):
         self._index, self._lifebar1, self._lifebar2 = None, None, None
         self._ia, self._leader, self._team = ia, leader, team
         self._dead = False
         self._direction = 2
+        self.FromJSON(file)
         if pos_tile:
             self.UpdatePos(tile_size, pos_tile = pos_tile)
         else:
             self._tile, self._px = None, None
 
-        self._skills = []
-        self._cara['PV'], self._cara['PV_max'] = 0, 0
-        self._cara['PA'], self._cara['PA_max'] = 0, 0
-        self._cara['PM'], self._cara['PM_max'] = 0, 0
-        self._cara['level'] = 1
-        self._cara['type'] = 'neutral'
-        self._cara['speed'] = 1
-        self._cara['magic'] = 1
-        self._cara['strength'] = 1
-        self._cara['defense'] = 1
-        self._cara['resistance'] = 1
-        self._cara['growth']= {'PV':5, 'strength':5, 'defense':5, 'speed':5,
-                               'magic':5, 'resistance':5}
-        self._cara['hit'] = 1
-        self._cara['avoid'] = 1
-        self._cara['object'] = 1
-        self._cara['effects'] = [False]
-        self._cara['resPA'] = 1
-        self._cara['resPM'] = 1
-        self._cara['elementalRes'] = {'fire':1, 'water':1, 'earth':1,
-                                      'wind':1, 'holy':1, 'unholy':1,
-                                      'neutral':1}
-
-        self._cara['xp']={'current':0,'on_damage':1, 'on_kill':100}
+    def FromJSON(self, file):
+        with open(os.path.join('json', 'character', file+'.json'), 'r') as file:
+            data = json.load(file)['character']
+        self._cara = data['cara']
+        self._sprite = {'values': data['sprite']}
+        self._sheet_name = data['sheet']
+        self.CreateSprite()
+        self._skills = [Skill.Skill.Initialization(skill) for skill in data['skill']]
 
     def ToJSON(self):
         """Write the character in a .json
@@ -68,7 +53,8 @@ class Character():
         Output:
         Nothing, but ._sprite is update"""
         for key, value in self._sprite['values'].items():
-            print(key, value)
+            if key in ['cols', 'rows']:
+                continue
             if key == 'portrait':
                 self._sprite[key] = pygame.image.load(value)
             elif len(value) == 2:
@@ -76,31 +62,6 @@ class Character():
             else:
                 self._sprite[key] = self.AddSprite(value[0])
 
-
-
-    def Initialization(name, team, tile_size = None, pos_tile = False, ia = False, leader = False):
-        """
-        Input:
-        name - string: name of the character
-        team - int: 1 for the player, 2 for opponent
-        tile_size - optional int
-        pos_tile - optional tuple of int
-        ia - optional string: False if the character is controlled by the player
-        leader - optional boolean
-
-        Output:
-        self - character
-        """
-        if name == 'Anna':
-            self = Anna()
-        elif name == 'Henry':
-            self = Henry()
-        self._ia = ia
-        self._leader = leader
-        self._team = team
-        if pos_tile:
-            self.UpdatePos(tile_size, pos_tile = pos_tile)
-        return self
 
     def AddSprite(self, begin, end=False):
         """Make a sprite (animated or not) from a sheet
@@ -113,10 +74,12 @@ class Character():
         Output:
         obj - a sprite"""
         print('AddSpriteCharacter:', begin, end)
+        rows = self._sprite['values']['rows']
+        cols = self._sprite['values']['cols']
         if not end:
             end = begin+1
         fullname = join('res', 'sprite', self._cara['name'], str(self._sheet_name) + '.png')
-        perso = pyganim.getImagesFromSpriteSheet(fullname,cols=self._cols,rows= self._rows)[begin:end]
+        perso = pyganim.getImagesFromSpriteSheet(fullname,cols=cols,rows= rows)[begin:end]
         if end > begin+1:
             frames = list(zip(perso, [200]*(end-begin)))
             obj = pyganim.PygAnimation(frames)
@@ -143,8 +106,10 @@ class Character():
             R = 255*(1-percentage)*2
             G = 255
         B = 0
-        self._lifebar1 = Highlight.Highlight(height_life, width, 255, (R, G, B), self._pixel[0], self._pixel[1])
-        self._lifebar2 = Highlight.Highlight(height_void, width, 255, (0, 0, 0), self._pixel[0]+height_life, self._pixel[1])
+        self._lifebar1 = Highlight.Highlight(height_life, width, 255, (R, G, B),
+                                             self._pixel[0], self._pixel[1])
+        self._lifebar2 = Highlight.Highlight(height_void, width, 255, (0, 0, 0),
+                                             self._pixel[0]+height_life, self._pixel[1])
 
     def UpdatePos(self, tile_size, pos_pixel = None, pos_tile = None):
         """Update pos_pixel or pos_tile
@@ -209,7 +174,8 @@ class Character():
             self._cara['PV'] = min(self._cara['PV_max'], max(0,self._cara['PV']-effect))
         else:# It's a debuff, a buff, or anything else
             self._cara['effects'].append(effect)
-            self._cara[effect._properties] = max(0, self._cara[effect._properties]-effect._power)
+            v = max(0, self._cara[effect._properties]-effect._power)
+            self._cara[effect._properties] = v
         if self._cara['PV'] == 0:
             self._dead = True
             xp += self._cara['xp']['on_kill']
@@ -324,7 +290,8 @@ class Character():
                     self._cara['effects'][i]._since += 1
                 else:
                     self._cara['effects'][i]._since += 1
-                    self._cara[effect._properties] = max(0, self._cara[effect._properties]-effect._power)
+                    v = max(0, self._cara[effect._properties]-effect._power)
+                    self._cara[effect._properties] = v
 
     def IA_Action(self, screen):
         """Execute the ia
@@ -345,7 +312,8 @@ class Character():
         path, skill_target, tiles_target = False, False, False
         for skill in self._skills:
             for tile in reachable:
-                targets = set(skill.GetAimable(tile, screen._map_data, screen._tile_size, self._team))
+                targets = set(skill.GetAimable(tile, screen._map_data,
+                                               screen._tile_size, self._team))
                 for target in targets:
                     dmgs = 0
                     affected = []
@@ -434,7 +402,6 @@ class Character():
             screen.refresh(force = True)
         screen._objects[self._index[0]][0] = static
         screen._objects[self._index[0]][2] = 'sprite'
-        print('final pos:', self._pixel, self._pixel[0]/screen._tile_size, self._pixel[1]/screen._tile_size)
         screen.UpdateStatus(self)
 
 
@@ -462,7 +429,8 @@ class Character():
             PM = self._cara['PM'] - d
             circle = (x-1, y), (x+1, y), (x, y-1), (x, y+1)
             for tile in circle:
-                d_to = int(Map.CheckProperties((tile[0]*tile_size, tile[1]*tile_size), 'slowness', screen._map_data,tile_size))
+                d_to = int(Map.CheckProperties((tile[0]*tile_size, tile[1]*tile_size),
+                                               'slowness', screen._map_data,tile_size))
                 if tile[0] < 0 or tile[0] >= screen._width//tile_size:
                     transparent = False  # Outside of screen
                 elif tile[1] < 0 or tile[1] >= screen._width//tile_size:
@@ -475,63 +443,3 @@ class Character():
                 if transparent and d_to != -1 and  d+d_to <= PM:  # Obstacle on the path
                     queue[(tile[0], tile[1])] = (d+d_to, path+[(x, y)])
         return reachable
-
-
-class Anna(Character):
-    def __init__(self, save=None):
-        Character.__init__(self)
-        self._id = 1
-        self._sheet_name = 'Anna_sheet'
-        self._cara['name'] = 'Anna'
-        self._cara['sex'] = 'f'
-        self._rows, self._cols = 144, 12
-        portrait = join('res', 'sprite', self._cara['name'], 'Anna_portrait.png')
-        self._sprite['values'] = {'standing':(0,4), 'static':(0,),
-                                 'attacking':(12,16), 'walking_left':(24,28),
-                                 'static_left':(24,), 'walking_right':(36,40),
-                                'static_right':(36,), 'walking_down':(48,52),
-                                'static_down':(48,), 'walking_up':(60,64),
-                                'static_up':(60,), 'portrait':portrait}
-        self.CreateSprite()
-        if save:
-            pass
-        else:
-            skills = ['Execution', 'Horizontal', 'Vertical']
-            self._skills = [Skill.Skill.Initialization(skill) for skill in skills]
-            self._cara['PV'], self._cara['PV_max'] = 100, 100
-            self._cara['PA'], self._cara['PA_max'] = 100, 100
-            self._cara['PM'], self._cara['PM_max'] = 100, 100
-            self._cara['strength'] = 50
-            self._cara['speed'] = 100
-            self._cara['xp']['current'] = 99
-        self.ToJSON()
-
-class Henry(Character):
-    def __init__(self, save=None):
-        Character.__init__(self)
-        self._sprite = {}
-        self._id = 2
-        self._sheet_name = 'Henry_sheet'
-        self._cara['name'] = 'Henry'
-        self._cara['sex'] = 'm'
-        self._rows, self._cols = 80, 12
-        portrait = join('res', 'sprite', self._cara['name'], 'Henry_portrait.png')
-        self._sprite['values'] = {'standing':(388,392), 'static':(388,),
-                                 'attacking':(400,404), 'walking_left':(412,416),
-                                 'static_left':(412,), 'walking_right':(424,428),
-                                'static_right':(424,), 'walking_down':(436,440),
-                                'static_down':(436,), 'walking_up':(448,452),
-                                'static_up':(448,), 'portrait':portrait}
-        self.CreateSprite()
-        if save:
-            pass
-        else:
-            skills = ['Apocalypse', 'Horizontal']
-            self._skills = [Skill.Skill.Initialization(skill) for skill in skills]
-            self._cara['PV'], self._cara['PV_max'] = 100, 100
-            self._cara['PA'], self._cara['PA_max'] = 100, 100
-            self._cara['PM'], self._cara['PM_max'] = 100, 100
-            self._cara['defense'] = 30
-            self._cara['speed'] = 80
-
-        self.ToJSON()

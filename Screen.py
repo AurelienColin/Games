@@ -92,7 +92,6 @@ class Screen():
     def AddSprite(self, sprite, pos):
         if str(type(sprite))=="<class 'pyganim.PygAnimation'>":
             self._objects.append([sprite, pos, 'character'])
-            print(sprite)
         else:
             self._objects.append([sprite, pos, 'sprite'])
         print('add sprite at:', pos)
@@ -117,9 +116,12 @@ class Screen():
         prec = len(self._objects)
         if box._imgs:
             for img in box._imgs:
-                self._objects.append([img[0], (pos[0]+img[1][0], pos[1]+img[1][1]), 'sprite'])
+                self._objects.append([img[0], (pos[0]+img[1][0],
+                                      pos[1]+img[1][1]), 'sprite'])
         for i, text in enumerate(box._text):
-            self._objects.append([text._string, (text._pixel[0] + pos[0], text._pixel[1] + pos[1]), 'text', text._text])
+            self._objects.append([text._string, (text._pixel[0] + pos[0],
+                                                 text._pixel[1] + pos[1]),
+ 'text', text._text])
         return [i for i in range(prec-1, len(self._objects))]
 
     def AddHighlight(self, s):
@@ -193,7 +195,7 @@ class Screen():
     def IniChar(self, characters):
         self._characters = []
         for character in characters:
-            char = Character.Character.Initialization(character[0], character[2],
+            char = Character.Character(character[0], character[2],
                                                       tile_size = self._tile_size,
                                                       pos_tile = character[1],
                                                       ia = character[3],
