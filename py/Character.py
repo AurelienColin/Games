@@ -25,13 +25,13 @@ class Character():
             self._tile, self._px = None, None
 
     def FromJSON(self, file):
-        with open(os.path.join('json', 'character', file+'.json'), 'r') as file:
+        with open(os.path.join('..', 'res','json', 'character', file+'.json'), 'r') as file:
             data = json.load(file)['character']
         self._cara = data['cara']
         self._sprite = {'values': data['sprite']}
         self._sheet_name = data['sheet']
         self.CreateSprite()
-        self._skills = [Skill.Skill.Initialization(skill) for skill in data['skill']]
+        self._skills = [Skill.Skill(skill) for skill in data['skill']]
 
     def ToJSON(self):
         """Write the character in a .json
@@ -40,7 +40,7 @@ class Character():
 
         Output :
         Nothing, but a .json est written"""
-        skills = [skill._name for skill in self._skills]
+        skills = [skill._cara['name'] for skill in self._skills]
         temp = {'cara':self._cara, 'sprite':self._sprite['values'],
                 'skill':skills, 'sheet':self._sheet_name}
         util.WriteJSON({'character':temp}, self._cara['name'])
@@ -56,6 +56,7 @@ class Character():
             if key in ['cols', 'rows']:
                 continue
             if key == 'portrait':
+                value = os.path.join('..', 'res','sprite', self._cara['name'], value)
                 self._sprite[key] = pygame.image.load(value)
             elif len(value) == 2:
                 self._sprite[key] = self.AddSprite(value[0], value[1])
@@ -78,7 +79,7 @@ class Character():
         cols = self._sprite['values']['cols']
         if not end:
             end = begin+1
-        fullname = join('res', 'sprite', self._cara['name'], str(self._sheet_name) + '.png')
+        fullname = join('..', 'res', 'sprite', self._cara['name'], str(self._sheet_name) + '.png')
         perso = pyganim.getImagesFromSpriteSheet(fullname,cols=cols,rows= rows)[begin:end]
         if end > begin+1:
             frames = list(zip(perso, [200]*(end-begin)))
@@ -174,6 +175,7 @@ class Character():
             self._cara['PV'] = min(self._cara['PV_max'], max(0,self._cara['PV']-effect))
         else:# It's a debuff, a buff, or anything else
             self._cara['effects'].append(effect)
+            print(effect)
             v = max(0, self._cara[effect._properties]-effect._power)
             self._cara[effect._properties] = v
         if self._cara['PV'] == 0:
@@ -257,7 +259,7 @@ class Character():
 
         self._cara = cara
         self.AddXP(skill.Affect(self, affected, tiles, screen), screen)
-        self._cara['PA'] -= skill._cost
+        self._cara['PA'] -= skill._cara['cost']
         direction = util.GetDirection(self._tile, tile_target)
         if direction == 0:
             static = self._sprite['static_up']

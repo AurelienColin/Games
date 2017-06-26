@@ -59,7 +59,7 @@ class Level():
 
     def ModeVN(self, filename):
         """Launch action loop for a visual novel"""
-        fullname = join('res', 'script', filename)
+        fullname = join('..', 'res', 'script', filename)
         file = open(fullname)
         lines = file.readlines()
         file.close()

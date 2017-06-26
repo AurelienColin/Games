@@ -1,0 +1,26 @@
+{
+    "skill": {
+        "cara": {
+			"name":"Vertical",
+			"AOE":"orthogonal",
+			"size":2,
+			"cost":4,
+			"damage":20,
+			"range":3,
+			"perce":false,
+			"type":"physic",
+			"ele":"neutral",
+			"hit":0.8
+			},
+        "sprite":{
+			"rows":1,
+			"cols":11,
+			"action": [
+				0,
+				10
+			]
+		},
+		 "sheet": "fire_4",
+		"effects": null
+	}
+}

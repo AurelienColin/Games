@@ -8,7 +8,7 @@
             "PV": 100,
             "PV_max": 100,
             "avoid": 1,
-            "defense": 30,
+            "defense": 1,
             "effects": [
                 false
             ],
@@ -32,68 +32,69 @@
             "hit": 1,
             "level": 1,
             "magic": 1,
-            "name": "Henry",
+            "name": "Anna",
             "object": 1,
             "resPA": 1,
             "resPM": 1,
             "resistance": 1,
-            "sex": "m",
-            "speed": 80,
-            "strength": 1,
+            "sex": "f",
+            "speed": 100,
+            "strength": 50,
             "type": "neutral",
             "xp": {
-                "current": 0,
+                "current": 99,
                 "on_damage": 1,
                 "on_kill": 100
             }
         },
-        "sheet": "Henry_sheet",
+        "sheet": "Anna_sheet",
         "skill": [
-            "Apocalypse",
-            "Horizontal"
+            "Execution",
+            "Horizontal",
+            "Vertical"
         ],
         "sprite": {
             "attacking": [
-                400,
-                404
+                12,
+                16
             ],
             "cols": 12,
-            "portrait": "res\\sprite\\Henry\\Henry_portrait.png",
-            "rows": 80,
+            "portrait": "Anna_portrait.png",
+            "rows": 144,
             "standing": [
-                388,
-                392
+                0,
+                4
             ],
             "static": [
-                388
+                0
             ],
             "static_down": [
-                436
+                48
             ],
             "static_left": [
-                412
+                24
             ],
             "static_right": [
-                424
+                36
             ],
             "static_up": [
-                448
+                60
             ],
             "walking_down": [
-                436,
-                440
+                48,
+                52
             ],
             "walking_left": [
-                412,
-                416
+                24,
+                28
             ],
             "walking_right": [
-                424,
-                428
+                36,
+                40
             ],
             "walking_up": [
-                448,
-                452
+                60,
+                64
             ]
         }
     }

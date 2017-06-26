@@ -24,7 +24,7 @@ class Screen():
         self._height = height
         self._tile_size = tile_size
         self._animation_length = self._tile_size
-        circle = pygame.image.load(join('res', 'sprite', 'circle.png'))
+        circle = pygame.image.load(join('..','res', 'sprite', 'circle.png'))
         self._objects = [[circle, (0, 0), 'hide']]
         self._portrait = False
         self._status = False
@@ -106,7 +106,7 @@ class Screen():
         return bar1_index-1, bar1_index, bar2_index
 
     def AddMap(self, filename):
-        fullname = join('res', 'map', filename)
+        fullname = join('..', 'res', 'map', filename)
         self._objects.append([Map.TiledMap(fullname), (0, 0), 'tiled_map'])
         self._objects[-1][0].run(self)
         return len(self._objects)-1

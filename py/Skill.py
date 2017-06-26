@@ -7,42 +7,55 @@ import random
 from os.path import join
 import pyganim
 import pygame
+import json
 
 class Skill():
-    def __init__(self):
-        self._char_effects = {}
-        self._damage = 0
-        self._heal = 0
-        self._hit = 0.8
-        self._tile_effects = {}
-        self._ele = 'neutral'
+    def __init__(self, file):
+        self.FromJSON(file)
         self._sprite = self.AddSprite('fire_4', 1, 11, 0, 10)
 
-    def Initialization(name):
-        """
-        Input:
-        name - string
+    def FromJSON(self, file):
+        print(file)
+        with open(join('..', 'res','json', 'skill', file+'.json'), 'r') as file:
+            data = json.load(file)['skill']
+        self._cara = data['cara']
+        self._sprite = {'values': data['sprite']}
+        self._sheet_name = data['sheet']
+        self.CreateSprite()
+        self._effects = {'values':data['effects'], 'effects':[]}
+        if self._effects['values']:
+            for e in self._effects['values']:
+                    print(e, type(e))
+                    effect = Effect.Effect(e['type'], e['power'], e['duration'])
+                    print(effect)
+                    self._effects['effects'].append(effect)
+            print(self._effects['effects'])
 
-        Output:
-        self - skill"""
-        if name == 'Execution':
-            self = Execution()
-        elif name == 'Vertical':
-            self = Vertical()
-        elif name == 'Horizontal':
-            self = Horizontal()
-        elif name == 'Apocalypse':
-            self = Apocalypse()
-        else:
-            self = None
-        return self
+    def ToJSON(self):
+        """Write the character in a .json
+        Input :
+        self - a character
+
+        Output :
+        Nothing, but a .json est written"""
+        temp = {'cara':self._cara, 'sprite':self._sprite['values'],
+                'sheet':self._sheet_name, 'effects':self._effects}
+        util.WriteJSON({'character':temp}, self._cara['name'])
+
+    def CreateSprite(self):
+        name = self._sheet_name
+        rows = self._sprite['values']['rows']
+        cols = self._sprite['values']['cols']
+        begin, end = self._sprite['values']['action']
+        self._sprite['action'] = self.AddSprite(name, rows, cols, begin, end)
+        pass
 
     def AddSprite(self, name, rows, cols, begin, end):
         """Make a sprite (animated or not) from a sheet
 
         Output:
         obj - a sprite"""
-        fullname = join('res', 'sprite', 'effect', name + '.png')
+        fullname = join('..', 'res', 'sprite', 'effect', name + '.png')
         perso = pyganim.getImagesFromSpriteSheet(fullname,cols=cols,rows=rows)[begin:end]
         if end > begin+1:
             frames = list(zip(perso, [100]*(end-begin)))
@@ -84,33 +97,33 @@ class Skill():
         Output:
         final_tiles - list of tuple of two int"""
         tiles = [tile_pos]
-        if self._size == 1:
+        if self._cara['size'] == 1:
             pass
-        elif not self._AOE:
-            for i in range(self._size):
+        elif not self._cara['AOE']:
+            for i in range(self._cara['size']):
                 j = 0
-                while j+i < self._size:
+                while j+i < self._cara['size']:
                     tiles.append([tile_pos[0]-i, tile_pos[1]-j])
                     tiles.append([tile_pos[0]+i, tile_pos[1]-j])
                     tiles.append([tile_pos[0]-i, tile_pos[1]+j])
                     tiles.append([tile_pos[0]+i, tile_pos[1]+j])
                     j+=1
-        elif self._AOE == 'parallel':
+        elif self._cara['AOE'] == 'parallel':
             if tile_pos[0] != character._tile[0]:
-                for i in range(self._size):
+                for i in range(self._cara['size']):
                     tiles.append([tile_pos[0], tile_pos[1]+i])
                     tiles.append([tile_pos[0], tile_pos[1]-i])
             elif tile_pos[1] != character._tile[1]:
-                for i in range(self._size):
+                for i in range(self._cara['size']):
                     tiles.append([tile_pos[0]+i, tile_pos[1]])
                     tiles.append([tile_pos[0]-i, tile_pos[1]])
-        elif self._AOE == 'orthogonal':
+        elif self._cara['AOE'] == 'orthogonal':
             if tile_pos[0] != character._tile[0]:
-                for i in range(self._size):
+                for i in range(self._cara['size']):
                     tiles.append([tile_pos[0]-i, tile_pos[1]])
                     tiles.append([tile_pos[0]+i, tile_pos[1]])
             elif tile_pos[1] != character._tile[1]:
-                for i in range(self._size):
+                for i in range(self._cara['size']):
                     tiles.append([tile_pos[0], tile_pos[1]+i])
                     tiles.append([tile_pos[0], tile_pos[1]-i])
         final_tiles = []
@@ -162,36 +175,30 @@ class Skill():
             else:
                 direction = util.GetDirection(affected._tile, current_character._aiming)
             if direction - affected._direction in [-2,2]:
-                dmg = self._damage * 1.5
+                dmg = self._cara['damage'] * 1.5
                 affected._cara['avoid'] = int(affected._cara['avoid']*0.75)
             elif direction - affected._direction in [-3,-1,1,3]:
-                dmg = self._damage * 1.25
+                dmg = self._cara['damage'] * 1.25
                 affected._cara['avoid'] = int(affected._cara['avoid']*0.5)
             else:
-                dmg = self._damage
-            if self._type == 'magic':
+                dmg = self._cara['damage']
+            if self._cara['type'] == 'magic':
                 dmg = current_character.MagicalDmg(dmg)
-                dmg = affected.MagicalReduction(dmg, self._ele)
-            elif self._type == 'physic':
+                dmg = affected.MagicalReduction(dmg, self._cara['ele'])
+            elif self._cara['type'] == 'physic':
                 dmg = current_character.PhysicalDmg(dmg)
-                dmg = affected.PhysicalReduction(dmg, self._ele)
+                dmg = affected.PhysicalReduction(dmg, self._cara['ele'])
             else:    # skill._type == 'heal'
-                dmg = -current_character.MagicalDmg(self._damage)
-            hit = affected.getCara('avoid')/current_character.getCara('hit')*self._hit
+                dmg = -current_character.MagicalDmg(self._cara['damage'])
+            hit = affected.getCara('avoid')/current_character.getCara('hit')*self._cara['hit']
             r = random.random()
             affected._cara = cara
             if r < hit:
                 animation_tiles.append(affected._tile)
                 xp += affected.Affect(dmg, screen)
-                for effect in self._char_effects:
-                    r = ['PA', 'PM']
-                    if effect._properties in r and random.random() < affected.getCara('res'+effect._properties):
-                        xp += affected.Affect(effect, screen)
-                    else:
-                        xp += affected.Affect(effect, screen)
-        for effect in self._tile_effects:
-            for tile in tiles:
-                screen._tile_effect.append([tile, effect])
+                print('effects:', self._effects)
+                for effect in self._effects['effects']:
+                    xp += affected.Affect(effect, screen)
         animations = []
         print('launch animation to:', animation_tiles)
         for tile in animation_tiles:
@@ -219,7 +226,7 @@ class Skill():
         list of tuple of two int"""
         map_data, tile_size = screen._map_data, screen._tile_size
         aimable = set()
-        scope = self._range
+        scope = self._cara['range']
         p = 'slowness'
         for x in range(max(pos[0]-scope, 0), pos[0]+scope+1):
             diff_x = x-pos[0]
@@ -227,7 +234,7 @@ class Skill():
                 diff_y = y-pos[1]
                 transparent = True
 
-                if (self._AOE == 'parallel' or self._AOE == 'orthogonal') and (x != pos[0] and y!= pos[1]):
+                if (self._cara['AOE'] == 'parallel' or self._cara['AOE'] == 'orthogonal') and (x != pos[0] and y!= pos[1]):
                     transparent = False
                 elif abs(diff_x) + abs(diff_y) > scope:
                     transparent = False
@@ -247,7 +254,7 @@ class Skill():
                         y_range = [y for i in range(R+1)]
                     tile_range = [(int(x_range[i]+0.5), int(y_range[i]+0.5)) for i in range(R)]
                     for x_c, y_c in tile_range:
-                        if not self._perce:
+                        if not self._cara['perce']:
                             for character in screen._characters:
                                 if character._tile == (x_c, y_c) and character._team != current_character._team:
                                     transparent = False
@@ -260,61 +267,6 @@ class Skill():
         current_character._aiming = pos
         return list(aimable)
 
-
-
-class Horizontal(Skill):
-    def __init__(self):
-        Skill.__init__(self)
-        self._name = 'Horizontal'
-        self._AOE = 'parallel'
-        self._size = 2
-        self._cost = 4
-        self._damage = 10
-        self._range = 2
-        self._sprite_sheet = None
-        self._perce = False
-        self._type = 'physic'
-
-class Vertical(Skill):
-    def __init__(self):
-        Skill.__init__(self)
-        self._name = 'Vertical'
-        self._AOE = 'orthogonal'
-        self._size = 2
-        self._cost = 4
-        self._damage = 20
-        self._range = 3
-        self._sprite_sheet = None
-        self._perce = False
-        self._type = 'physic'
-
-class Execution(Skill):
-    def __init__(self):
-        Skill.__init__(self)
-        self._name = 'Execution'
-        self._AOE = None
-        self._size = 1
-        self._cost = 3
-        self._damage = 30
-        self._range = 5
-        self._sprite_sheet = None
-        self._perce = False
-        self._type = 'physic'
-
-class Apocalypse(Skill):
-    def __init__(self):
-        Skill.__init__(self)
-        self._name = 'Apocalypse'
-        self._AOE = None
-        self._size = 2
-        self._cost = 4
-        self._damage = 10
-        self._range = 5
-        self._sprite_sheet = None
-        self._perce = False
-        self._char_effects = [Effect.Effect('PA', 1, 2)]
-        self._tile_effects = [Effect.Effect('PV', 1, 5)]
-        self._type = 'physic'
 
 def ListSkills():
     return set(['Horizontal', 'Vertical', 'Execution', 'Apocalypse'])

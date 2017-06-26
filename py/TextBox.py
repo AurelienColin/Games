@@ -5,7 +5,7 @@ import Map
 
 class TextBox():
     def __init__(self, box_file, texts, width, height, pos, size=20, color=(0,0,0)):
-        fullname = join('res', 'textbox', box_file)
+        fullname = join('..', 'res', 'textbox', box_file)
         self._text = []
         self._string = []
         for j, text in enumerate(texts):
@@ -55,7 +55,7 @@ class MainMenu(TextBox):
 
 class SkillMenu(TextBox):
     def __init__(self, character):
-        skills = [skill._name for skill in character._skills]
+        skills = [skill._cara['name'] for skill in character._skills]
         string = [';'.join(skills)]
         name = "TextBox_ExtraLarge.png"
         TextBox.__init__(self, name, string, 150, 150, [(30, 30)])
@@ -80,12 +80,12 @@ class Status(TextBox):
 
 class SkillDetails(TextBox):
     def __init__(self, skill, character):
-        if skill._type == 'magic':
-            dmg = character.MagicalDmg(skill._damage)
-        elif skill._type == 'physic':
-            dmg = character.PhysicalDmg(skill._damage)
-        hit = str(int(skill._hit*character.getCara('hit')*100))
-        data = [skill._name, 'Type: ' + skill._type, 'PA: ' + str(skill._cost),
+        if skill._cara['type'] == 'magic':
+            dmg = character.MagicalDmg(skill._cara['damage'])
+        elif skill._cara['type'] == 'physic':
+            dmg = character.PhysicalDmg(skill._cara['damage'])
+        hit = str(int(skill._cara['hit']*character.getCara('hit')*100))
+        data = [skill._cara['name'], 'Type: ' + skill._cara['type'], 'PA: ' + str(skill._cara['cost']),
                 'Dmg: ' + str(int(dmg)), 'Hit: ' + hit]
         string = [';'.join(data)]
         name = "TextBox_ExtraLarge.png"
@@ -148,7 +148,7 @@ class StatusBox(TextBox):
                     + str(u(c['resistance'])) + ';Spd: ' + str(u(c['speed'])) \
                     + ';Hit: ' + str(u(c['hit'])) + ';Avd: ' + str(u(c['avoid']))
         for skill in character._skills[:5]:
-            string[3] +=skill._name + ';'
+            string[3] +=skill._cara['name'] + ';'
         string[3] = string[3][:-1]  # Remove the last ';'
         name = 'TextBox_ExtraLarge.png'
         TextBox.__init__(self, name, string, 300, 300, pos, size=size)

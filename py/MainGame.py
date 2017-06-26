@@ -74,7 +74,7 @@ def AimingLoop(current_character, screen, skill):
                 sys.exit()
             elif event.type == KEYDOWN:
                 change = True
-                if event.key == K_RETURN and current_character._cara['PA'] > skill._cost:
+                if event.key == K_RETURN and current_character._cara['PA'] > skill._cara['cost']:
                     current_character.Attack(skill, red, screen, tile)
                     end = True
                     screen.UpdateStatus(current_character)
@@ -142,7 +142,7 @@ def MenusLoop(menu, current_character, screen):
                     choice = screen._objects[menu_index[0]][0]._string[selection-1]
                     if choice in skills: # We use a skill
                         for skill in current_character._skills:
-                            if choice == skill._name:
+                            if choice == skill._cara['name']:
                                 print('Aim with skill', choice)
                                 screen.QuitMenu(menu_index, selection_id)
                                 selection = 1
@@ -354,7 +354,7 @@ def VNLoop(screen, lines):
                     x = screen._height+x
                 if y < 0:
                     y = screen._width+y
-                img = pygame.image.load(join('res', 'sprite',
+                img = pygame.image.load(join('..', 'res', 'sprite',
                                         file.split('_')[0], file))
                 if transf == 'sym':
                     sprite = pygame.transform.flip(img, True, False)
