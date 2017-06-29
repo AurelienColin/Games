@@ -20,7 +20,7 @@ class Character():
         self._direction = 2
         self.FromJSON(file)
         if pos_tile:
-            self.UpdatePos(tile_size, pos_tile = pos_tile)
+            self.UpdatePos(tile_size, pos_tile = tuple(pos_tile))
         else:
             self._tile, self._px = None, None
 

@@ -4,11 +4,26 @@ import pygame
 import sys
 from MainGame import *
 from os.path import join
+import json
 
 class Level():
-    def __init__(self, screen):
+    def __init__(self, screen, file):
+
+        with open(join('..', 'res','json', 'level', file+'.json'), 'r') as file:
+            data = json.load(file)['level']
+        map_index = screen.AddMap(data['map'])
+        screen._map_data = screen._objects[map_index][0].renderer.tmx_data
+
         self._map_data = screen._map_data
         self._screen = screen
+
+        self.ModeVN(data['script'])
+        characters = data['characters']
+        screen.IniChar(characters)
+
+        ini_tiles = data['initial_tiles']
+        PlacementLoop(ini_tiles, self._screen)
+        self._victory_condition = data['victory_condition']
 
     def CheckVictoryCondition(self):
         """Check if a victory is fulfilled
@@ -30,12 +45,10 @@ class Level():
                     playerVictory = False
         if playerVictory:
             print('You win')
-            self._screen._objects = []
             self._screen.refresh()
             sys.exit()
         if opponentVictory:
             print('Game Over')
-            self._screen._objects = []
             self._screen.refresh()
             sys.exit()
 
@@ -126,18 +139,3 @@ class Level():
             level.CheckVictoryCondition()
             return self.NextTurn(turns, turn)
         return turn
-
-class Level_0(Level):
-    def __init__(self, screen):
-        map_index = screen.AddMap("TestLevel.tmx")
-        screen._map_data = screen._objects[map_index][0].renderer.tmx_data
-        Level.__init__(self, screen)
-
-        self.ModeVN('level0.txt')
-        characters = [('Anna', None, 1, False, True),('Henry', None, 1, False, True),
-                      ('Henry', (3, 3), 2, False, True)]
-        screen.IniChar(characters)
-
-        ini_tiles = [(4, 4), (10, 5), (3, 2)]
-        PlacementLoop(ini_tiles, self._screen)
-        self._victory_condition = 'destroy'

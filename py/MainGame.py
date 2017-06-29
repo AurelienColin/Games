@@ -382,5 +382,5 @@ if __name__ == '__main__':
     tile_size = 29
     pygame.init()
     screen = Screen.Screen(screen_height, screen_width, tile_size)
-    level = Level.Level_0(screen)
+    level = Level.Level(screen, 'level0')
     level.ModeTRPG()

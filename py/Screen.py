@@ -43,10 +43,10 @@ class Screen():
             self._objects[0][2] = 'show'
 
     def refresh(self, force = False):
-        if not force:
+        """if not force:
             if self._previous == self._objects:
                 return
-            self._previous = list(self._objects)  # list() used to disting previous hand object
+            self._previous = list(self._objects)"""  # list() used to disting previous hand object
         circle, circle_pos, show = self._objects[0]
         circle_pos = (circle_pos[0]-4, circle_pos[1])
         for element in self._objects:
@@ -195,11 +195,12 @@ class Screen():
     def IniChar(self, characters):
         self._characters = []
         for character in characters:
-            char = Character.Character(character[0], character[2],
+            print(character)
+            char = Character.Character(character['name'], character['team'],
                                        tile_size = self._tile_size,
-                                       pos_tile = character[1],
-                                        ia = character[3],
-                                        leader = character[4])
-            if character[1]:
+                                       pos_tile = character['initial'],
+                                        ia = character['ia'],
+                                        leader = character['leader'])
+            if character['initial']:
                 char._index = self.AddCharacter(char, 'standing')
             self._characters.append(char)

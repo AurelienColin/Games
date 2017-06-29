@@ -11,9 +11,9 @@ class Highlight():
 def HighlightTiles(tile_size, tiles, alpha, color):
     highlighted = {}
     if type(tiles) == list:
-        for pos in tiles:
-            highlighted[pos] = Highlight(tile_size, tile_size, alpha, color,
-                                         pos[0]*tile_size, pos[1]*tile_size)
+        for x, y in tiles:
+            highlighted[(x, y)] = Highlight(tile_size, tile_size, alpha, color,
+                                         x*tile_size, y*tile_size)
     else:
         highlighted[tiles] = Highlight(tile_size, tile_size, alpha, color,
                                        tiles[0]*tile_size, tiles[1]*tile_size)
