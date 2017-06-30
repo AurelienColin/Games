@@ -1,7 +1,6 @@
 import pygame
 from pytmx import *
 from pytmx.util_pygame import load_pygame
-from os.path import join
 
 class TiledRenderer(object):
     """

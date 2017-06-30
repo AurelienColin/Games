@@ -1,13 +1,10 @@
-import Highlight
-import Map
-import numpy as np
-import util
-import Effect
+from . import Highlight, Map, util, Effect
 import random
 from os.path import join
 import pyganim
 import pygame
 import json
+import numpy as np
 
 class Skill():
     def __init__(self, file):
@@ -15,8 +12,7 @@ class Skill():
         self._sprite = self.AddSprite('fire_4', 1, 11, 0, 10)
 
     def FromJSON(self, file):
-        print(file)
-        with open(join('..', 'res','json', 'skill', file+'.json'), 'r') as file:
+        with open(join('res','json', 'skill', file+'.json'), 'r') as file:
             data = json.load(file)['skill']
         self._cara = data['cara']
         self._sprite = {'values': data['sprite']}
@@ -25,11 +21,8 @@ class Skill():
         self._effects = {'values':data['effects'], 'effects':[]}
         if self._effects['values']:
             for e in self._effects['values']:
-                    print(e, type(e))
                     effect = Effect.Effect(e['type'], e['power'], e['duration'])
-                    print(effect)
                     self._effects['effects'].append(effect)
-            print(self._effects['effects'])
 
     def ToJSON(self):
         """Write the character in a .json
@@ -55,7 +48,7 @@ class Skill():
 
         Output:
         obj - a sprite"""
-        fullname = join('..', 'res', 'sprite', 'effect', name + '.png')
+        fullname = join('res', 'sprite', 'effect', name + '.png')
         perso = pyganim.getImagesFromSpriteSheet(fullname,cols=cols,rows=rows)[begin:end]
         if end > begin+1:
             frames = list(zip(perso, [100]*(end-begin)))
@@ -196,7 +189,6 @@ class Skill():
             if r < hit:
                 animation_tiles.append(affected._tile)
                 xp += affected.Affect(dmg, screen)
-                print('effects:', self._effects)
                 for effect in self._effects['effects']:
                     xp += affected.Affect(effect, screen)
         animations = []

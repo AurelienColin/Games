@@ -1,7 +1,9 @@
 {
     "level": {
         "map":"TestLevel.tmx",
-		"victory_condition":"destroy",
+		"victories":[{
+			"condition":"destroy",
+			"next_level":"level0"}],
 		"script":"level0.txt",
 		"characters":[{
 			"name":"Anna",
@@ -19,8 +21,9 @@
 			"name":"Henry",
 			"initial":[3,3],
 			"team":2,
-			"ia":null,
+			"ia":"defensif",
 			"leader":false
 		}],
 		"initial_tiles":[[5, 5], [10,5], [3,2]]
-		}}
+		}
+}

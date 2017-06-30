@@ -1,16 +1,11 @@
-import pyganim
 from os.path import join
-import Highlight
-import Skill
-import pygame
-import util
-import Map
-import TextBox
+from . import Highlight, Skill, util, Map, TextBox
 import sys
 import json
-import os
 from random import uniform
+import pygame
 from pygame.locals import *  # Import the event
+import pyganim
 
 class Character():
     def __init__(self, file,team = 0, tile_size = None, pos_tile = False, ia = False, leader = False):
@@ -25,7 +20,7 @@ class Character():
             self._tile, self._px = None, None
 
     def FromJSON(self, file):
-        with open(os.path.join('..', 'res','json', 'character', file+'.json'), 'r') as file:
+        with open(join('res','json', 'character', file+'.json'), 'r') as file:
             data = json.load(file)['character']
         self._cara = data['cara']
         self._sprite = {'values': data['sprite']}
@@ -56,7 +51,7 @@ class Character():
             if key in ['cols', 'rows']:
                 continue
             if key == 'portrait':
-                value = os.path.join('..', 'res','sprite', self._cara['name'], value)
+                value = join('res','sprite', self._cara['name'], value)
                 self._sprite[key] = pygame.image.load(value)
             elif len(value) == 2:
                 self._sprite[key] = self.AddSprite(value[0], value[1])
@@ -79,7 +74,7 @@ class Character():
         cols = self._sprite['values']['cols']
         if not end:
             end = begin+1
-        fullname = join('..', 'res', 'sprite', self._cara['name'], str(self._sheet_name) + '.png')
+        fullname = join('res', 'sprite', self._cara['name'], str(self._sheet_name) + '.png')
         perso = pyganim.getImagesFromSpriteSheet(fullname,cols=cols,rows= rows)[begin:end]
         if end > begin+1:
             frames = list(zip(perso, [200]*(end-begin)))
@@ -175,7 +170,6 @@ class Character():
             self._cara['PV'] = min(self._cara['PV_max'], max(0,self._cara['PV']-effect))
         else:# It's a debuff, a buff, or anything else
             self._cara['effects'].append(effect)
-            print(effect)
             v = max(0, self._cara[effect._properties]-effect._power)
             self._cara[effect._properties] = v
         if self._cara['PV'] == 0:
@@ -190,14 +184,11 @@ class Character():
         return xp
 
     def AddXP(self, xp, screen):
-        print('At the begining:', self._cara['xp']['current'], '+', xp)
-
         self._cara['xp']['current'] += xp
         while self._cara['xp']['current'] > 100:
             self._cara['xp']['current'] = self._cara['xp']['current']-100
             self.LevelUp(screen)
 
-        print('At the end:', self._cara['xp']['current'])
 
     def LevelUp(self, screen):
         pos = (int((screen._height-288)/2), int((screen._width-174)/2))
@@ -309,13 +300,11 @@ class Character():
             reachable = self.getReachable(screen)
         elif self._ia == 'passif':
             reachable = {(self._tile):(0, [])}
-            pass
         max_dmgs = 0
         path, skill_target, tiles_target = False, False, False
         for skill in self._skills:
             for tile in reachable:
-                targets = set(skill.GetAimable(tile, screen._map_data,
-                                               screen._tile_size, self._team))
+                targets = set(skill.GetAimable(tile, screen, self))
                 for target in targets:
                     dmgs = 0
                     affected = []
@@ -326,12 +315,12 @@ class Character():
                         if target_character._tile in final_tiles and target_character != self:
                             affected.append(target_character)
                     for target_character in affected:
-                            if skill._type == 'magic':
-                                dmg = self.MagicalDmg(skill._damage)
-                                dmg = target_character.MagicalReduction(dmg, skill._ele)
-                            elif skill._type == 'physic':
-                                dmg = self.PhysicalDmg(skill._damage)
-                                dmg = target_character.PhysicalReduction(dmg, skill._ele)
+                            if skill._cara['type'] == 'magic':
+                                dmg = self.MagicalDmg(skill._cara['damage'])
+                                dmg = target_character.MagicalReduction(dmg, skill._cara['ele'])
+                            elif skill._cara['type'] == 'physic':
+                                dmg = self.PhysicalDmg(skill._cara['damage'])
+                                dmg = target_character.PhysicalReduction(dmg, skill._cara['ele'])
                             if self._team == target_character._team:
                                 dmgs -= 2*dmg
                             else:

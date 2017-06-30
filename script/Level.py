@@ -1,15 +1,12 @@
-import Character
-import Screen
+from . import Loop, util, Effect, Screen
 import pygame
 import sys
-from MainGame import *
 from os.path import join
 import json
 
 class Level():
     def __init__(self, screen, file):
-
-        with open(join('..', 'res','json', 'level', file+'.json'), 'r') as file:
+        with open(join('res','json', 'level', file+'.json'), 'r') as file:
             data = json.load(file)['level']
         map_index = screen.AddMap(data['map'])
         screen._map_data = screen._objects[map_index][0].renderer.tmx_data
@@ -22,8 +19,9 @@ class Level():
         screen.IniChar(characters)
 
         ini_tiles = data['initial_tiles']
-        PlacementLoop(ini_tiles, self._screen)
-        self._victory_condition = data['victory_condition']
+        Loop.PlacementLoop(ini_tiles, self._screen)
+        self._victories = data['victories']
+        self.ModeTRPG()
 
     def CheckVictoryCondition(self):
         """Check if a victory is fulfilled
@@ -31,26 +29,32 @@ class Level():
 
         Output:
         sys.exit if a condition is fulfilled"""
-        playerVictory, opponentVictory = True, True
+        opponentVictory = True
         for character in self._screen._characters:
             if character._team == 1 and character._leader and not character._dead:
                 opponentVictory = False
-        if self._victory_condition == 'destroy':
-            for character in self._screen._characters:
-                if not character._dead and character._team == 2:
-                    playerVictory = False
-        elif self._victory_condition == 'kill leaders':
-            for character in self._scree._characters:
-                if not character._dead and character._team == 2 and character._leader:
-                    playerVictory = False
-        if playerVictory:
-            print('You win')
-            self._screen.refresh()
-            sys.exit()
         if opponentVictory:
             print('Game Over')
             self._screen.refresh()
             sys.exit()
+
+        for victory in self._victories:
+            playerVictory = True
+            next_level = victory['next_level']
+            if victory['condition'] == 'destroy':
+                for character in self._screen._characters:
+                    if not character._dead and character._team == 2:
+                        playerVictory = False
+            elif victory['condition'] == 'kill leaders':
+                for character in self._scree._characters:
+                    if not character._dead and character._team == 2 and character._leader:
+                        playerVictory = False
+            if playerVictory:
+                print('You win')
+                screen = self._screen
+                self._screen._objects = []
+                screen = Screen.Screen(screen._height, screen._width, screen._tile_size)
+                self = Level(screen, next_level)
 
     def ModeTRPG(self):
         """Launch action loop for a tactical RPG"""
@@ -60,11 +64,11 @@ class Level():
         pygame.display.update()  # Initial display
         self._screen.refresh()
         while True:
-            menu = MovementLoop(character, self._screen)
+            menu = Loop.MovementLoop(character, self._screen)
             if character._cara['PA'] == 0 and character._cara['PM'] == 0 :
                 turn = self.NextTurn(turns, turn)
                 character = turns[turn]
-            menu = MenusLoop(menu, character, self._screen)
+            menu = Loop.MenusLoop(menu, character, self._screen)
             if menu == 'End Turn' or (character._cara['PA'] == 0 and character._cara['PM'] == 0) or character._dead:
                 turn = self.NextTurn(turns, turn)
                 character = turns[turn]
@@ -72,11 +76,11 @@ class Level():
 
     def ModeVN(self, filename):
         """Launch action loop for a visual novel"""
-        fullname = join('..', 'res', 'script', filename)
+        fullname = join('res', 'script', filename)
         file = open(fullname)
         lines = file.readlines()
         file.close()
-        VNLoop(self._screen, lines)
+        Loop.VNLoop(self._screen, lines)
 
 
     def IniTurns(self):
@@ -134,8 +138,9 @@ class Level():
         self._screen.MoveCircle(pos = turns[turn]._pixel)
         self._screen.UpdateStatus(turns[turn])
         self._screen.UpdateIniList(turns, turn)
+        print('ia:', turns[turn]._ia)
         if turns[turn]._ia:
-            turns[turn].IA_Action(level._screen)
-            level.CheckVictoryCondition()
+            turns[turn].IA_Action(self._screen)
+            self.CheckVictoryCondition()
             return self.NextTurn(turns, turn)
         return turn

@@ -1,11 +1,10 @@
 import pygame
 from os.path import join
-import util
-import Map
+from . import util, Map
 
 class TextBox():
     def __init__(self, box_file, texts, width, height, pos, size=20, color=(0,0,0)):
-        fullname = join('..', 'res', 'textbox', box_file)
+        fullname = join('res', 'textbox', box_file)
         self._text = []
         self._string = []
         for j, text in enumerate(texts):

@@ -1,7 +1,6 @@
-import os
+from os.path import join
 import json
-import Character
-import Skill
+from . import Character, Skill
 
 def ObjToCoord(obj):
     """From an object, retourn it's coordinates
@@ -110,7 +109,7 @@ def ReadJSON(folder, file):
 
     Output:
     object - Could be a skill or a character"""
-    with open(os.path.join('json', folder, file+'.json'), 'r') as file:
+    with open(join('json', folder, file+'.json'), 'r') as file:
         data = json.load(file)
         if 'skill' in data.keys():
             return Skill.Skill.FromJSON(data['skill'])
@@ -125,6 +124,6 @@ def WriteJSON(data, file):
     Output:
     Nothing, but a .json is written"""
     folder = list(data.keys())[0] # Only one key aniway
-    with open(os.path.join('..', 'res', 'json', folder, file+'.json'), 'w') as file:
+    with open(join('res', 'json', folder, file+'.json'), 'w') as file:
         json.dump(data, file, sort_keys=True, indent=4)
 

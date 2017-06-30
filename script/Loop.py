@@ -2,15 +2,7 @@
 """
 import sys
 import pygame
-import Character
-import Screen
-import Map
-import TextBox
-import Skill
-import Highlight
-import util
-import Level
-import Effect
+from . import Map, TextBox, Skill, Highlight, util
 from os.path import join
 from pygame.locals import *  # Import the event
 
@@ -354,7 +346,7 @@ def VNLoop(screen, lines):
                     x = screen._height+x
                 if y < 0:
                     y = screen._width+y
-                img = pygame.image.load(join('..', 'res', 'sprite',
+                img = pygame.image.load(join('res', 'sprite',
                                         file.split('_')[0], file))
                 if transf == 'sym':
                     sprite = pygame.transform.flip(img, True, False)
@@ -377,10 +369,3 @@ def VNLoop(screen, lines):
     [screen.RemoveObject(i) for i in current_dialog + list(on_screen.values())]
     print('Dialog end')
 
-if __name__ == '__main__':
-    screen_height, screen_width = (640,640)
-    tile_size = 29
-    pygame.init()
-    screen = Screen.Screen(screen_height, screen_width, tile_size)
-    level = Level.Level(screen, 'level0')
-    level.ModeTRPG()
