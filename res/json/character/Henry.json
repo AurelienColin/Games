@@ -49,8 +49,8 @@
         },
         "sheet": "Henry_sheet",
         "skill": [
-            "Apocalypse",
-            "Horizontal"
+            ["Apocalypse", 1],
+            ["Horizontal", 1]
         ],
         "sprite": {
             "attacking": [

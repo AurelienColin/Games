@@ -26,7 +26,14 @@ class Character():
         self._sprite = {'values': data['sprite']}
         self._sheet_name = data['sheet']
         self.CreateSprite()
-        self._skills = [Skill.Skill(skill) for skill in data['skill']]
+        skills = [(Skill.Skill(skill[0]), skill[1]) for skill in data['skill']]
+        self._skills = []
+        self._next_skills = []
+        for skill, level in skills:
+            if level>0 and self._cara['level'] >= level:
+                self._skills.append(skill)
+            else:
+                self._next_skills.append([skill, level])
 
     def ToJSON(self):
         """Write the character in a .json
@@ -191,21 +198,22 @@ class Character():
 
 
     def LevelUp(self, screen):
-        pos = (int((screen._height-288)/2), int((screen._width-174)/2))
-        index = screen.AddTextBox(TextBox.LevelUp(self), pos)
-        loop = True
-        mainClock = pygame.time.Clock()
-        while loop:
-            screen.refresh()
-            mainClock.tick(30)
-            for event in pygame.event.get():
-                if event.type == QUIT:  # The game is closed
-                    pygame.quit()
-                    sys.exit()
-                if event.type == KEYDOWN:
-                    loop = False
-        for i in index:
-            screen.RemoveObject(i)
+        if self._team == 1:
+            pos = (int((screen._height-288)/2), int((screen._width-174)/2))
+            index = screen.AddTextBox(TextBox.LevelUp(self), pos)
+            loop = True
+            mainClock = pygame.time.Clock()
+            while loop:
+                screen.refresh()
+                mainClock.tick(30)
+                for event in pygame.event.get():
+                    if event.type == QUIT:  # The game is closed
+                        pygame.quit()
+                        sys.exit()
+                    if event.type == KEYDOWN:
+                        loop = False
+            for i in index:
+                screen.RemoveObject(i)
         self._cara['level'] += 1
         self._cara['PV_max'] += self._cara['growth']['PV']
         self._cara['PV'] += self._cara['growth']['PV']
@@ -214,6 +222,11 @@ class Character():
         self._cara['magic'] += self._cara['growth']['magic']
         self._cara['resistance'] += self._cara['growth']['resistance']
         self._cara['speed'] += self._cara['growth']['speed']
+        for i, obj in enumerate(self._next_skills):
+            skill, level = obj
+            if level > 0 and self._cara['level'] >= level:
+                self._skills.append(skill)
+                self._next_skills[i][1] = -1
         return
 
     def Attack(self, skill, tiles, screen, tile_target):

@@ -49,9 +49,9 @@
         },
         "sheet": "Anna_sheet",
         "skill": [
-            "Execution",
-            "Horizontal",
-            "Vertical"
+            ["Execution", 1],
+            ["Horizontal", 1],
+            ["Vertical", 1]
         ],
         "sprite": {
             "attacking": [
