@@ -193,7 +193,8 @@ class Screen():
                                        tile_size = self._tile_size,
                                        pos_tile = character['initial'],
                                         ia = character['ia'],
-                                        leader = character['leader'])
+                                        leader = character['leader'],
+                                        coef=character['coef'])
             if character['initial']:
                 char._index = self.AddCharacter(char, 'standing')
             self._characters.append(char)

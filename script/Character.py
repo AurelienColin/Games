@@ -8,7 +8,7 @@ from pygame.locals import *  # Import the event
 import pyganim
 
 class Character():
-    def __init__(self, file,team = 0, tile_size = None, pos_tile = False, ia = False, leader = False):
+    def __init__(self, file,team = 0, tile_size = None, pos_tile = False, ia = False, leader = False, coef=1):
         self._index, self._lifebar1, self._lifebar2 = None, None, None
         self._ia, self._leader, self._team = ia, leader, team
         self._dead = False
@@ -18,6 +18,11 @@ class Character():
             self.UpdatePos(tile_size, pos_tile = tuple(pos_tile))
         else:
             self._tile, self._px = None, None
+
+        for key in self._cara['growth']:
+            self._cara[key]*=coef
+        self._cara['PV_max']*=coef
+
 
     def FromJSON(self, file):
         with open(join('res','json', 'character', file+'.json'), 'r') as file:
