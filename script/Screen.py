@@ -59,6 +59,18 @@ class Screen():
                     self._display.blit(ele, position)
         pygame.display.update()
 
+    def Clean(self):
+        circle = pygame.image.load(join('res', 'sprite', 'circle.png'))
+        self._objects = [[circle, (0, 0), 'hide']]
+        self._portrait = False
+        self._status = False
+        self._status_box = -1
+        self._ini_list = False
+        self._childBox = []
+        self._tile_effect = []
+        self._map_details = []
+        self._previous = []
+
 
     def onHover(self, pos):
         if self._portrait:

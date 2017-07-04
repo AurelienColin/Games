@@ -104,7 +104,7 @@ def AimingLoop(current_character, screen, skill):
                         red[pos] = screen.AddHighlight(s[pos])
                 screen.AddTileDetails(tile)
 
-def MenusLoop(menu, current_character, screen):
+def MenusLoop(menu, screen, current_character=None):
     """Action Loop: current_character navigate in the menus
     menu - string: name of the menu entered
     current_character - character
@@ -117,7 +117,7 @@ def MenusLoop(menu, current_character, screen):
     implemented_menu = TextBox.ListMenus()
     menus = [menu]
     selection = 1
-    menu_index, selection_id = screen.OpenMenu('MainMenu')
+    menu_index, selection_id = screen.OpenMenu(menu)
     choice = None
     mainClock = pygame.time.Clock()
     while True:
@@ -132,7 +132,7 @@ def MenusLoop(menu, current_character, screen):
                 ####### We are doing something in the menu ######
                 if event.key == K_RETURN:  # We open a menu
                     choice = screen._objects[menu_index[0]][0]._string[selection-1]
-                    if choice in skills: # We use a skill
+                    if current_character and choice in skills: # We use a skill
                         for skill in current_character._skills:
                             if choice == skill._cara['name']:
                                 print('Aim with skill', choice)

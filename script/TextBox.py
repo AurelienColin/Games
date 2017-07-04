@@ -1,6 +1,6 @@
 import pygame
 from os.path import join
-from . import util, Map
+from . import util, Map, Level
 
 class TextBox():
     def __init__(self, box_file, texts, width, height, pos, size=20, color=(0,0,0)):
@@ -28,6 +28,12 @@ class TextBox():
             self = StatusBox(screen)
             if screen._status_box == -1:
                 screen._status_box = 0
+        elif name == 'LauncherMenu':
+            self = LauncherMenu()
+        elif name == 'Level Selection':
+            self = LevelSelection()
+        elif name == 'Level0':
+            Level.Level(screen, 'level0')
         else:
             self = None
         return self
@@ -49,6 +55,18 @@ class Text():
 class MainMenu(TextBox):
     def __init__(self):
         string = ["Aide;Skills;Objets;Status;Exit;End Turn"]
+        name = "TextBox_ExtraLarge.png"
+        TextBox.__init__(self,name, string, 170, 130, [(30, 20)])
+
+class LauncherMenu(TextBox):
+    def __init__(self):
+        string = ['Level Selection']
+        name = "Title1.png"
+        TextBox.__init__(self,name, string, 50, 200, [(45, 12)], color=(255,255,255))
+
+class LevelSelection(TextBox):
+    def __init__(self):
+        string = ['Level0;Prologue;Level1;Epilogue']
         name = "TextBox_ExtraLarge.png"
         TextBox.__init__(self,name, string, 170, 130, [(30, 20)])
 
@@ -222,4 +240,4 @@ class LevelUp(TextBox):
                          color=(255,255,255))
 
 def ListMenus():
-    return set(['MainMenu', 'Skills', 'Status'])
+    return set(['MainMenu', 'Skills', 'Status', 'LauncherMenu', 'Level Selection', 'Level0'])

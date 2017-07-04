@@ -6,6 +6,7 @@ import json
 
 class Level():
     def __init__(self, screen, file):
+        screen.Clean()
         with open(join('res','json', 'level', file+'.json'), 'r') as file:
             data = json.load(file)['level']
         map_index = screen.AddMap(data['map'])
