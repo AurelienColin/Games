@@ -12,7 +12,6 @@ class Level():
         map_index = screen.AddMap(data['map'])
         screen._map_data = screen._objects[map_index][0].renderer.tmx_data
 
-        self._map_data = screen._map_data
         self._screen = screen
 
         self.ModeVN(data['script'])
@@ -52,10 +51,7 @@ class Level():
                         playerVictory = False
             if playerVictory:
                 print('You win')
-                screen = self._screen
-                self._screen._objects = []
-                screen = Screen.Screen(screen._height, screen._width, screen._tile_size)
-                self = Level(screen, next_level)
+                self = Level(self._screen, next_level)
 
     def ModeTRPG(self):
         """Launch action loop for a tactical RPG"""
@@ -69,7 +65,7 @@ class Level():
             if character._cara['PA'] == 0 and character._cara['PM'] == 0 :
                 turn = self.NextTurn(turns, turn)
                 character = turns[turn]
-            menu = Loop.MenusLoop(menu, character, self._screen)
+            menu = Loop.MenusLoop(menu, self._screen, current_character=character)
             if menu == 'End Turn' or (character._cara['PA'] == 0 and character._cara['PM'] == 0) or character._dead:
                 turn = self.NextTurn(turns, turn)
                 character = turns[turn]
@@ -101,7 +97,7 @@ class Level():
         turn = min(turns)
 
         self._screen.MoveCircle(pos = turns[turn]._pixel)
-        self._screen.UpdateStatus(turns[turn], (self._screen._height-128, self._screen._width-100))
+        self._screen.UpdateStatus(turns[turn])
         self._screen.UpdateIniList(turns, turn)
         if turns[turn]._ia:
             turns[turn].IA_Action(self._screen)

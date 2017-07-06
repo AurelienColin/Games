@@ -18,7 +18,7 @@ def ObjToCoord(obj):
     pox_y - int: px pos of the object (up left)"""
     rect = obj[0].get_rect()
     pos_x, pos_y = obj[1]
-    return rect.height, rect.width, pos_x, pos_y
+    return rect.size, obj[1]
 
 def StatCalculation(value):
     """Each point in value reduce the result by 0.4%

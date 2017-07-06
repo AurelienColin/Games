@@ -16,13 +16,13 @@ def IfDeplacement(character, key, screen):
     """
     position = character._tile
     tile_size = screen._tile_size
-    if key == K_DOWN and position[1] < screen._height//tile_size:
+    if key == K_DOWN and position[1] < screen._size[0]//tile_size:
         new_pos = (position[0], position[1]+1)
     elif key == K_UP and position[1] > 0:
         new_pos = (position[0], position[1]-1)
     elif key == K_LEFT and position[0] > 0:
         new_pos = (position[0]-1, position[1])
-    elif key == K_RIGHT and position[0] < screen._width//tile_size:
+    elif key == K_RIGHT and position[0] < screen._size[1]//tile_size:
         new_pos = (position[0]+1, position[1])
     else:
         new_pos = position
@@ -56,7 +56,7 @@ def AimingLoop(current_character, screen, skill):
     end = False
     mainClock = pygame.time.Clock()
     skillDetails = screen.AddTextBox(TextBox.SkillDetails(skill, current_character),
-                                     (screen._height-128,screen._width-2*100))
+                                     (screen._size[0]-128,screen._size[1]-2*100))
     while True:
         screen.refresh()
         mainClock.tick(30)
@@ -70,6 +70,9 @@ def AimingLoop(current_character, screen, skill):
                     current_character.Attack(skill, red, screen, tile)
                     end = True
                     screen.UpdateStatus(current_character)
+                    for i in screen._ui['hovering']:
+                        screen.RemoveObject(i)
+                    screen._ui['hovering'] = []
                 elif event.key == K_DOWN and (tile[0], tile[1]+1) in blue:
                         tile = (tile[0], tile[1]+1)
                 elif event.key == K_UP and (tile[0], tile[1]-1) in blue:
@@ -86,9 +89,8 @@ def AimingLoop(current_character, screen, skill):
 
             if (event.type == KEYDOWN and event.key == K_ESCAPE) or end:# Return to skill menu
                 print('Return to skill menu')
-                for index in list(blue.values()) + list(red.values()) + skillDetails + screen._map_details:
+                for index in list(blue.values()) + list(red.values()) + skillDetails:
                     screen.RemoveObject(index)
-                screen._map_details = []
                 if end:
                     return True
                 return False
@@ -97,12 +99,12 @@ def AimingLoop(current_character, screen, skill):
                 change = False
                 tiles = skill.AOE(tile, current_character, screen)
                 s = Highlight.HighlightTiles(screen._tile_size, tiles, alpha, color)
-                for index in list(red.values()) + screen._map_details:
+                for index in list(red.values()):
                     screen.RemoveObject(index)
                 red = {}
                 for pos in s:
                         red[pos] = screen.AddHighlight(s[pos])
-                screen.AddTileDetails(tile)
+                screen.onHover((tile[0]*screen._tile_size, tile[1]*screen._tile_size))
 
 def MenusLoop(menu, screen, current_character=None):
     """Action Loop: current_character navigate in the menus
@@ -155,28 +157,28 @@ def MenusLoop(menu, screen, current_character=None):
                         pass
                 if event.key == K_UP or event.key == K_DOWN:  # We navigate through the menu
                     selection, selection_id = screen.MenuNavigation(event.key, menu_index, selection, selection_id)
-                if screen._status_box != -1 and (event.key == K_RIGHT or event.key == K_LEFT):
+                if screen._charBox != -1 and (event.key == K_RIGHT or event.key == K_LEFT):
                     screen.QuitMenu(menu_index, selection_id)
                     if event.key == K_RIGHT:
                         j = -1
                     else:
                         j = 1
-                    screen._status_box = (screen._status_box+j)%len(screen._characters)
+                    screen._charBox = (screen._charBox+j)%len(screen._characters)
                     menu_index, selection_id = screen.OpenMenu('Status')
                     screen.RemoveObject(selection_id)
                 ##### We are closing a menu #####
                 if event.key == K_ESCAPE or choice == 'Exit' or choice == 'End Turn':
-                    for index in screen._childBox + screen._map_details:
+                    for index in screen._ui['childBox'] + screen._ui['hovering']:
                         screen.RemoveObject(index)
-                    screen._childBox = []
-                    screen._map_details = []
+                    screen._ui['childBox'] = []
+                    screen._ui['hovering'] = []
                     if len(menus) > 1:  # Go to the previous menu
                         menus.pop(-1)
                         print('Return to menu:', menus[-1])
                         screen.QuitMenu(menu_index, selection_id)
                         menu_index, selection_id = screen.OpenMenu(menus[-1], character=current_character)
                         selection = 1
-                        screen._status_box = -1
+                        screen._charBox = -1
                     else: # We quit the last menu
                         menus = []
                         screen.QuitMenu(menu_index, selection_id)
@@ -217,7 +219,7 @@ def PlacementLoop(ini_tiles, screen):
     l = list(blue.keys())
     selection = 0
     selection_menu = 0
-    s = Highlight.HighlightTiles(screen._tile_size,l[selection], 120, (255, 0, 0))
+    s = Highlight.HighlightTiles(screen._tile_size,[l[selection]], 120, (255, 0, 0))
     red = [screen.AddHighlight(s[l[selection]]), l[selection]]
 
     mainClock = pygame.time.Clock()
@@ -227,7 +229,7 @@ def PlacementLoop(ini_tiles, screen):
     available = []
     for i, character in enumerate(screen._characters):
         if character._team == 1:
-            screen._status_box = i
+            screen._charBox = i
             available.append(character)
     max_chara = len(available)
     while True:
@@ -242,25 +244,25 @@ def PlacementLoop(ini_tiles, screen):
             elif event.type == KEYDOWN:
                 if menu_open:
                     if event.key == K_RETURN:
-                        characters[l[screen._status_box]] = screen._characters[screen._status_box]
-                        screen._characters[screen._status_box].UpdatePos(screen._tile_size, pos_tile = l[selection])
-                        screen._characters[screen._status_box]._index = screen.AddCharacter(screen._characters[screen._status_box], 'standing')
+                        characters[l[screen._charBox]] = screen._characters[screen._charBox]
+                        screen._characters[screen._charBox].UpdatePos(screen._tile_size, pos_tile = l[selection])
+                        screen._characters[screen._charBox]._index = screen.AddCharacter(screen._characters[screen._charBox], 'standing')
                         change = True
                         for i, character in enumerate(available):
-                            if character == screen._characters[screen._status_box]:
+                            if character == screen._characters[screen._charBox]:
                                 available.pop(i)
                                 break
                         if len(available) == 0:
                             screen.RemoveObject(red[0])
-                            for tile in list(blue.values()) + screen._childBox:
+                            for tile in list(blue.values()) + screen._ui['childBox']:
                                 screen.RemoveObject(tile)
-                            screen._childBox = []
+                            screen._ui['childBox'] = []
                             screen.QuitMenu(menu_index, selection_id)
-                            screen._status_box = -1
+                            screen._charBox = -1
                             return characters
-                        screen._status_box = (screen._status_box+1)%len(l)
-                        while screen._characters[screen._status_box]._team == 1:
-                            screen._status_box = (screen._status_box+1)%len(l)
+                        screen._charBox = (screen._charBox+1)%len(l)
+                        while screen._characters[screen._charBox]._team == 1:
+                            screen._charBox = (screen._charBox+1)%len(l)
                         event.key = K_ESCAPE
                     elif event.key in [K_UP, K_DOWN]:  # We navigate through the menu
                         selection_menu, selection_id = screen.MenuNavigation(event.key, menu_index, selection_menu, selection_id)
@@ -270,17 +272,17 @@ def PlacementLoop(ini_tiles, screen):
                             j = -1
                         else:
                             j = 1
-                        screen._status_box = (screen._status_box+j)%len(screen._characters)
-                        while screen._characters[screen._status_box] not in available:
-                            screen._status_box = (screen._status_box+j)%len(screen._characters)
+                        screen._charBox = (screen._charBox+j)%len(screen._characters)
+                        while screen._characters[screen._charBox] not in available:
+                            screen._charBox = (screen._charBox+j)%len(screen._characters)
                         menu_index, selection_id = screen.OpenMenu('Status')
 
                     if event.key == K_ESCAPE:
-                        for index in screen._childBox:
+                        for index in screen._ui['childBox']:
                             screen.RemoveObject(index)
-                        screen._childBox = []
+                        screen._ui['childBox'] = []
                         screen.QuitMenu(menu_index, selection_id)
-                        screen._status_box = -1
+                        screen._charBox = -1
                         menu_open = False
                 else:
                     if event.key == K_RETURN:
@@ -292,9 +294,9 @@ def PlacementLoop(ini_tiles, screen):
                                     for index in character._index:
                                         screen.RemoveObject(index)
                         else:
-                            screen._status_box = 1
-                            while screen._characters[screen._status_box] not in available:
-                                screen._status_box = (screen._status_box+1)%len(screen._characters)
+                            screen._charBox = 1
+                            while screen._characters[screen._charBox] not in available:
+                                screen._charBox = (screen._charBox+1)%len(screen._characters)
                             menu_index, selection_id = screen.OpenMenu('Status')
                             menu_open = True
                     elif event.key == K_RIGHT:
@@ -319,7 +321,7 @@ def PlacementLoop(ini_tiles, screen):
             if change:
                 change = False
                 screen.RemoveObject(red[0])
-                s = Highlight.HighlightTiles(screen._tile_size,l[selection],
+                s = Highlight.HighlightTiles(screen._tile_size,[l[selection]],
                                              120, (255, 0, 0))
                 red = [screen.AddHighlight(s[l[selection]]), l[selection]]
 
@@ -334,7 +336,7 @@ def VNLoop(screen, lines):
         change = False
         if ':' in line:  # This is a declaration
             box = TextBox.Dialog(util.FormatText(line, 42))
-            pos = (int((screen._height-box._height)/2),screen._width-box._width)
+            pos = (int((screen._size[0]-box._size[0])/2),screen._size[1]-box._size[1])
             current_dialog = screen.AddTextBox(box, pos)
         else:  # A character enter or leave
             change = True
@@ -343,9 +345,9 @@ def VNLoop(screen, lines):
                 character, file, transf, pos = line[1:]
                 x, y = tuple([int(ele) for ele in pos.split(',')])
                 if x < 0:
-                    x = screen._height+x
+                    x = screen._size[0]+x
                 if y < 0:
-                    y = screen._width+y
+                    y = screen._size[1]+y
                 img = pygame.image.load(join('res', 'sprite',
                                         file.split('_')[0], file))
                 if transf == 'sym':

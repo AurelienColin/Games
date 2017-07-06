@@ -200,7 +200,7 @@ class Skill():
         if animations != []:
             mainClock = pygame.time.Clock()
             for i in range(25):
-                screen.refresh(force = True)
+                screen.refresh()
                 mainClock.tick(100)
             [screen.RemoveObject(index) for index in animations]
 

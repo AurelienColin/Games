@@ -9,7 +9,7 @@ import pyganim
 
 class Character():
     def __init__(self, file,team = 0, tile_size = None, pos_tile = False, ia = False, leader = False, coef=1):
-        self._index, self._lifebar1, self._lifebar2 = None, None, None
+        self._index, self._lifebar = None, (None, None)
         self._ia, self._leader, self._team = ia, leader, team
         self._dead = False
         self._direction = 2
@@ -103,10 +103,11 @@ class Character():
         self - character
         tile_size - int: number of pixel of the tile side
         """
-        width = 2
         percentage = self._cara['PV']/self._cara['PV_max']
         height_life = tile_size*percentage
-        height_void = tile_size - height_life
+        size1 = (height_life,2)
+        size2 = (tile_size - height_life,2)
+        pos2 = (self._pixel[0]+height_life, self._pixel[1])
         if percentage < 0.5:
             G = 255 - 255*(1-percentage*2)
             R = 255
@@ -114,10 +115,9 @@ class Character():
             R = 255*(1-percentage)*2
             G = 255
         B = 0
-        self._lifebar1 = Highlight.Highlight(height_life, width, 255, (R, G, B),
-                                             self._pixel[0], self._pixel[1])
-        self._lifebar2 = Highlight.Highlight(height_void, width, 255, (0, 0, 0),
-                                             self._pixel[0]+height_life, self._pixel[1])
+        l1 = Highlight.Highlight(size1, 255, (R, G, B), self._pixel)
+        l2 = Highlight.Highlight(size2, 255, (0, 0, 0), pos2)
+        self._lifebar = (l1, l2)
 
     def UpdatePos(self, tile_size, pos_pixel = None, pos_tile = None):
         """Update pos_pixel or pos_tile
@@ -191,8 +191,8 @@ class Character():
                 screen.RemoveObject(i)
         else:
             self.AddLifeBar(screen._tile_size)
-            screen._objects[self._index[1]][0] = self._lifebar1._content
-            screen._objects[self._index[2]][0] = self._lifebar2._content
+            screen._objects[self._index[1]][0] = self._lifebar[0]._content
+            screen._objects[self._index[2]][0] = self._lifebar[1]._content
         return xp
 
     def AddXP(self, xp, screen):
@@ -204,7 +204,7 @@ class Character():
 
     def LevelUp(self, screen):
         if self._team == 1:
-            pos = (int((screen._height-288)/2), int((screen._width-174)/2))
+            pos = (int((screen._size[0]-288)/2), int((screen._size[1]-174)/2))
             index = screen.AddTextBox(TextBox.LevelUp(self), pos)
             loop = True
             mainClock = pygame.time.Clock()
@@ -393,22 +393,22 @@ class Character():
             return
         self._cara['PM'] -= p
         pix_pos = self._pixel
-        ini_bar1 = self._lifebar1._pixel
-        ini_bar2 = self._lifebar2._pixel
+        ini_bar1 = self._lifebar[0]._pixel
+        ini_bar2 = self._lifebar[1]._pixel
         screen._objects[self._index[0]][0] = animation
         screen._objects[self._index[0]][2] = 'character'
         n = screen._animation_length
         for i in range(n+1):
             temp_pos = int(diff[0]*i/n), int(diff[1]*i/n)
             full_temp_pos = pix_pos[0]+temp_pos[0], pix_pos[1]+temp_pos[1]
-            self._lifebar1._pixel = (ini_bar1[0] + temp_pos[0], ini_bar1[1] + temp_pos[1])
-            self._lifebar2._pixel = (ini_bar2[0] + temp_pos[0], ini_bar2[1] + temp_pos[1])
+            self._lifebar[0]._pixel = (ini_bar1[0] + temp_pos[0], ini_bar1[1] + temp_pos[1])
+            self._lifebar[1]._pixel = (ini_bar2[0] + temp_pos[0], ini_bar2[1] + temp_pos[1])
             self.UpdatePos(screen._tile_size, pos_pixel = full_temp_pos)
             screen._objects[self._index[0]][1] = self._pixel
-            screen._objects[self._index[1]][1] = self._lifebar1._pixel
-            screen._objects[self._index[2]][1] = self._lifebar2._pixel
+            screen._objects[self._index[1]][1] = self._lifebar[0]._pixel
+            screen._objects[self._index[2]][1] = self._lifebar[1]._pixel
             screen.MoveCircle(pos = self._pixel)
-            screen.refresh(force = True)
+            screen.refresh()
         screen._objects[self._index[0]][0] = static
         screen._objects[self._index[0]][2] = 'sprite'
         screen.UpdateStatus(self)

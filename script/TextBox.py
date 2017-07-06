@@ -3,7 +3,7 @@ from os.path import join
 from . import util, Map, Level
 
 class TextBox():
-    def __init__(self, box_file, texts, width, height, pos, size=20, color=(0,0,0)):
+    def __init__(self, box_file, texts, dim, pos, size=20, color=(0,0,0)):
         fullname = join('res', 'textbox', box_file)
         self._text = []
         self._string = []
@@ -12,11 +12,10 @@ class TextBox():
             self._string += [text[i] for i in range(len(text))]
             self._text += [Text(text[i], (pos[j][0], pos[j][1]+i*(size+2)),
                                 size, color=color) for i in range(len(text))]
-        self._height = height
-        self._width = width
+        self._size = dim
         self._imgs = False
         img = pygame.image.load(fullname)
-        self._box = pygame.transform.smoothscale(img, (height, width))
+        self._box = pygame.transform.smoothscale(img, dim)
         self._imgs = False
 
     def Initialization(name, screen = None, character=None):
@@ -26,8 +25,8 @@ class TextBox():
             self = SkillMenu(character)
         elif name == 'Status':
             self = StatusBox(screen)
-            if screen._status_box == -1:
-                screen._status_box = 0
+            if screen._charBox == -1:
+                screen._charBox = 0
         elif name == 'LauncherMenu':
             self = LauncherMenu()
         elif name == 'Level Selection':
@@ -56,26 +55,26 @@ class MainMenu(TextBox):
     def __init__(self):
         string = ["Aide;Skills;Objets;Status;Exit;End Turn"]
         name = "TextBox_ExtraLarge.png"
-        TextBox.__init__(self,name, string, 170, 130, [(30, 20)])
+        TextBox.__init__(self,name, string, (130,170), [(30, 20)])
 
 class LauncherMenu(TextBox):
     def __init__(self):
         string = ['Level Selection']
         name = "Title1.png"
-        TextBox.__init__(self,name, string, 50, 200, [(45, 12)], color=(255,255,255))
+        TextBox.__init__(self,name, string, (200,50), [(45, 12)], color=(255,255,255))
 
 class LevelSelection(TextBox):
     def __init__(self):
         string = ['Level0;Prologue;Level1;Epilogue']
         name = "TextBox_ExtraLarge.png"
-        TextBox.__init__(self,name, string, 170, 130, [(30, 20)])
+        TextBox.__init__(self,name, string, (130,170), [(30, 20)])
 
 class SkillMenu(TextBox):
     def __init__(self, character):
         skills = [skill._cara['name'] for skill in character._skills]
         string = [';'.join(skills)]
         name = "TextBox_ExtraLarge.png"
-        TextBox.__init__(self, name, string, 150, 150, [(30, 30)])
+        TextBox.__init__(self, name, string, (150, 150), [(30, 30)])
 
 class Status(TextBox):
     def __init__(self, character):
@@ -85,7 +84,7 @@ class Status(TextBox):
                 'PM: '+ str(character._cara['PM']) + '/' + str(character._cara['PM_max'])]
         string = [';'.join(data)]
         name = "TextBox_ExtraLarge.png"
-        TextBox.__init__(self, name, string, 100, 128, [(20, 10)], size =18)
+        TextBox.__init__(self, name, string, (128,100), [(20, 10)], size =18)
 
     def Update(self, character):
         data = [str(character._cara['name']),
@@ -106,11 +105,11 @@ class SkillDetails(TextBox):
                 'Dmg: ' + str(int(dmg)), 'Hit: ' + hit]
         string = [';'.join(data)]
         name = "TextBox_ExtraLarge.png"
-        TextBox.__init__(self, name, string, 100, 128, [(20, 10)], size = 15)
+        TextBox.__init__(self, name, string, (128,100), [(20, 10)], size = 15)
 
 class Portrait(TextBox):
     def __init__(self, chara):
-        size = 230, 200
+        size = 200,230
         u = util.StatToStr
         data1 = [str(chara._cara['name']),
                 'PV: '+ str(chara._cara['PV']) + '/' + str(chara._cara['PV_max']),
@@ -122,8 +121,8 @@ class Portrait(TextBox):
                 ' ;Lvl: ' + str(chara._cara['level'])]
         string = [';'.join(data1), ';'.join(data2)]
         name = "TextBox_ExtraLarge.png"
-        TextBox.__init__(self, name, string, size[0], size[1], [(20, 10), (130, 10+18+2)], size = 18)
-        self._imgs = [[chara._sprite['portrait'], (0, size[0]-128-12)]]
+        TextBox.__init__(self, name, string, size, [(20, 10), (130, 10+18+2)], size = 18)
+        self._imgs = [[chara._sprite['portrait'], (0, size[1]-128-12)]]
 
 class IniList(TextBox):
     def __init__(self, characters, turns, turn):
@@ -139,9 +138,9 @@ class IniList(TextBox):
                     k+=1
                 temp_turns[k] = temp_turns[i]
             i += 1
-        size = 50, margin*min(cap, len(characters)*2)+10
+        size = margin*min(cap, len(characters)*2)+10,50
         name = "TextBox_LongSmall.png"
-        TextBox.__init__(self, name, [''], size[0], size[1], [(0, 0)])
+        TextBox.__init__(self, name, [''], size, [(0, 0)])
         self._imgs = []
         for i, character in enumerate(temp):
             self._imgs.append([character._sprite['static'], (5+i*margin, 10)])
@@ -150,7 +149,7 @@ class IniList(TextBox):
 
 class StatusBox(TextBox):
     def __init__(self, screen):
-        character = screen._characters[screen._status_box]
+        character = screen._characters[screen._charBox]
         c = character._cara
         u = util.StatToStr
         string = ['', '', '', '']
@@ -168,7 +167,7 @@ class StatusBox(TextBox):
             string[3] +=skill._cara['name'] + ';'
         string[3] = string[3][:-1]  # Remove the last ';'
         name = 'TextBox_ExtraLarge.png'
-        TextBox.__init__(self, name, string, 300, 300, pos, size=size)
+        TextBox.__init__(self, name, string, (300, 300), pos, size=size)
         self._imgs = [[character._sprite['portrait'], (0, 0)]]
 
 class ChildBox(TextBox):
@@ -200,7 +199,7 @@ class ChildBox(TextBox):
         elif choice[:3] == 'Avd':
             string = 'Decrease the;probability;of begin hit'
         name = "TextBox_ExtraLarge.png"
-        TextBox.__init__(self, name, [string], 100, 128, [(20, 10)], size=20)
+        TextBox.__init__(self, name, [string], (128,100), [(20, 10)], size=20)
 
 class TileData(TextBox):
     def __init__(self, tile_pos, map_data, tile_size):
@@ -211,13 +210,13 @@ class TileData(TextBox):
         avoid = str(Map.CheckProperties(px_pos, 'Avoid', map_data, tile_size))
         string = name +';def: ' + Def + ';res: ' + Res + ';avoid: ' + avoid
         name = "TextBox_ExtraLarge.png"
-        TextBox.__init__(self, name, [string], 75, 90, [(15, 3)], size=15)
+        TextBox.__init__(self, name, [string], (90,75), [(15, 3)], size=15)
 
 class Dialog(TextBox):
     def __init__(self, text):
         char_name, string = text.split(':')
         name = 'TextBox_Large.png'
-        TextBox.__init__(self, name, [char_name, string], 100, 300,
+        TextBox.__init__(self, name, [char_name, string], (300,100),
                          [(15, 10), (20, 30)], size=17)
 
 class LevelUp(TextBox):
@@ -236,7 +235,7 @@ class LevelUp(TextBox):
         string=[cname, lvl, PV, Spd, Str, Def, Mgc, Res, title]
         pos = [(45,29), (190,29), (45,62), (190,62), (45, 93), (190,93),
                (45,126), (190,126), (120, 8)]
-        TextBox.__init__(self, name, string, 176, 296, pos, size=13,
+        TextBox.__init__(self, name, string, (296,176), pos, size=13,
                          color=(255,255,255))
 
 def ListMenus():

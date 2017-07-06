@@ -1,21 +1,17 @@
 import pygame
 
 class Highlight():
-    def __init__(self, height, width, alpha, color, pos_x, pos_y):
-        s = pygame.Surface((height, width))
+    def __init__(self, size, alpha, color, pos):
+        s = pygame.Surface(size)
         s.fill(color)
         s.set_alpha(alpha)
         self._content = s
-        self._pixel = pos_x, pos_y
+        self._pixel = pos
 
 def HighlightTiles(tile_size, tiles, alpha, color):
     highlighted = {}
-    if type(tiles) == list:
-        for x, y in tiles:
-            highlighted[(x, y)] = Highlight(tile_size, tile_size, alpha, color,
-                                         x*tile_size, y*tile_size)
-    else:
-        highlighted[tiles] = Highlight(tile_size, tile_size, alpha, color,
-                                       tiles[0]*tile_size, tiles[1]*tile_size)
-
+    size = (tile_size, tile_size)
+    for tile in tiles:
+        pos = (tile[0]*tile_size, tile[1]*tile_size)
+        highlighted[tuple(tile)] = Highlight(size, alpha, color,pos)
     return highlighted
