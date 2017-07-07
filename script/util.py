@@ -14,10 +14,10 @@ def ObjToCoord(obj):
     output:
     rect.height - int: height of the object
     rect.width - int: width of the object
-    pos_x - int: px pos of the object (up left)
+    posX - int: px pos of the object (up left)
     pox_y - int: px pos of the object (up left)"""
     rect = obj[0].get_rect()
-    pos_x, pos_y = obj[1]
+    posX, posY = obj[1]
     return rect.size, obj[1]
 
 def StatCalculation(value):
@@ -47,23 +47,24 @@ def GetDirection(ini_tile, final_tile):
     Output:
     direction - int"""
     diff = final_tile[0] - ini_tile[0], final_tile[1] - ini_tile[1]
-    if diff[0]>=0 and diff[1]>=0:
-        if diff[0]>diff[1]:
+    x, y = diff
+    if x>=0 and y>=0:
+        if x>y:
             direction = 3
         else:
             direction = 2
-    elif diff[0]>=0 and diff[1]<=0:
-        if diff[0]>-diff[1]:
+    elif x>=0 and y<=0:
+        if x>-y:
             direction = 3
         else:
             direction = 0
-    elif diff[0]<=0 and diff[1]<=0:
-        if -diff[0]>-diff[1]:
+    elif x<=0 and y<=0:
+        if -x>-y:
             direction = 1
         else:
             direction = 0
-    elif diff[0]<=0 and diff[1]>=0:
-        if -diff[0]>diff[1]:
+    elif x<=0 and y>=0:
+        if -x>y:
             direction = 1
         else:
             direction = 2

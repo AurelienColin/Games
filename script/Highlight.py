@@ -5,13 +5,13 @@ class Highlight():
         s = pygame.Surface(size)
         s.fill(color)
         s.set_alpha(alpha)
-        self._content = s
-        self._pixel = pos
+        self.content = s
+        self.pixel = pos
 
-def HighlightTiles(tile_size, tiles, alpha, color):
+def HighlightTiles(tileSize, tiles, alpha, color):
     highlighted = {}
-    size = (tile_size, tile_size)
+    size = (tileSize, tileSize)
     for tile in tiles:
-        pos = (tile[0]*tile_size, tile[1]*tile_size)
+        pos = (tile[0]*tileSize, tile[1]*tileSize)
         highlighted[tuple(tile)] = Highlight(size, alpha, color,pos)
     return highlighted

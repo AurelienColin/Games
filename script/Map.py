@@ -97,18 +97,18 @@ class TiledMap(object):
         pygame.transform.smoothscale(temp, surface.get_size(), surface)
 
     def run(self, screen):
-        self.draw(screen._display)
+        self.draw(screen.display)
         pygame.display.flip()
 
 
-def CheckProperties(xy, P,  map_data, tile_size):
+def CheckProperties(xy, P,  mapData, tile_size):
     # Add a try, because if some properties aren't define on all tiles
     # there will be casualties
     try:
         x_id = xy[0]//tile_size
         y_id = xy[1]//tile_size
-        gid = map_data.get_tile_gid(x_id, y_id,0)
-        properties = map_data.get_tile_properties_by_gid(gid)
+        gid = mapData.get_tile_gid(x_id, y_id,0)
+        properties = mapData.get_tile_properties_by_gid(gid)
         return properties[P]
     except Exception as e:
         print('ERROR: no propertie',P,'at', x_id, y_id, 'for', xy)

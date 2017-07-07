@@ -3,11 +3,11 @@ from os.path import join
 import pygame
 
 def Launcher():
-    screen_height, screen_width = (640,640)
-    tile_size = 29
+    screenHeight, screenWidth = (640,640)
+    tileSize = 29
     pygame.init()
 
-    screen = Screen.Screen(screen_height, screen_width, tile_size)
+    screen = Screen.Screen(screenHeight, screenWidth, tileSize)
     img = join('res', 'img', 'bg_main.png')
     background = pygame.image.load(img)
     screen.AddSprite(background, (0,0))

@@ -9,20 +9,20 @@ import numpy as np
 class Skill():
     def __init__(self, file):
         self.FromJSON(file)
-        self._sprite = self.AddSprite('fire_4', 1, 11, 0, 10)
+        self.sprite = self.AddSprite('fire_4', 1, 11, 0, 10)
 
     def FromJSON(self, file):
         with open(join('res','json', 'skill', file+'.json'), 'r') as file:
             data = json.load(file)['skill']
-        self._cara = data['cara']
-        self._sprite = {'values': data['sprite']}
-        self._sheet_name = data['sheet']
+        self.cara = data['cara']
+        self.sprite = {'values': data['sprite']}
+        self.sheetName = data['sheet']
         self.CreateSprite()
-        self._effects = {'values':data['effects'], 'effects':[]}
-        if self._effects['values']:
-            for e in self._effects['values']:
+        self.effects = {'values':data['effects'], 'effects':[]}
+        if self.effects['values']:
+            for e in self.effects['values']:
                     effect = Effect.Effect(e['type'], e['power'], e['duration'])
-                    self._effects['effects'].append(effect)
+                    self.effects['effects'].append(effect)
 
     def ToJSON(self):
         """Write the character in a .json
@@ -31,16 +31,16 @@ class Skill():
 
         Output :
         Nothing, but a .json est written"""
-        temp = {'cara':self._cara, 'sprite':self._sprite['values'],
-                'sheet':self._sheet_name, 'effects':self._effects}
-        util.WriteJSON({'character':temp}, self._cara['name'])
+        temp = {'cara':self.cara, 'sprite':self.sprite['values'],
+                'sheet':self.sheetName, 'effects':self.effects}
+        util.WriteJSON({'character':temp}, self.cara['name'])
 
     def CreateSprite(self):
-        name = self._sheet_name
-        rows = self._sprite['values']['rows']
-        cols = self._sprite['values']['cols']
-        begin, end = self._sprite['values']['action']
-        self._sprite['action'] = self.AddSprite(name, rows, cols, begin, end)
+        name = self.sheetName
+        rows = self.sprite['values']['rows']
+        cols = self.sprite['values']['cols']
+        begin, end = self.sprite['values']['action']
+        self.sprite['action'] = self.AddSprite(name, rows, cols, begin, end)
         pass
 
     def AddSprite(self, name, rows, cols, begin, end):
@@ -69,11 +69,11 @@ class Skill():
         blue - dictionary
             key - tuple of two int
             value - highlight"""
-        center = (int(character._pixel[0]/screen._tile_size),
-                  int(character._pixel[1]/screen._tile_size))
+        center = (int(character.pos['px'][0]/screen.tileSize),
+                  int(character.pos['px'][1]/screen.tileSize))
 
         aimable = self.GetAimable(center,screen, character)
-        highlighted = Highlight.HighlightTiles(screen._tile_size, aimable,60, (0, 0,255))
+        highlighted = Highlight.HighlightTiles(screen.tileSize, aimable,60, (0, 0,255))
         blue = {}
         for pos in highlighted:
             blue[pos] = screen.AddHighlight(highlighted[pos])
@@ -88,49 +88,49 @@ class Skill():
         screen - screen
 
         Output:
-        final_tiles - list of tuple of two int"""
+        finalTiles - list of tuple of two int"""
         tiles = [tile_pos]
-        if self._cara['size'] == 1:
+        if self.cara['size'] == 1:
             pass
-        elif not self._cara['AOE']:
-            for i in range(self._cara['size']):
+        elif not self.cara['AOE']:
+            for i in range(self.cara['size']):
                 j = 0
-                while j+i < self._cara['size']:
+                while j+i < self.cara['size']:
                     tiles.append([tile_pos[0]-i, tile_pos[1]-j])
                     tiles.append([tile_pos[0]+i, tile_pos[1]-j])
                     tiles.append([tile_pos[0]-i, tile_pos[1]+j])
                     tiles.append([tile_pos[0]+i, tile_pos[1]+j])
                     j+=1
-        elif self._cara['AOE'] == 'parallel':
-            if tile_pos[0] != character._tile[0]:
-                for i in range(self._cara['size']):
+        elif self.cara['AOE'] == 'parallel':
+            if tile_pos[0] != character.pos['tile'][0]:
+                for i in range(self.cara['size']):
                     tiles.append([tile_pos[0], tile_pos[1]+i])
                     tiles.append([tile_pos[0], tile_pos[1]-i])
-            elif tile_pos[1] != character._tile[1]:
-                for i in range(self._cara['size']):
+            elif tile_pos[1] != character.pos['tile'][1]:
+                for i in range(self.cara['size']):
                     tiles.append([tile_pos[0]+i, tile_pos[1]])
                     tiles.append([tile_pos[0]-i, tile_pos[1]])
-        elif self._cara['AOE'] == 'orthogonal':
-            if tile_pos[0] != character._tile[0]:
-                for i in range(self._cara['size']):
+        elif self.cara['AOE'] == 'orthogonal':
+            if tile_pos[0] != character.pos['tile'][0]:
+                for i in range(self.cara['size']):
                     tiles.append([tile_pos[0]-i, tile_pos[1]])
                     tiles.append([tile_pos[0]+i, tile_pos[1]])
-            elif tile_pos[1] != character._tile[1]:
-                for i in range(self._cara['size']):
+            elif tile_pos[1] != character.pos['tile'][1]:
+                for i in range(self.cara['size']):
                     tiles.append([tile_pos[0], tile_pos[1]+i])
                     tiles.append([tile_pos[0], tile_pos[1]-i])
-        final_tiles = []
+        finalTiles = []
         for tile in tiles:
-            if tile not in final_tiles:
-                final_tiles.append(tuple(tile))
-        return final_tiles
+            if tile not in finalTiles:
+                finalTiles.append(tuple(tile))
+        return finalTiles
 
-    def Affect(self, current_character, all_affected, tiles, screen):
+    def Affect(self, character, allAffected, tiles, screen):
         """Use the skill and apply it's effect on the targets
         Input:
         self - skill
-        current_character - character
-        all_affected - list of character
+        character - character
+        allAffected - list of character
         tiles - list of tuple of two int (target of the skill)
         screen - screen
 
@@ -138,65 +138,65 @@ class Skill():
         xp - int: xp earn from the attack
         The effects are applied on the targets (character or tile)"""
         xp = 0
-        animation_tiles = []
-        for i, affected in enumerate(all_affected):
-            cara = affected._cara
+        animated = []
+        for i, affected in enumerate(allAffected):
+            cara = affected.cara
             w, s = util.WeakAgainst(cara['type'])
-            tile_type = Map.CheckProperties(affected._tile, 'type',
-                                            screen._map_data, screen._tile_size)
-            if tile_type == w:
-                affected._cara['def'] -= 56
-                affected._cara['avoid'] -= 56
-                affected._cara['speed'] -= 56
-                affected._cara['resistance'] -= 56
-                affected._cara['elementalRes'][w] -= 56
-            elif tile_type == cara['type']:
-                affected._cara['def'] += 56
-                affected._cara['avoid'] += 56
-                affected._cara['speed'] += 56
-                affected._cara['resistance'] += 56
-                affected._cara['elementalRes'][w] += 56
+            tileType = Map.CheckProperties(affected.pos['tile'], 'type',
+                                            screen.mapData, screen.tileSize)
+            if tileType == w:
+                affected.cara['def'] -= 56
+                affected.cara['avoid'] -= 56
+                affected.cara['speed'] -= 56
+                affected.cara['resistance'] -= 56
+                affected.cara['elementalRes'][w] -= 56
+            elif tileType == cara['type']:
+                affected.cara['def'] += 56
+                affected.cara['avoid'] += 56
+                affected.cara['speed'] += 56
+                affected.cara['resistance'] += 56
+                affected.cara['elementalRes'][w] += 56
             else:
-                w, s = util.WeakAgainst(tile_type)
+                w, s = util.WeakAgainst(tileType)
                 if w:
-                    affected._cara['elementalRes'][w] -= 23
-                    affected._cara['elementalRes'][s] += 23
+                    affected.cara['elementalRes'][w] -= 23
+                    affected.cara['elementalRes'][s] += 23
 
 
-            if current_character._aiming == affected._tile:
-                direction = util.GetDirection(affected._tile, current_character._tile)
+            if character.aiming == affected.pos['tile']:
+                direction = util.GetDirection(affected.pos['tile'], character.pos['tile'])
             else:
-                direction = util.GetDirection(affected._tile, current_character._aiming)
-            if direction - affected._direction in [-2,2]:
-                dmg = self._cara['damage'] * 1.5
-                affected._cara['avoid'] = int(affected._cara['avoid']*0.75)
-            elif direction - affected._direction in [-3,-1,1,3]:
-                dmg = self._cara['damage'] * 1.25
-                affected._cara['avoid'] = int(affected._cara['avoid']*0.5)
+                direction = util.GetDirection(affected.pos['tile'], character.aiming)
+            if direction - affected.direction in [-2,2]:
+                dmg = self.cara['damage'] * 1.5
+                affected.cara['avoid'] = int(affected.cara['avoid']*0.75)
+            elif direction - affected.direction in [-3,-1,1,3]:
+                dmg = self.cara['damage'] * 1.25
+                affected.cara['avoid'] = int(affected.cara['avoid']*0.5)
             else:
-                dmg = self._cara['damage']
-            if self._cara['type'] == 'magic':
-                dmg = current_character.MagicalDmg(dmg)
-                dmg = affected.MagicalReduction(dmg, self._cara['ele'])
-            elif self._cara['type'] == 'physic':
-                dmg = current_character.PhysicalDmg(dmg)
-                dmg = affected.PhysicalReduction(dmg, self._cara['ele'])
-            else:    # skill._type == 'heal'
-                dmg = -current_character.MagicalDmg(self._cara['damage'])
-            hit = affected.getCara('avoid')/current_character.getCara('hit')*self._cara['hit']
+                dmg = self.cara['damage']
+            if self.cara['type'] == 'magic':
+                dmg = character.MagicalDmg(dmg)
+                dmg = affected.MagicalReduction(dmg, self.cara['ele'])
+            elif self.cara['type'] == 'physic':
+                dmg = character.PhysicalDmg(dmg)
+                dmg = affected.PhysicalReduction(dmg, self.cara['ele'])
+            else:    # skill.type == 'heal'
+                dmg = -character.MagicalDmg(self.cara['damage'])
+            hit = affected.getCara('avoid')/character.getCara('hit')*self.cara['hit']
             r = random.random()
-            affected._cara = cara
+            affected.cara = cara
             if r < hit:
-                animation_tiles.append(affected._tile)
+                animated.append(affected.pos['tile'])
                 xp += affected.Affect(dmg, screen)
-                for effect in self._effects['effects']:
+                for effect in self.effects['effects']:
                     xp += affected.Affect(effect, screen)
         animations = []
-        print('launch animation to:', animation_tiles)
-        for tile in animation_tiles:
-            pos = tuple(x*screen._tile_size for x in tile)
+        print('launch animation to:', animated)
+        for tile in animated:
+            pos = tuple(x*screen.tileSize for x in tile)
             print('indeed:', pos)
-            animations.append(screen.AddSprite(self._sprite, pos))
+            animations.append(screen.AddSprite(self.sprite, pos))
         if animations != []:
             mainClock = pygame.time.Clock()
             for i in range(25):
@@ -206,57 +206,57 @@ class Skill():
 
         return xp
 
-    def GetAimable(self, pos, screen, current_character):
+    def GetAimable(self, pos, screen, character):
         """
         Input:
         self - skill
         pos - tuple of two int: origin of the attack
         screen - screen
-        current_character - character using the attack
+        character - character using the attack
 
         Output:
         list of tuple of two int"""
-        map_data, tile_size = screen._map_data, screen._tile_size
+        mapData, tileSize = screen.mapData, screen.tileSize
         aimable = set()
-        scope = self._cara['range']
+        scope = self.cara['range']
         p = 'slowness'
         for x in range(max(pos[0]-scope, 0), pos[0]+scope+1):
-            diff_x = x-pos[0]
+            diffX = x-pos[0]
             for y in range(max(pos[1]-scope,0), pos[1]+scope+1):
-                diff_y = y-pos[1]
+                diffY = y-pos[1]
                 transparent = True
 
-                if (self._cara['AOE'] == 'parallel' or self._cara['AOE'] == 'orthogonal') and (x != pos[0] and y!= pos[1]):
+                if (self.cara['AOE'] == 'parallel' or self.cara['AOE'] == 'orthogonal') and (x != pos[0] and y!= pos[1]):
                     transparent = False
-                elif abs(diff_x) + abs(diff_y) > scope:
+                elif abs(diffX) + abs(diffY) > scope:
                     transparent = False
-                elif Map.CheckProperties((x*tile_size, y*tile_size), p, map_data, tile_size) != '1':
+                elif Map.CheckProperties((x*tileSize, y*tileSize), p, mapData, tileSize) != '1':
                     transparent = False
-                elif diff_y != 0 or diff_x != 0:
-                    R = abs(diff_y)+abs(diff_x)
-                    y_step = diff_y/R
-                    x_step = diff_x/R
-                    if x_step != 0:
-                        x_range = np.arange(pos[0], x, x_step)
+                elif diffY != 0 or diffX != 0:
+                    R = abs(diffY)+abs(diffX)
+                    yStep = diffY/R
+                    xStep = diffX/R
+                    if xStep != 0:
+                        xRange = np.arange(pos[0], x, xStep)
                     else:
-                        x_range = [x for i in range(R+1)]
-                    if y_step != 0:
-                        y_range = np.arange(pos[1], y, y_step)
+                        xRange = [x for i in range(R+1)]
+                    if yStep != 0:
+                        yRange = np.arange(pos[1], y, yStep)
                     else:
-                        y_range = [y for i in range(R+1)]
-                    tile_range = [(int(x_range[i]+0.5), int(y_range[i]+0.5)) for i in range(R)]
-                    for x_c, y_c in tile_range:
-                        if not self._cara['perce']:
-                            for character in screen._characters:
-                                if character._tile == (x_c, y_c) and character._team != current_character._team:
+                        yRange = [y for i in range(R+1)]
+                    tileRange = [(int(xRange[i]+0.5), int(yRange[i]+0.5)) for i in range(R)]
+                    for x_c, y_c in tileRange:
+                        if not self.cara['perce']:
+                            for atlChar in screen.characters:
+                                if atlChar.pos['tile'] == (x_c, y_c) and atlChar.team != character.team:
                                     transparent = False
                                     break
-                        if Map.CheckProperties((x_c*tile_size, y_c*tile_size), p, map_data, tile_size) != '1':
+                        if Map.CheckProperties((x_c*tileSize, y_c*tileSize), p, mapData, tileSize) != '1':
                             transparent = False
                             break
                 if transparent:
                     aimable.add((x, y))
-        current_character._aiming = pos
+        character.aiming = pos
         return list(aimable)
 
 

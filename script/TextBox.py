@@ -5,28 +5,28 @@ from . import util, Map, Level
 class TextBox():
     def __init__(self, box_file, texts, dim, pos, size=20, color=(0,0,0)):
         fullname = join('res', 'textbox', box_file)
-        self._text = []
-        self._string = []
+        self.text = []
+        self.string = []
         for j, text in enumerate(texts):
             text = text.split(';')
-            self._string += [text[i] for i in range(len(text))]
-            self._text += [Text(text[i], (pos[j][0], pos[j][1]+i*(size+2)),
+            self.string += [text[i] for i in range(len(text))]
+            self.text += [Text(text[i], (pos[j][0], pos[j][1]+i*(size+2)),
                                 size, color=color) for i in range(len(text))]
-        self._size = dim
-        self._imgs = False
+        self.size = dim
+        self.imgs = False
         img = pygame.image.load(fullname)
-        self._box = pygame.transform.smoothscale(img, dim)
-        self._imgs = False
+        self.box = pygame.transform.smoothscale(img, dim)
+        self.imgs = False
 
-    def Initialization(name, screen = None, character=None):
+    def Initialization(name, screen = None, char=None):
         if name == 'MainMenu':
             self = MainMenu()
         elif name == 'Skills':
-            self = SkillMenu(character)
+            self = SkillMenu(char)
         elif name == 'Status':
             self = StatusBox(screen)
-            if screen._charBox == -1:
-                screen._charBox = 0
+            if screen.charBox == -1:
+                screen.charBox = 0
         elif name == 'LauncherMenu':
             self = LauncherMenu()
         elif name == 'Level Selection':
@@ -38,18 +38,18 @@ class TextBox():
         return self
 
     def Update(self, texts, pos, size=20):
-        self._string = []
+        self.string = []
         for j, text in enumerate(texts):
             text = text.split(';')
-            self._string += [text[i] for i in range(len(text))]
-            self._text += [Text(text[i], (pos[j][0], pos[j][1]+i*size), 20) for i in range(len(text))]
+            self.string += [text[i] for i in range(len(text))]
+            self.text += [Text(text[i], (pos[j][0], pos[j][1]+i*size), 20) for i in range(len(text))]
 
 class Text():
-    def __init__(self, text, pos, size, color=(0,0,0)):
+    def __init__(self, text, pixel, size, color=(0,0,0)):
         font = pygame.font.SysFont('freesans', size)
-        self._text = text
-        self._string = font.render(text, True, color)
-        self._pixel = pos
+        self.text = text
+        self.string = font.render(text, True, color)
+        self.pixel = pixel
 
 class MainMenu(TextBox):
     def __init__(self):
@@ -71,37 +71,37 @@ class LevelSelection(TextBox):
 
 class SkillMenu(TextBox):
     def __init__(self, character):
-        skills = [skill._cara['name'] for skill in character._skills]
+        skills = [skill.cara['name'] for skill in character.skills]
         string = [';'.join(skills)]
         name = "TextBox_ExtraLarge.png"
         TextBox.__init__(self, name, string, (150, 150), [(30, 30)])
 
 class Status(TextBox):
     def __init__(self, character):
-        data = [str(character._cara['name']),
-                'PV: '+ str(character._cara['PV']) + '/' + str(character._cara['PV_max']),
-                'PA: '+ str(character._cara['PA']) + '/' + str(character._cara['PA_max']),
-                'PM: '+ str(character._cara['PM']) + '/' + str(character._cara['PM_max'])]
+        data = [str(character.cara['name']),
+                'PV: '+ str(character.cara['PV']) + '/' + str(character.cara['PV_max']),
+                'PA: '+ str(character.cara['PA']) + '/' + str(character.cara['PA_max']),
+                'PM: '+ str(character.cara['PM']) + '/' + str(character.cara['PM_max'])]
         string = [';'.join(data)]
         name = "TextBox_ExtraLarge.png"
         TextBox.__init__(self, name, string, (128,100), [(20, 10)], size =18)
 
     def Update(self, character):
-        data = [str(character._cara['name']),
-                'PV: '+ str(character._cara['PV']) + '/' + str(character._cara['PV_max']),
-                'PA: '+ str(character._cara['PA']) + '/' + str(character._cara['PA_max']),
-                'PM: '+ str(character._cara['PM']) + '/' + str(character._cara['PM_max'])]
+        data = [str(character.cara['name']),
+                'PV: '+ str(character.cara['PV']) + '/' + str(character.cara['PV_max']),
+                'PA: '+ str(character.cara['PA']) + '/' + str(character.cara['PA_max']),
+                'PM: '+ str(character.cara['PM']) + '/' + str(character.cara['PM_max'])]
         text = ';'.join(data)
-        self._string = text.split(';')
+        self.string = text.split(';')
 
 class SkillDetails(TextBox):
     def __init__(self, skill, character):
-        if skill._cara['type'] == 'magic':
-            dmg = character.MagicalDmg(skill._cara['damage'])
-        elif skill._cara['type'] == 'physic':
-            dmg = character.PhysicalDmg(skill._cara['damage'])
-        hit = str(int(skill._cara['hit']*character.getCara('hit')*100))
-        data = [skill._cara['name'], 'Type: ' + skill._cara['type'], 'PA: ' + str(skill._cara['cost']),
+        if skill.cara['type'] == 'magic':
+            dmg = character.MagicalDmg(skill.cara['damage'])
+        elif skill.cara['type'] == 'physic':
+            dmg = character.PhysicalDmg(skill.cara['damage'])
+        hit = str(int(skill.cara['hit']*character.getCara('hit')*100))
+        data = [skill.cara['name'], 'Type: ' + skill.cara['type'], 'PA: ' + str(skill.cara['cost']),
                 'Dmg: ' + str(int(dmg)), 'Hit: ' + hit]
         string = [';'.join(data)]
         name = "TextBox_ExtraLarge.png"
@@ -111,46 +111,46 @@ class Portrait(TextBox):
     def __init__(self, chara):
         size = 200,230
         u = util.StatToStr
-        data1 = [str(chara._cara['name']),
-                'PV: '+ str(chara._cara['PV']) + '/' + str(chara._cara['PV_max']),
-                'PA: '+ str(chara._cara['PA']) + '/' + str(chara._cara['PA_max']),
-                'PM: '+ str(chara._cara['PM']) + '/' + str(chara._cara['PM_max'])]
-        data2 = ['Str: ' + u(chara._cara['strength']), 'Mgc: ' + u(chara._cara['magic']),
-                 'Def: ' + u(chara._cara['defense']), 'Res: ' + u(chara._cara['resistance']),
-                 'Hit: ' + u(chara._cara['hit']), 'Avd: ' + u(chara._cara['avoid']),
-                ' ;Lvl: ' + str(chara._cara['level'])]
+        data1 = [str(chara.cara['name']),
+                'PV: '+ str(chara.cara['PV']) + '/' + str(chara.cara['PV_max']),
+                'PA: '+ str(chara.cara['PA']) + '/' + str(chara.cara['PA_max']),
+                'PM: '+ str(chara.cara['PM']) + '/' + str(chara.cara['PM_max'])]
+        data2 = ['Str: ' + u(chara.cara['strength']), 'Mgc: ' + u(chara.cara['magic']),
+                 'Def: ' + u(chara.cara['defense']), 'Res: ' + u(chara.cara['resistance']),
+                 'Hit: ' + u(chara.cara['hit']), 'Avd: ' + u(chara.cara['avoid']),
+                ' ;Lvl: ' + str(chara.cara['level'])]
         string = [';'.join(data1), ';'.join(data2)]
         name = "TextBox_ExtraLarge.png"
         TextBox.__init__(self, name, string, size, [(20, 10), (130, 10+18+2)], size = 18)
-        self._imgs = [[chara._sprite['portrait'], (0, size[1]-128-12)]]
+        self.imgs = [[chara.sprite['portrait'], (0, size[1]-128-12)]]
 
 class IniList(TextBox):
     def __init__(self, characters, turns, turn):
-        temp_turns, i, j, temp = turns, turn, 0, []
+        turns, i, j, temp = turns, turn, 0, []
         cap = 10
         margin = 37
         while j < len(characters)*2:
-            if i in temp_turns:
+            if i in turns:
                 j+=1
-                temp.append(temp_turns[i])
-                k = turn + int(util.StatCalculation(turns[turn]._cara['speed'])*100)
-                while k in temp_turns:
+                temp.append(turns[i])
+                k = turn + int(util.StatCalculation(turns[turn].cara['speed'])*100)
+                while k in turns:
                     k+=1
-                temp_turns[k] = temp_turns[i]
+                turns[k] = turns[i]
             i += 1
         size = margin*min(cap, len(characters)*2)+10,50
         name = "TextBox_LongSmall.png"
         TextBox.__init__(self, name, [''], size, [(0, 0)])
-        self._imgs = []
+        self.imgs = []
         for i, character in enumerate(temp):
-            self._imgs.append([character._sprite['static'], (5+i*margin, 10)])
+            self.imgs.append([character.sprite['static'], (5+i*margin, 10)])
             if i == cap:
                 break
 
 class StatusBox(TextBox):
     def __init__(self, screen):
-        character = screen._characters[screen._charBox]
-        c = character._cara
+        character = screen.characters[screen.charBox]
+        c = character.cara
         u = util.StatToStr
         string = ['', '', '', '']
         size = 18
@@ -163,12 +163,12 @@ class StatusBox(TextBox):
                     + ';Def: ' + str(u(c['defense'])) + ';Res: ' \
                     + str(u(c['resistance'])) + ';Spd: ' + str(u(c['speed'])) \
                     + ';Hit: ' + str(u(c['hit'])) + ';Avd: ' + str(u(c['avoid']))
-        for skill in character._skills[:5]:
-            string[3] +=skill._cara['name'] + ';'
+        for skill in character.skills[:5]:
+            string[3] +=skill.cara['name'] + ';'
         string[3] = string[3][:-1]  # Remove the last ';'
         name = 'TextBox_ExtraLarge.png'
         TextBox.__init__(self, name, string, (300, 300), pos, size=size)
-        self._imgs = [[character._sprite['portrait'], (0, 0)]]
+        self.imgs = [[character.sprite['portrait'], (0, 0)]]
 
 class ChildBox(TextBox):
     def __init__(self, choice):
@@ -202,12 +202,12 @@ class ChildBox(TextBox):
         TextBox.__init__(self, name, [string], (128,100), [(20, 10)], size=20)
 
 class TileData(TextBox):
-    def __init__(self, tile_pos, map_data, tile_size):
-        px_pos = (tile_pos[0]*tile_size, tile_pos[1]*tile_size)
-        name = str(Map.CheckProperties(px_pos, 'name', map_data, tile_size))
-        Def = str(Map.CheckProperties(px_pos, 'Def', map_data, tile_size))
-        Res = str(Map.CheckProperties(px_pos, 'Res', map_data, tile_size))
-        avoid = str(Map.CheckProperties(px_pos, 'Avoid', map_data, tile_size))
+    def __init__(self, tile, mapData, tileSize):
+        px = (tile[0]*tileSize, tile[1]*tileSize)
+        name = str(Map.CheckProperties(px, 'name', mapData, tileSize))
+        Def = str(Map.CheckProperties(px, 'Def', mapData, tileSize))
+        Res = str(Map.CheckProperties(px, 'Res', mapData, tileSize))
+        avoid = str(Map.CheckProperties(px, 'Avoid', mapData, tileSize))
         string = name +';def: ' + Def + ';res: ' + Res + ';avoid: ' + avoid
         name = "TextBox_ExtraLarge.png"
         TextBox.__init__(self, name, [string], (90,75), [(15, 3)], size=15)
@@ -221,7 +221,7 @@ class Dialog(TextBox):
 
 class LevelUp(TextBox):
     def __init__(self, character):
-        c = character._cara
+        c = character.cara
         name = 'Level_up.png'
         cname = c['name']
         title = 'LEVEL UP !'
