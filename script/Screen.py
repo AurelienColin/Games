@@ -21,6 +21,7 @@ class Screen():
         self.objects = [[circle, (0, 0), 'hide']]
         self.charBox = -1
         self.ui={'hovering':[],'initiative':[]}
+        self.tileEffects = []
 
     def MoveCircle(self, pos = None, hide = False):
         if hide:

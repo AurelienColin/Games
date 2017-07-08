@@ -20,7 +20,8 @@
 				10
 			]
 		},
-		 "sheet": "fire_4",
-		"effects": null
+		"sheet": "fire_4",
+		"effects": [],
+		"tileEffects":[]
 	}
 }

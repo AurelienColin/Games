@@ -441,9 +441,9 @@ class Character():
             for tile in circle:
                 d_to = int(Map.CheckProperties((tile[0]*tileSize, tile[1]*tileSize),
                                                'slowness', screen.mapData,tileSize))
-                if tile[0] < 0 or tile[0] >= screen.width//tileSize:
+                if tile[0] < 0 or tile[0] >= screen.size[1]//tileSize:
                     transparent = False  # Outside of screen
-                elif tile[1] < 0 or tile[1] >= screen.width//tileSize:
+                elif tile[1] < 0 or tile[1] >= screen.size[1]//tileSize:
                     transparent = False # Outside of screen
                 elif tile in reachable and d_to+d > reachable[(tile[0], tile[1])][0]:
                     transparent = False # Shorter path already in reachable

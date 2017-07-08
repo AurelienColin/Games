@@ -24,6 +24,12 @@ class Skill():
                     effect = Effect.Effect(e['type'], e['power'], e['duration'])
                     self.effects['effects'].append(effect)
 
+        self.tileEffects = {'values':data['tileEffects'], 'effects':[]}
+        if self.tileEffects['values']:
+            for e in self.tileEffects['values']:
+                effect = Effect.Effect(e['type'], e['power'], e['duration'])
+                self.tileEffects['effects'].append(effect)
+
     def ToJSON(self):
         """Write the character in a .json
         Input :
@@ -139,6 +145,10 @@ class Skill():
         The effects are applied on the targets (character or tile)"""
         xp = 0
         animated = []
+        for tile in tiles:
+            for effect in self.tileEffects['effects']:
+                print('apply effect',effect)
+                screen.tileEffects.append([tile, effect])
         for i, affected in enumerate(allAffected):
             cara = affected.cara
             w, s = util.WeakAgainst(cara['type'])

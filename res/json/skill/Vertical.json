@@ -20,7 +20,11 @@
 				10
 			]
 		},
-		 "sheet": "fire_4",
-		"effects": null
-	}
+		"sheet": "fire_4",
+		"effects": [],
+		"tileEffects":[{
+				"type":"strength",
+				"duration":5,
+				"power":50}]
+}
 }

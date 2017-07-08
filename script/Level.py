@@ -120,17 +120,18 @@ class Level():
             turn +=1
         turns[turn].passTurn()
 
-        for i, tileEffect in enumerate(self.screen.tileEffect):
-            if tileEffect:
-                pos, effect = tileEffect
-                charEffect = Effect.Effect(effect.properties, effect.power, 1)
-                if turns[turn].pos['tile'] == pos:
-                        turns[turn].Affect(charEffect, self.screen)
-                        break
-                if effect.since != effect.duration:
-                    self.screen.tileEffect[i][1].since += 1
-                else:
-                    self.screen.tileEffect.pop(i)
+        print('will apply:', self.screen.tileEffects)
+        for i, tileEffect in enumerate(self.screen.tileEffects):
+            pos, effect = tileEffect
+            print('apply effect', effect)
+            charEffect = Effect.Effect(effect.properties, effect.power, 1)
+            if turns[turn].pos['tile'] == pos:
+                turns[turn].Affect(charEffect, self.screen)
+                break
+            if effect.since != effect.duration:
+                self.screen.tileEffects[i][1].since += 1
+            else:
+                self.screen.tileEffects.pop(i)
 
         self.screen.MoveCircle(pos = turns[turn].pos['px'])
         self.screen.UpdateStatus(turns[turn])
