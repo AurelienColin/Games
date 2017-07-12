@@ -24,11 +24,11 @@
 		"effects":  [{
 				"type":"PA",
 				"duration":2,
-				"power":1
+				"power":-1
 			},{
 				"type":"PM",
 				"duration":5,
-				"power":1
+				"power":-1
 				}],
 		"tileEffects":[]
 	}

@@ -1,5 +1,5 @@
 from os.path import join
-from . import Highlight, Skill, util, Map, TextBox
+from . import Highlight, Skill, util, Map, TextBox, Item, Effect
 import sys
 import json
 from random import uniform
@@ -32,7 +32,9 @@ class Character():
         self.sprite = {'values': data['sprite']}
         self.sheetName = data['sheet']
         self.CreateSprite()
-        skills = [(Skill.Skill(skill[0]), skill[1]) for skill in data['skill']]
+        self.items = {place:Item.Item(item[0]) for place, item in data['items'].items()}
+        [self.Equip(name) for name, equiped in data['items'].values() if equiped]
+        skills = [(Skill.Skill(skill), level) for skill, level in data['skill']]
         self.skills = []
         self.nextSkills = []
         for skill, level in skills:
@@ -50,8 +52,36 @@ class Character():
         Nothing, but a .json est written"""
         skills = [skill.cara['name'] for skill in self.skills]
         temp = {'cara':self.cara, 'sprite':self.sprite['values'],
-                'skill':skills, 'sheet':self.sheetName}
+                'skill':skills, 'sheet':self.sheetName, 'items':self.items}
         util.WriteJSON({'character':temp}, self.cara['name'])
+
+    def Equip(self, name):
+        item = self.getItem(name)
+        for cara, power in item.cara.items():
+            self.cara[cara]+=power
+        item.equiped=True
+
+    def Desequip(self, name):
+        item = self.getItem(name)
+        for cara, power in item.cara.items():
+            self.cara[cara]-=power
+        item.equiped=False
+
+    def UseItem(self, name, screen):
+        item = self.getItem(name)
+        for cara, value in item.use.items():
+            power, length = value
+            effect = Effect.Effect(cara, power, length)
+            self.Affect(effect, screen)
+            self.cara['effects'].append(effect)
+        self.cara['PA']-=item.cost
+        item.ReduceDurability()
+
+    def getItem(self, name):
+        print(name, [item.name for item in self.items.values()])
+        for item in self.items.values():
+            if item.name == name:
+                return item
 
     def CreateSprite(self):
         """From .sprite['values'] get all sprites
@@ -70,7 +100,6 @@ class Character():
                 self.sprite[key] = self.AddSprite(value[0], value[1])
             else:
                 self.sprite[key] = self.AddSprite(value[0])
-
 
     def AddSprite(self, begin, end=False):
         """Make a sprite (animated or not) from a sheet
@@ -104,7 +133,7 @@ class Character():
         self - character
         tileSize - int: number of pixel of the tile side
         """
-        percentage = self.cara['PV']/self.cara['PV_max']
+        percentage = min(1,max(0,self.cara['PV']/self.cara['PV_max']))
         height_life = tileSize*percentage
         size1 = (height_life,2)
         size2 = (tileSize - height_life,2)
@@ -183,7 +212,7 @@ class Character():
             self.cara['PV'] = min(self.cara['PV_max'], max(0,self.cara['PV']-effect))
         else:# It's a debuff, a buff, or anything else
             self.cara['effects'].append(effect)
-            v = max(0, self.cara[effect.properties]-effect.power)
+            v = max(0, self.cara[effect.properties]+effect.power)
             self.cara[effect.properties] = v
         if self.cara['PV'] == 0:
             self.dead = True

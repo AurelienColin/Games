@@ -1,0 +1,17 @@
+{
+    "item": {
+        "name":"Carak Dae",
+		"cara":{
+			"strength":5,
+			"speed":50},
+		"durability":5,
+		"cost":2,
+		"use":{
+			"PV":[20,1],
+			"PV_max":[20,1],
+			"strength":[50,2],
+			"PA":[5,3]
+				},
+		"spot":"2h"
+		}
+}

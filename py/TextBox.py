@@ -33,8 +33,20 @@ class TextBox():
             self = LevelSelection()
         elif name == 'Level0':
             Level.Level(screen, 'level0')
-        else:
-            self = None
+        elif name == 'Items':
+            self = ItemsMenu(char)
+        elif name in itemList():
+            self = ItemMenu(char.getItem(name))
+            screen.currentItem = name
+        elif name == 'Use':
+            char.UseItem(screen.currentItem, screen)
+            self = DoneBox()
+        elif name == 'Equip':
+            char.Equip(screen.currentItem)
+            self = DoneBox()
+        elif name == 'Desequip':
+            char.Desequip(screen.currentItem)
+            self = DoneBox()
         return self
 
     def Update(self, texts, pos, size=20):
@@ -53,7 +65,7 @@ class Text():
 
 class MainMenu(TextBox):
     def __init__(self):
-        string = ["Aide;Skills;Objets;Status;Exit;End Turn"]
+        string = ["Aide;Skills;Items;Status;Exit;End Turn"]
         name = "TextBox_ExtraLarge.png"
         TextBox.__init__(self,name, string, (130,170), [(30, 20)])
 
@@ -74,7 +86,7 @@ class SkillMenu(TextBox):
         skills = [skill.cara['name'] for skill in character.skills]
         string = [';'.join(skills)]
         name = "TextBox_ExtraLarge.png"
-        TextBox.__init__(self, name, string, (150, 150), [(30, 30)])
+        TextBox.__init__(self, name, string, (130, 170), [(30, 20)])
 
 class Status(TextBox):
     def __init__(self, character):
@@ -238,5 +250,32 @@ class LevelUp(TextBox):
         TextBox.__init__(self, name, string, (296,176), pos, size=13,
                          color=(255,255,255))
 
-def ListMenus():
-    return set(['MainMenu', 'Skills', 'Status', 'LauncherMenu', 'Level Selection', 'Level0'])
+class ItemMenu(TextBox):
+    def __init__(self, item):
+        name = "TextBox_ExtraLarge.png"
+        if item.equiped:
+            string = "Desequip;Throw;Trade"
+        else:
+            string = "Equip;Throw;Trade"
+        if item.usable:
+            string += ';Use'
+        TextBox.__init__(self,name, [string], (130,170), [(30, 20)])
+
+class ItemsMenu(TextBox):
+    def __init__(self, character):
+        name = "TextBox_ExtraLarge.png"
+        string = ""
+        for place, item in character.items.items():
+            string += item.name +';'
+        if string[-1] == ';':
+            string = string[:-1]
+        TextBox.__init__(self,name, [string], (170,170), [(30, 20)])
+
+class DoneBox(TextBox):
+    def __init__(self):
+        name = "TextBox_Small.png"
+        TextBox.__init__(self,name, ["Done"], (80,50), [(20, 10)])
+
+
+def itemList():
+    return ['Carak Dae', 'Broken Artefact']

@@ -25,10 +25,9 @@ class Skill():
                     self.effects['effects'].append(effect)
 
         self.tileEffects = {'values':data['tileEffects'], 'effects':[]}
-        if self.tileEffects['values']:
-            for e in self.tileEffects['values']:
-                effect = Effect.Effect(e['type'], e['power'], e['duration'])
-                self.tileEffects['effects'].append(effect)
+        for e in self.tileEffects['values']:
+            effect = Effect.Effect(e['type'], e['power'], e['duration'])
+            self.tileEffects['effects'].append(effect)
 
     def ToJSON(self):
         """Write the character in a .json
@@ -269,6 +268,3 @@ class Skill():
         character.aiming = pos
         return list(aimable)
 
-
-def ListSkills():
-    return set(['Horizontal', 'Vertical', 'Execution', 'Apocalypse'])

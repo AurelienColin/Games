@@ -115,8 +115,6 @@ def MenusLoop(menu, screen, char=None):
     Output
     None if a skill is used
     'Exit' or 'End Turn': reason to quit the menus"""
-    skills = Skill.ListSkills()
-    implemented_menu = TextBox.ListMenus()
     menus = [menu]
     select = 1
     menuIndex, selectId = screen.OpenMenu(menu)
@@ -134,7 +132,7 @@ def MenusLoop(menu, screen, char=None):
                 ####### We are doing something in the menu ######
                 if event.key == K_RETURN:  # We open a menu
                     choice = screen.objects[menuIndex[0]][0].string[select-1]
-                    if char and choice in skills: # We use a skill
+                    if char and choice in listSkills(): # We use a skill
                         for skill in char.skills:
                             if choice == skill.cara['name']:
                                 print('Aim with skill', choice)
@@ -146,7 +144,7 @@ def MenusLoop(menu, screen, char=None):
                                 else:
                                     return
 
-                    elif choice in implemented_menu:
+                    elif choice in listMenus():
                         print('Open menu:', choice)
                         menus.append(choice)
                         old_menuIndex, old_selectId = menuIndex, selectId
@@ -371,3 +369,8 @@ def VNLoop(screen, lines):
     [screen.RemoveObject(i) for i in current_dialog + list(on_screen.values())]
     print('Dialog end')
 
+def listMenus():
+    return ['MainMenu', 'Skills', 'Status', 'LauncherMenu', 'Level Selection',
+            'Level0', 'Items', 'Use', 'Equip', 'Desequip']+TextBox.itemList()
+def listSkills():
+    return ['Horizontal', 'Vertical', 'Execution', 'Apocalypse', 'Trade']

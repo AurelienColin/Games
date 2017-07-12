@@ -3,6 +3,7 @@ from pytmx import *
 from os.path import join
 import pygame
 from . import Map, Highlight, TextBox, util, Character, Skill
+from .Loop import listSkills
 
 class Screen():
     """A screen had
@@ -18,7 +19,7 @@ class Screen():
         self.tileSize = tileSize
         self.frameNumber = self.tileSize
         circle = pygame.image.load(join('res', 'sprite', 'circle.png'))
-        self.objects = [[circle, (0, 0), 'hide']]
+        self.objects = [[circle, (-tileSize, -tileSize), 'hide']]
         self.charBox = -1
         self.ui={'hovering':[],'initiative':[]}
         self.tileEffects = []
@@ -33,7 +34,27 @@ class Screen():
     def refresh(self):
         circle, circle_pos, show = self.objects[0]
         circle_pos = (circle_pos[0]-4, circle_pos[1])
-        for element in self.objects:
+        tiled_map = [obj for obj in self.objects if obj and obj[2]=='tiled_map']
+        characters = [obj for obj in self.objects if obj and obj[2]=='character']
+        sprites = [obj for obj in self.objects if obj and obj[2]=='sprite']
+        box = [obj for obj in self.objects if obj and obj[2]=='box']
+        others = [obj for obj in self.objects if obj and obj[2] not in ['tiled_map','hide',
+                                                              'character', 'box', 'sprite', 'show']]
+
+        [ele[0].draw(self.display) for ele in tiled_map]
+        if show!='hide':
+            self.display.blit(circle, circle_pos)
+
+        tiles = [effect[0] for effect in self.tileEffects]
+        white = Highlight.HighlightTiles(self.tileSize,tiles, 120, (255, 255,255))
+        [self.display.blit(tile.content, tile.pixel) for pos, tile in white.items()]
+
+        [ele[0].blit(self.display, ele[1]) for ele in characters]
+        [self.display.blit(ele[0], ele[1]) for ele in sprites]
+        [self.display.blit(ele[0].box, ele[1]) for ele in box]
+        [self.display.blit(ele[0], ele[1]) for ele in others]
+
+        """for element in self.objects:
             if element:
                 ele, position, eleType = element[:3]
                 if eleType == 'tiled_map':
@@ -46,7 +67,7 @@ class Screen():
                 elif eleType == 'box':
                     self.display.blit(ele.box, position)
                 elif eleType != 'hide':
-                    self.display.blit(ele, position)
+                    self.display.blit(ele, position)"""
         pygame.display.update()
 
     def Clean(self):
@@ -84,7 +105,7 @@ class Screen():
         """The len is returned to know where is the sprite"""
         sprite = character.sprite[key]
         self.objects.append([sprite, character.pos['px'], 'character'])
-        bar1Index = self.AddHighlight(character.lifebar[0])
+        bar1Index = self.AddHighlight(character.lifebar[0], priority=False)
         bar2Index = self.AddHighlight(character.lifebar[1])
         return bar1Index-1, bar1Index, bar2Index
 
@@ -100,15 +121,18 @@ class Screen():
         if box.imgs:
             for img in box.imgs:
                 self.objects.append([img[0], (pos[0]+img[1][0],
-                                      pos[1]+img[1][1]), 'sprite'])
+                                      pos[1]+img[1][1]), 'others'])
         for i, text in enumerate(box.text):
             self.objects.append([text.string, (text.pixel[0] + pos[0],
                                                  text.pixel[1] + pos[1]),
                                  'text', text.text])
         return [i for i in range(prec-1, len(self.objects))]
 
-    def AddHighlight(self, s):
-        self.objects.append([s.content, (s.pixel[0], s.pixel[1]), 'highlight'])
+    def AddHighlight(self, s, priority=True):
+        if priority:
+            self.objects.append([s.content, (s.pixel[0], s.pixel[1]), 'highlight'])
+        else:
+            self.objects.append([s.content, (s.pixel[0], s.pixel[1]), 'sprite'])
         return len(self.objects)-1
 
     def UpdateStatus(self, character, pos=False):
@@ -140,7 +164,7 @@ class Screen():
         if self.charBox!=-1 and len(self.objects[menuIndex[select]])>3:
             for i in self.ui['childBox']:
                     self.RemoveObject(i)
-            if self.objects[menuIndex[select]][3] in Skill.ListSkills():
+            if self.objects[menuIndex[select]][3] in listSkills():
                 box = TextBox.SkillDetails(Skill.Skill(self.objects[menuIndex[select]][3]),
                                            self.characters[self.charBox])
             else:

@@ -1,6 +1,7 @@
-from script import Screen, Loop
+from py import Screen, Loop
 from os.path import join
 import pygame
+
 
 def Launcher():
     screenHeight, screenWidth = (640,640)
@@ -17,3 +18,6 @@ def Launcher():
 
 if __name__ == '__main__':
     Launcher()
+
+
+# Status minibox (in the bottom right corner) isn't updating

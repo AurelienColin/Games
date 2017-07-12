@@ -96,6 +96,10 @@
                 60,
                 64
             ]
-        }
+        },
+        "items":{
+			"2h":["Carak Dae",true],
+			"ring":["Broken Artefact",false]
+		}
     }
 }
