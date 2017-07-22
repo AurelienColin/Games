@@ -264,6 +264,28 @@ class Character():
                 self.nextSkills[i][1] = -1
         return
 
+
+    def Trade(self, item, screen, tile_target):
+        print("begin trade")
+        item = self.getItem(item)
+        target = [char for char in screen.characters if char.pos['tile']==tile_target]
+        if not target:
+            return
+        target = target[0]
+        if target.team == self.team:
+            print("OK TEAM")
+            if item.spot in target.items:
+                self.items[item.spot] = target.items[item.spot]
+            else:
+                self.items.pop(item.spot)
+            target.items[item.spot] = item
+            print('the item is:', item)
+            print(target.items)
+            print(self.items)
+            target.Desequip(item.name)
+
+
+
     def Attack(self, skill, tiles, screen, tile_target):
         """Use an attack
         Input:

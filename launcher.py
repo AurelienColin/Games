@@ -20,4 +20,10 @@ if __name__ == '__main__':
     Launcher()
 
 
-# Status minibox (in the bottom right corner) isn't updating
+# Text over any menu (not only !its! menu)
+# Status minibox isn't updated whithout moving
+# Should do a void sprite sheet for Trade
+
+# When leaving aiming, should erase screen.ui['hover']
+# Should print items (and is equiped in the box status and items)
+# Should delete item.spot and leave only equiped (like a fire emblem)

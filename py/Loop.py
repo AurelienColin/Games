@@ -67,7 +67,11 @@ def AimingLoop(char, screen, skill):
             elif event.type == KEYDOWN:
                 change = True
                 if event.key == K_RETURN and char.cara['PA'] > skill.cara['cost']:
-                    char.Attack(skill, red, screen, tile)
+                    print('apply:', skill.name)
+                    if skill.name == "Trade":
+                        char.Trade(skill.item, screen, tile)
+                    else:
+                        char.Attack(skill, red, screen, tile)
                     end = True
                     screen.UpdateStatus(char)
                     for i in screen.ui['hovering']:
@@ -103,7 +107,7 @@ def AimingLoop(char, screen, skill):
                     screen.RemoveObject(index)
                 red = {}
                 for pos in s:
-                        red[pos] = screen.AddHighlight(s[pos])
+                        red[pos] = screen.AddHighlight(s[pos], priority=False)
                 screen.onHover((tile[0]*screen.tileSize, tile[1]*screen.tileSize))
 
 def MenusLoop(menu, screen, char=None):
@@ -115,6 +119,9 @@ def MenusLoop(menu, screen, char=None):
     Output
     None if a skill is used
     'Exit' or 'End Turn': reason to quit the menus"""
+    for i in screen.ui['hovering']:
+        screen.RemoveObject(i)
+    screen.ui['hovering'] = []
     menus = [menu]
     select = 1
     menuIndex, selectId = screen.OpenMenu(menu)
@@ -133,16 +140,22 @@ def MenusLoop(menu, screen, char=None):
                 if event.key == K_RETURN:  # We open a menu
                     choice = screen.objects[menuIndex[0]][0].string[select-1]
                     if char and choice in listSkills(): # We use a skill
-                        for skill in char.skills:
-                            if choice == skill.cara['name']:
-                                print('Aim with skill', choice)
-                                screen.QuitMenu(menuIndex, selectId)
-                                select = 1
-                                use = AimingLoop(char, screen, skill)
-                                if not use:
-                                    menuIndex, selectId = screen.OpenMenu(menus[-1], char=char)
-                                else:
-                                    return
+                        skill = False
+                        if choice == "Trade":
+                            skill = Skill.Skill("Trade")
+                            skill.item = screen.currentItem
+                        else:
+                            for skill in char.skills:
+                                if choice == skill.cara['name']:
+                                    break
+                        print('Aim with skill', choice)
+                        screen.QuitMenu(menuIndex, selectId)
+                        select = 1
+                        use = AimingLoop(char, screen, skill)
+                        if not use:
+                            menuIndex, selectId = screen.OpenMenu(menus[-1], char=char)
+                        else:
+                            return
 
                     elif choice in listMenus():
                         print('Open menu:', choice)
@@ -165,7 +178,7 @@ def MenusLoop(menu, screen, char=None):
                     menuIndex, selectId = screen.OpenMenu('Status')
                     screen.RemoveObject(selectId)
                 ##### We are closing a menu #####
-                if event.key == K_ESCAPE or choice == 'Exit' or choice == 'End Turn':
+                if event.key == K_ESCAPE or choice in ['Exit','End Turn']:
                     for index in screen.ui['childBox'] + screen.ui['hovering']:
                         screen.RemoveObject(index)
                     screen.ui['childBox'] = []
@@ -177,6 +190,7 @@ def MenusLoop(menu, screen, char=None):
                         menuIndex, selectId = screen.OpenMenu(menus[-1], char=char)
                         select = 1
                         screen.charBox = -1
+                        choice = screen.objects[menuIndex[0]][0].string[select-1]
                     else: # We quit the last menu
                         menus = []
                         screen.QuitMenu(menuIndex, selectId)
@@ -213,12 +227,12 @@ def PlacementLoop(iniTiles, screen):
     highlighted = Highlight.HighlightTiles(screen.tileSize, iniTiles,60, (0, 0,255))
     blue, red = {}, [False, False]
     for pos in highlighted:
-        blue[pos] = screen.AddHighlight(highlighted[pos])
+        blue[pos] = screen.AddHighlight(highlighted[pos], priority=False)
     l = list(blue.keys())
     select = 0
     selectMenu = 0
     s = Highlight.HighlightTiles(screen.tileSize,[l[select]], 120, (255, 0, 0))
-    red = [screen.AddHighlight(s[l[select]]), l[select]]
+    red = [screen.AddHighlight(s[l[select]], priority=False), l[select]]
 
     mainClock = pygame.time.Clock()
     chars = {}
@@ -321,7 +335,7 @@ def PlacementLoop(iniTiles, screen):
                 screen.RemoveObject(red[0])
                 s = Highlight.HighlightTiles(screen.tileSize,[l[select]],
                                              120, (255, 0, 0))
-                red = [screen.AddHighlight(s[l[select]]), l[select]]
+                red = [screen.AddHighlight(s[l[select]], priority=False), l[select]]
 
 
 def VNLoop(screen, lines):

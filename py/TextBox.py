@@ -40,13 +40,13 @@ class TextBox():
             screen.currentItem = name
         elif name == 'Use':
             char.UseItem(screen.currentItem, screen)
-            self = DoneBox()
+            self = ExitBox()
         elif name == 'Equip':
             char.Equip(screen.currentItem)
-            self = DoneBox()
+            self = ExitBox()
         elif name == 'Desequip':
             char.Desequip(screen.currentItem)
-            self = DoneBox()
+            self = ExitBox()
         return self
 
     def Update(self, texts, pos, size=20):
@@ -267,14 +267,14 @@ class ItemsMenu(TextBox):
         string = ""
         for place, item in character.items.items():
             string += item.name +';'
-        if string[-1] == ';':
+        if string and string[-1] == ';':
             string = string[:-1]
         TextBox.__init__(self,name, [string], (170,170), [(30, 20)])
 
-class DoneBox(TextBox):
+class ExitBox(TextBox):
     def __init__(self):
         name = "TextBox_Small.png"
-        TextBox.__init__(self,name, ["Done"], (80,50), [(20, 10)])
+        TextBox.__init__(self,name, ["Exit"], (80,50), [(20, 10)])
 
 
 def itemList():

@@ -12,6 +12,7 @@ class Skill():
         self.sprite = self.AddSprite('fire_4', 1, 11, 0, 10)
 
     def FromJSON(self, file):
+        self.name = file
         with open(join('res','json', 'skill', file+'.json'), 'r') as file:
             data = json.load(file)['skill']
         self.cara = data['cara']
@@ -81,7 +82,7 @@ class Skill():
         highlighted = Highlight.HighlightTiles(screen.tileSize, aimable,60, (0, 0,255))
         blue = {}
         for pos in highlighted:
-            blue[pos] = screen.AddHighlight(highlighted[pos])
+            blue[pos] = screen.AddHighlight(highlighted[pos], priority=False)
         return blue
 
     def AOE(self, tile_pos, character, screen):

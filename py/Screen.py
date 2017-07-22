@@ -34,11 +34,11 @@ class Screen():
     def refresh(self):
         circle, circle_pos, show = self.objects[0]
         circle_pos = (circle_pos[0]-4, circle_pos[1])
-        tiled_map = [obj for obj in self.objects if obj and obj[2]=='tiled_map']
-        characters = [obj for obj in self.objects if obj and obj[2]=='character']
-        sprites = [obj for obj in self.objects if obj and obj[2]=='sprite']
-        box = [obj for obj in self.objects if obj and obj[2]=='box']
-        others = [obj for obj in self.objects if obj and obj[2] not in ['tiled_map','hide',
+        tiled_map = [obj[:2] for obj in self.objects if obj and obj[2]=='tiled_map']
+        characters = [obj[:2] for obj in self.objects if obj and obj[2]=='character']
+        sprites = [obj[:2] for obj in self.objects if obj and obj[2]=='sprite']
+        box = [obj[:2] for obj in self.objects if obj and obj[2]=='box']
+        others = [obj[:2] for obj in self.objects if obj and obj[2] not in ['tiled_map','hide',
                                                               'character', 'box', 'sprite', 'show']]
 
         [ele[0].draw(self.display) for ele in tiled_map]
@@ -47,27 +47,12 @@ class Screen():
 
         tiles = [effect[0] for effect in self.tileEffects]
         white = Highlight.HighlightTiles(self.tileSize,tiles, 120, (255, 255,255))
-        [self.display.blit(tile.content, tile.pixel) for pos, tile in white.items()]
+        [self.display.blit(tile.content, tile.pixel) for tile in white.values()]
+        [ele.blit(self.display, pos) for ele, pos in characters]
+        [self.display.blit(ele, pos) for ele, pos in sprites]
+        [self.display.blit(ele.box, pos) for ele, pos in box]
+        [self.display.blit(ele, pos) for ele, pos in others]
 
-        [ele[0].blit(self.display, ele[1]) for ele in characters]
-        [self.display.blit(ele[0], ele[1]) for ele in sprites]
-        [self.display.blit(ele[0].box, ele[1]) for ele in box]
-        [self.display.blit(ele[0], ele[1]) for ele in others]
-
-        """for element in self.objects:
-            if element:
-                ele, position, eleType = element[:3]
-                if eleType == 'tiled_map':
-                    # We add the circle after the map (and before anything else)
-                    ele.draw(self.display)
-                    if show != 'hide':
-                        self.display.blit(circle, circle_pos)
-                elif eleType == 'character':
-                    ele.blit(self.display, position)
-                elif eleType == 'box':
-                    self.display.blit(ele.box, position)
-                elif eleType != 'hide':
-                    self.display.blit(ele, position)"""
         pygame.display.update()
 
     def Clean(self):
@@ -106,7 +91,7 @@ class Screen():
         sprite = character.sprite[key]
         self.objects.append([sprite, character.pos['px'], 'character'])
         bar1Index = self.AddHighlight(character.lifebar[0], priority=False)
-        bar2Index = self.AddHighlight(character.lifebar[1])
+        bar2Index = self.AddHighlight(character.lifebar[1], priority=False)
         return bar1Index-1, bar1Index, bar2Index
 
     def AddMap(self, filename):
