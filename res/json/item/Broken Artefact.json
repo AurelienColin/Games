@@ -4,7 +4,6 @@
 		"cara":{},
 		"durability":1,
 		"cost":0,
-		"use":{},
-		"spot":"any"
+		"use":{}
 		}
 }

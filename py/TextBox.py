@@ -265,7 +265,7 @@ class ItemsMenu(TextBox):
     def __init__(self, character):
         name = "TextBox_ExtraLarge.png"
         string = ""
-        for place, item in character.items.items():
+        for item in character.items:
             string += item.name +';'
         if string and string[-1] == ';':
             string = string[:-1]

@@ -26,14 +26,15 @@ class Character():
 
 
     def FromJSON(self, file):
+        print('open:', file)
         with open(join('res','json', 'character', file+'.json'), 'r') as file:
             data = json.load(file)['character']
         self.cara = data['cara']
         self.sprite = {'values': data['sprite']}
         self.sheetName = data['sheet']
         self.CreateSprite()
-        self.items = {place:Item.Item(item[0]) for place, item in data['items'].items()}
-        [self.Equip(name) for name, equiped in data['items'].values() if equiped]
+        self.items = [Item.Item(item) for item, equiped in data['items']]
+        [self.Equip(name) for name, equiped in data['items'] if equiped]
         skills = [(Skill.Skill(skill), level) for skill, level in data['skill']]
         self.skills = []
         self.nextSkills = []
@@ -52,10 +53,15 @@ class Character():
         Nothing, but a .json est written"""
         skills = [skill.cara['name'] for skill in self.skills]
         temp = {'cara':self.cara, 'sprite':self.sprite['values'],
-                'skill':skills, 'sheet':self.sheetName, 'items':self.items}
+                'skill':skills, 'sheet':self.sheetName}
+        temp[items] = [[item.name, item.equiped] for item in self.items]
         util.WriteJSON({'character':temp}, self.cara['name'])
 
     def Equip(self, name):
+        for item in self.items:
+            if item.equiped:
+                print("One item already equiped")
+                return
         item = self.getItem(name)
         for cara, power in item.cara.items():
             self.cara[cara]+=power
@@ -63,6 +69,7 @@ class Character():
 
     def Desequip(self, name):
         item = self.getItem(name)
+        print(item)
         for cara, power in item.cara.items():
             self.cara[cara]-=power
         item.equiped=False
@@ -78,8 +85,8 @@ class Character():
         item.ReduceDurability()
 
     def getItem(self, name):
-        print(name, [item.name for item in self.items.values()])
-        for item in self.items.values():
+        for item in self.items:
+            print('getItem:', item.name, name)
             if item.name == name:
                 return item
 
@@ -272,17 +279,15 @@ class Character():
         if not target:
             return
         target = target[0]
-        if target.team == self.team:
+        if target.team == self.team and len(target.items) < 5:
             print("OK TEAM")
-            if item.spot in target.items:
-                self.items[item.spot] = target.items[item.spot]
-            else:
-                self.items.pop(item.spot)
-            target.items[item.spot] = item
+            if item.equiped:
+                self.Desequip(item.name)
+            self.items.pop(self.items.index(item))
+            target.items.append(item)
             print('the item is:', item)
             print(target.items)
             print(self.items)
-            target.Desequip(item.name)
 
 
 

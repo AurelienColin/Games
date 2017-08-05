@@ -18,7 +18,6 @@ class Item():
             self.usable = True
         else:
             self.usable = False
-        self.spot = data['spot']
         self.durability = data['durability']
 
     def ReduceDurability(self):

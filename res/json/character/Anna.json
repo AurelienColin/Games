@@ -97,9 +97,9 @@
                 64
             ]
         },
-        "items":{
-			"2h":["Carak Dae",true],
-			"ring":["Broken Artefact",false]
-		}
+        "items":[
+			["Carak Dae",true],
+			["Broken Artefact",false]
+		]
     }
 }
