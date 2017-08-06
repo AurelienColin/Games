@@ -249,7 +249,15 @@ class LevelUp(TextBox):
                (45,126), (190,126), (120, 8)]
         TextBox.__init__(self, name, string, (296,176), pos, size=13,
                          color=(255,255,255))
-
+class Drop(TextBox):
+    def __init__(self, drop):
+        name = 'Level_up.png'
+        string = drop
+        pos = [(190,29), (45,62), (190,62), (45, 93), (190,93), (45,126),
+               (190,126)][:len(drop)]
+        TextBox.__init__(self, name, string, (296,176), pos, size=13,
+                         color=(255,255,255))
+    
 class ItemMenu(TextBox):
     def __init__(self, item):
         name = "TextBox_ExtraLarge.png"

@@ -7,6 +7,7 @@ import pygame
 from pygame.locals import *  # Import the event
 import pyganim
 
+max_item = 8
 class Character():
     def __init__(self, file,team = 0, tileSize = None, posTile = False, ia = False, leader = False, coef=1):
         self.index, self.lifebar = None, (None, None)
@@ -43,6 +44,7 @@ class Character():
                 self.skills.append(skill)
             else:
                 self.nextSkills.append([skill, level])
+        self.drop = data['drop']
 
     def ToJSON(self):
         """Write the character in a .json
@@ -53,7 +55,7 @@ class Character():
         Nothing, but a .json est written"""
         skills = [skill.cara['name'] for skill in self.skills]
         temp = {'cara':self.cara, 'sprite':self.sprite['values'],
-                'skill':skills, 'sheet':self.sheetName}
+                'skill':skills, 'sheet':self.sheetName, 'drop':self.drop}
         temp[items] = [[item.name, item.equiped] for item in self.items]
         util.WriteJSON({'character':temp}, self.cara['name'])
 
@@ -279,7 +281,7 @@ class Character():
         if not target:
             return
         target = target[0]
-        if target.team == self.team and len(target.items) < 5:
+        if target.team == self.team and len(target.items) <= max_item:
             print("OK TEAM")
             if item.equiped:
                 self.Desequip(item.name)
@@ -509,3 +511,24 @@ class Character():
                 if transparent and d_to != -1 and  d+d_to <= PM:  # Obstacle on the path
                     queue[(tile[0], tile[1])] = (d+d_to, path+[(x, y)])
         return reachable
+
+    def Drop(self, drop, screen):
+        if self.team == 1:
+            drop = drop[:max_item-len(self.items)]
+            pos = (int((screen.size[0]-288)/2), int((screen.size[1]-174)/2))
+            index = screen.AddTextBox(TextBox.Drop(drop), pos)
+            loop = True
+            mainClock = pygame.time.Clock()
+            while loop:
+                screen.refresh()
+                mainClock.tick(30)
+                for event in pygame.event.get():
+                    if event.type == QUIT:  # The game is closed
+                        pygame.quit()
+                        sys.exit()
+                    if event.type == KEYDOWN:
+                        loop = False
+            for i in index:
+                screen.RemoveObject(i)
+            for name in drop:
+                self.items.append(Item.Item(name))

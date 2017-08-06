@@ -5,6 +5,7 @@ import pyganim
 import pygame
 import json
 import numpy as np
+from random import uniform
 
 class Skill():
     def __init__(self, file):
@@ -144,6 +145,7 @@ class Skill():
         xp - int: xp earn from the attack
         The effects are applied on the targets (character or tile)"""
         xp = 0
+        drop = []
         animated = []
         for tile in tiles:
             for effect in self.tileEffects['effects']:
@@ -201,6 +203,10 @@ class Skill():
                 xp += affected.Affect(dmg, screen)
                 for effect in self.effects['effects']:
                     xp += affected.Affect(effect, screen)
+                if affected.dead:
+                    for name, proba in affected.drop:
+                        if uniform(0.0, 1.0) < proba:
+                            drop.append(name)
         animations = []
         print('launch animation to:', animated)
         for tile in animated:
@@ -213,7 +219,8 @@ class Skill():
                 screen.refresh()
                 mainClock.tick(100)
             [screen.RemoveObject(index) for index in animations]
-
+        if drop:
+            character.Drop(drop, screen)
         return xp
 
     def GetAimable(self, pos, screen, character):

@@ -43,8 +43,8 @@
             "type": "neutral",
             "xp": {
                 "current": 99,
-                "on_damage": 1,
-                "on_kill": 100
+                "on_damage": 0,
+                "on_kill": 1
             }
         },
         "sheet": "Anna_sheet",
@@ -100,6 +100,10 @@
         "items":[
 			["Carak Dae",true],
 			["Broken Artefact",false]
+		],
+		"drop":[
+			["Carak Dae", 0.5],
+			["Broken Artefact", 0.8]
 		]
     }
 }

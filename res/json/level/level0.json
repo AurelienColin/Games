@@ -17,7 +17,7 @@
 			"initial":null,
 			"team":1,
 			"ia":null,
-			"leader":false,
+			"leader":true,
 			"coef":1
 		},{
 			"name":"Henry",
