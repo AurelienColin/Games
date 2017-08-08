@@ -247,7 +247,7 @@ class Character():
         if self.team == 1:
             screen.RemoveUI()
             pos = (int((screen.size[0]-288)/2), int((screen.size[1]-174)/2))
-            index = screen.AddTextBox(TextBox.LevelUp(self), pos)
+            index = screen.AddTextBox(TextBox.LevelUp(self, [pos]))
             loop = True
             mainClock = pygame.time.Clock()
             while loop:
@@ -519,7 +519,7 @@ class Character():
         if self.team == 1:
             drop = drop[:max_item-len(self.items)]
             pos = (int((screen.size[0]-288)/2), int((screen.size[1]-174)/2))
-            index = screen.AddTextBox(TextBox.Drop(drop), pos)
+            index = screen.AddTextBox(TextBox.Drop(drop, [pos]))
             loop = True
             mainClock = pygame.time.Clock()
             while loop:

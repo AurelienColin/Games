@@ -50,7 +50,7 @@ class Screen():
         [self.display.blit(tile.content, tile.pixel) for tile in white.values()]
         [ele.blit(self.display, pos) for ele, pos in characters]
         [self.display.blit(ele, pos) for ele, pos in sprites]
-        [self.display.blit(ele.box, pos) for ele, pos in box]
+        [[self.display.blit(ele.box[i], ele.pos[i]) for i in range(len(ele.box))] for ele, pos in box]
         [self.display.blit(ele, pos) for ele, pos in others]
 
         pygame.display.update()
@@ -69,10 +69,10 @@ class Screen():
         for character in self.characters:
             if mouse_pos == character.pos['tile'] and not character.dead:
                 pos = character.pos['px'][0]+self.tileSize, character.pos['px'][1]+self.tileSize
-                self.ui['hovering'] = self.AddTextBox(TextBox.Portrait(character), pos)
+                self.ui['hovering'] = self.AddTextBox(TextBox.Portrait(character, [pos]))
                 break
-        box = TextBox.TileData(mouse_pos,self.mapData, self.tileSize)
-        self.ui['hovering'] += self.AddTextBox(box, (self.size[0]-90,0))
+        box = TextBox.TileData(mouse_pos,self.mapData, self.tileSize, [(self.size[0]-90,0)])
+        self.ui['hovering'] += self.AddTextBox(box)
         return mouse_pos
 
     def RemoveObject(self, index):
@@ -100,16 +100,17 @@ class Screen():
         self.objects[-1][0].run(self)
         return len(self.objects)-1
 
-    def AddTextBox(self, box, pos):
-        self.objects.append([box, pos, 'box'])
+    def AddTextBox(self, box):
+        self.objects.append([box, box.pos[0], 'box'])
         prec = len(self.objects)
         if box.imgs:
             for img in box.imgs:
-                self.objects.append([img[0], (pos[0]+img[1][0],
-                                      pos[1]+img[1][1]), 'others'])
+                self.objects.append([img[0], (box.pos[0][0]+img[1][0],
+                                     box.pos[0][1]+img[1][1]), 'others'])
         for i, text in enumerate(box.text):
-            self.objects.append([text.string, (text.pixel[0] + pos[0],
-                                                 text.pixel[1] + pos[1]),
+            print("box.pos:", box.pos, '|', box.pos[0])
+            self.objects.append([text.string, (text.pixel[0] + box.pos[0][0],
+                                                 text.pixel[1] + box.pos[0][1]),
                                  'text', text.text])
         return [i for i in range(prec-1, len(self.objects))]
 
@@ -121,23 +122,24 @@ class Screen():
         return len(self.objects)-1
 
     def UpdateStatus(self, character, pos=False):
-        pos = (self.size[1]-128, self.size[0]-100)
+        pos = [(self.size[1]-128, self.size[0]-100)]
         for i in self.ui['status']:
             self.RemoveObject(i)
-        self.ui['status'] = self.AddTextBox(TextBox.Status(character), pos)
+        self.ui['status'] = self.AddTextBox(TextBox.Status(character, pos))
 
 
     def UpdateIniList(self, turns, turn):
         for i in self.ui['initiative']:
             self.RemoveObject(i)
-        box = TextBox.IniList(self.characters, turns, turn)
-        self.ui['initiative'] = self.AddTextBox(box, (0, self.size[1]-50))
+        box = TextBox.IniList(self.characters, turns, turn, [(0, self.size[1]-50)])
+        self.ui['initiative'] = self.AddTextBox(box)
 
 
     def MenuNavigation(self, key, menuIndex, select, selectId):
         alpha = 80
         color = (0,0,0)
         self.RemoveObject(selectId)
+        pos = [(self.size[0]-128, self.size[1]-2*100)]
         if key == K_DOWN:
             select = (select+1)%len(menuIndex)
             if select == 0:
@@ -151,10 +153,10 @@ class Screen():
                     self.RemoveObject(i)
             if self.objects[menuIndex[select]][3] in listSkills():
                 box = TextBox.SkillDetails(Skill.Skill(self.objects[menuIndex[select]][3]),
-                                           self.characters[self.charBox])
+                                           self.characters[self.charBox], pos)
             else:
-                box = TextBox.ChildBox(self.objects[menuIndex[select]][3])
-            self.ui['childBox'] = self.AddTextBox(box,(self.size[0]-128, self.size[1]-2*100))
+                box = TextBox.ChildBox(self.objects[menuIndex[select]][3], pos)
+            self.ui['childBox'] = self.AddTextBox(box)
         size, pos = util.ObjToCoord(self.objects[menuIndex[select]])
         s = Highlight.Highlight(size, alpha, color, pos)
         selectId = self.AddHighlight(s)
@@ -162,10 +164,8 @@ class Screen():
 
 
     def OpenMenu(self, key, char=None):
-        box = TextBox.TextBox.Initialization(key, char=char, screen = self)
-        posX = (self.size[0] - box.size[0])/2
-        posY = (self.size[1] - box.size[1])/2
-        self.menuIndex = self.AddTextBox(box, (posX, posY))
+        box = TextBox.TextBox.Initialization(key, ['middle', self.size], char=char, screen = self)
+        self.menuIndex = self.AddTextBox(box)
 
         alpha = 80
         color = (0,0,0)

@@ -55,8 +55,8 @@ def AimingLoop(char, screen, skill):
     change = True
     end = False
     mainClock = pygame.time.Clock()
-    skillDetails = screen.AddTextBox(TextBox.SkillDetails(skill, char),
-                                     (screen.size[0]-128,screen.size[1]-2*100))
+    box = TextBox.SkillDetails(skill, char, [(screen.size[0]-128,screen.size[1]-2*100)])
+    skillDetails = screen.AddTextBox(box)
     while True:
         screen.refresh()
         mainClock.tick(30)
@@ -178,7 +178,7 @@ def MenusLoop(menu, screen, char=None):
                     screen.RemoveObject(selectId)
                 ##### We are closing a menu #####
                 if event.key == K_ESCAPE or choice in ['Exit','End Turn']:
-                    self.RemoveUI()
+                    screen.RemoveUI()
                     if len(menus) > 1:  # Go to the previous menu
                         menus.pop(-1)
                         print('Return to menu:', menus[-1])
@@ -343,9 +343,9 @@ def VNLoop(screen, lines):
     for line in lines:
         change = False
         if ':' in line:  # This is a declaration
-            box = TextBox.Dialog(util.FormatText(line, 42))
-            pos = (int((screen.size[0]-box.size[0])/2),screen.size[1]-box.size[1])
-            current_dialog = screen.AddTextBox(box, pos)
+            pos = (int((screen.size[0]-300)/2),screen.size[1]-100)
+            box = TextBox.Dialog(util.FormatText(line, 42), [pos])
+            current_dialog = screen.AddTextBox(box)
         else:  # A character enter or leave
             change = True
             line = line.split()
