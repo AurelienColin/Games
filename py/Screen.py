@@ -192,3 +192,9 @@ class Screen():
             if character['initial']:
                 char.index = self.AddCharacter(char, 'standing')
             self.characters.append(char)
+            
+    def RemoveUI(self):
+        for index in self.ui['childBox'] + self.ui['hovering']:
+            self.RemoveObject(index)
+        self.ui['childBox'] = []
+        self.ui['hovering'] = []

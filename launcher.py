@@ -21,8 +21,7 @@ if __name__ == '__main__':
 
 # Text over any menu (not only !its! menu)
 # Status minibox isn't updated whithout moving
-# Remove hover when ECHAP aiming
-# Remove hover on levelup
 # Should do a void sprite sheet for Trade
 # Should print items (and is equiped in the box status and items)
 # Should print info about items (cara when use, equiped, unequiped, durability)
+# Black lifebar not weel positioned

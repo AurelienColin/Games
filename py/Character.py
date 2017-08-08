@@ -243,6 +243,7 @@ class Character():
 
     def LevelUp(self, screen):
         if self.team == 1:
+            screen.RemoveUI()
             pos = (int((screen.size[0]-288)/2), int((screen.size[1]-174)/2))
             index = screen.AddTextBox(TextBox.LevelUp(self), pos)
             loop = True

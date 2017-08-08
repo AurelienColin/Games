@@ -74,9 +74,7 @@ def AimingLoop(char, screen, skill):
                         char.Attack(skill, red, screen, tile)
                     end = True
                     screen.UpdateStatus(char)
-                    for i in screen.ui['hovering']:
-                        screen.RemoveObject(i)
-                    screen.ui['hovering'] = []
+                    screen.RemoveUI()
                 elif event.key == K_DOWN and (tile[0], tile[1]+1) in blue:
                         tile = (tile[0], tile[1]+1)
                 elif event.key == K_UP and (tile[0], tile[1]-1) in blue:
@@ -92,6 +90,7 @@ def AimingLoop(char, screen, skill):
                     tile = mouse_pos
 
             if (event.type == KEYDOWN and event.key == K_ESCAPE) or end:# Return to skill menu
+                screen.RemoveUI()
                 print('Return to skill menu')
                 for index in list(blue.values()) + list(red.values()) + skillDetails:
                     screen.RemoveObject(index)
@@ -179,10 +178,7 @@ def MenusLoop(menu, screen, char=None):
                     screen.RemoveObject(selectId)
                 ##### We are closing a menu #####
                 if event.key == K_ESCAPE or choice in ['Exit','End Turn']:
-                    for index in screen.ui['childBox'] + screen.ui['hovering']:
-                        screen.RemoveObject(index)
-                    screen.ui['childBox'] = []
-                    screen.ui['hovering'] = []
+                    self.RemoveUI()
                     if len(menus) > 1:  # Go to the previous menu
                         menus.pop(-1)
                         print('Return to menu:', menus[-1])
