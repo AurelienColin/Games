@@ -146,7 +146,7 @@ class Character():
         height_life = tileSize*percentage
         size1 = (height_life,2)
         size2 = (tileSize - height_life,2)
-        pos2 = (self.pos['px'][0]+height_life, self.pos['px'][1])
+        pos2 = (self.pos['px'][0]+size1[0], self.pos['px'][1])
         if percentage < 0.5:
             G = 255 - 255*(1-percentage*2)
             R = 255
@@ -231,7 +231,9 @@ class Character():
         else:
             self.AddLifeBar(screen.tileSize)
             screen.objects[self.index[1]][0] = self.lifebar[0].content
+            screen.objects[self.index[1]][1] = self.lifebar[0].pixel
             screen.objects[self.index[2]][0] = self.lifebar[1].content
+            screen.objects[self.index[2]][1] = self.lifebar[1].pixel
         return xp
 
     def AddXP(self, xp, screen):
