@@ -19,10 +19,7 @@ def Launcher():
 if __name__ == '__main__':
     Launcher()
 
-# Text over any menu (not only !its! menu)
 # Status minibox isn't updated whithout moving
 # Should do a void sprite sheet for Trade
 # Add support for mutliple font color
 # Should print info about items (cara when use, equiped, unequiped, durability)
-
-#Bug on level selection: con't ECHAP

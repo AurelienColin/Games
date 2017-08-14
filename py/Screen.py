@@ -21,7 +21,7 @@ class Screen():
         circle = pygame.image.load(join('res', 'sprite', 'circle.png'))
         self.objects = [[circle, (-tileSize, -tileSize), 'hide']]
         self.charBox = -1
-        self.ui={'hovering':[],'initiative':[]}
+        self.ui={'hovering':[],'initiative':[], 'childBox':[]}
         self.tileEffects = []
 
     def MoveCircle(self, pos = None, hide = False):
