@@ -16,6 +16,7 @@ def ObjToCoord(obj):
     rect.width - int: width of the object
     posX - int: px pos of the object (up left)
     pox_y - int: px pos of the object (up left)"""
+    print('enter:', obj, '|', obj[0])
     rect = obj[0].get_rect()
     posX, posY = obj[1]
     return rect.size, obj[1]

@@ -37,9 +37,8 @@ class Screen():
         tiled_map = [obj[:2] for obj in self.objects if obj and obj[2]=='tiled_map']
         characters = [obj[:2] for obj in self.objects if obj and obj[2]=='character']
         sprites = [obj[:2] for obj in self.objects if obj and obj[2]=='sprite']
-        box = [obj[:2] for obj in self.objects if obj and obj[2]=='box']
-        others = [obj[:2] for obj in self.objects if obj and obj[2] not in ['tiled_map','hide',
-                                                              'character', 'box', 'sprite', 'show']]
+        box = [obj[:4] for obj in self.objects if obj and obj[2]=='box']
+        highlight = [obj[:2] for obj in self.objects if obj and obj[2] == 'highlight']
 
         [ele[0].draw(self.display) for ele in tiled_map]
         if show!='hide':
@@ -50,8 +49,15 @@ class Screen():
         [self.display.blit(tile.content, tile.pixel) for tile in white.values()]
         [ele.blit(self.display, pos) for ele, pos in characters]
         [self.display.blit(ele, pos) for ele, pos in sprites]
-        [[self.display.blit(ele.box[i], ele.pos[i]) for i in range(len(ele.box))] for ele, pos in box]
-        [self.display.blit(ele, pos) for ele, pos in others]
+        for ele, pos, t, index in box:
+            for i in index:
+                ele, pos=  self.objects[i][:2]
+                if type(ele) == pygame.Surface:
+                    self.display.blit(ele, pos)
+                else:
+                    for i in range(len(ele.box)):
+                        self.display.blit(ele.box[i], ele.pos[i])
+        [self.display.blit(ele, pos) for ele, pos in highlight]
 
         pygame.display.update()
 
@@ -101,8 +107,8 @@ class Screen():
         return len(self.objects)-1
 
     def AddTextBox(self, box):
-        self.objects.append([box, box.pos[0], 'box'])
         prec = len(self.objects)
+        self.objects.append([box, box.pos[0], 'box'])
         if box.imgs:
             for img in box.imgs:
                 self.objects.append([img[0], (box.pos[0][0]+img[1][0],
@@ -112,7 +118,9 @@ class Screen():
             self.objects.append([text.string, (text.pixel[0] + box.pos[0][0],
                                                  text.pixel[1] + box.pos[0][1]),
                                  'text', text.text])
-        return [i for i in range(prec-1, len(self.objects))]
+        index = [i for i in range(prec, len(self.objects))]
+        self.objects[prec].append(index)
+        return index
 
     def AddHighlight(self, s, priority=True):
         if priority:

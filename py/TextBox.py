@@ -140,7 +140,7 @@ class Portrait(TextBox):
         string = [';'.join(data1), ';'.join(data2)]
         box = ["TextBox_ExtraLarge.png"]
         TextBox.__init__(self, box, string, size, [(20, 10), (130, 10+18+2)], pos, size = 18)
-        self.imgs = [[chara.sprite['portrait'], (0, size[1]-128-12)]]
+        self.imgs = [[chara.sprite['portrait'], (0, size[0][1]-128-12)]]
 
 class IniList(TextBox):
     def __init__(self, characters, turns, turn, pos):
