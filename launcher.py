@@ -21,5 +21,5 @@ if __name__ == '__main__':
 
 # Status minibox isn't updated whithout moving
 # Should do a void sprite sheet for Trade
-# Add support for mutliple font color
+# Adjust item pos
 # Should print info about items (cara when use, equiped, unequiped, durability)

@@ -3,15 +3,24 @@ from os.path import join
 from . import util, Map, Level
 
 class TextBox():
-    def __init__(self, files, texts, dim, text_pos, pos, size=20, color=(0,0,0)):
+    def __init__(self, files, texts, dim, text_pos, pos, size=20, color={'default':(0,0,0)}):
         names = [join('res', 'textbox', file) for file in files]
         self.text = []
         self.string = []
+        c = color['default']
         for j, text in enumerate(texts):
             text = text.split(';')
             self.string += [text[i] for i in range(len(text))]
             self.text += [Text(text[i], (text_pos[j][0], text_pos[j][1]+i*(size+2)),
-                                size, color=color) for i in range(len(text))]
+                          size, color=c) for i in range(len(text))]
+        print("text in object:", self.text)
+        for i, c in color.items():
+            if type(i)==int:
+                if i < 0:
+                    print('change', i, 'to', len(self.text)+i, len(self.text))
+                    i = len(self.text)+i
+                self.text[i].ChangeColor(c)
+                
         self.size = dim
         self.imgs = False
         f1, f2 = pygame.transform.smoothscale, pygame.image.load
@@ -65,10 +74,15 @@ class TextBox():
 class Text():
     def __init__(self, text, pixel, size, color=(0,0,0)):
         font = pygame.font.SysFont('freesans', size)
+        self.size = size
         self.text = text
         self.string = font.render(text, True, color)
         self.pixel = pixel
-
+    
+    def ChangeColor(self, color):
+        font = pygame.font.SysFont('freesans', self.size)
+        self.string = font.render(self.text, True, color)
+        
 class MainMenu(TextBox):
     def __init__(self, pos):
         string = ["Skills;Items;Status;Exit;End Turn"]
@@ -79,7 +93,8 @@ class LauncherMenu(TextBox):
     def __init__(self, pos):
         string = ['Level Selection']
         box = ["Title1.png"]
-        TextBox.__init__(self,box, string, [(200,50)], [(45, 12)], pos, color=(255,255,255))
+        c = {'default':(255,255,255)}
+        TextBox.__init__(self,box, string, [(200,50)], [(45, 12)], pos, color=c)
 
 class LevelSelection(TextBox):
     def __init__(self, pos):
@@ -193,9 +208,12 @@ class StatusBox(TextBox):
             pos = [(posX, posY)]
         pos = pos + [(pos[0][0], pos[0][1]+size[0][1])]
         text_pos += [(45,329), (190,329), (45,362), (190,362), (45, 393), (190,393),
-               (45,426), (190,426)][:len(character.items)]
-        print(pos, size)
-        TextBox.__init__(self, box, string, size, text_pos, pos, size=font_size)
+               (45,426), (190,426)]#[:len(character.items)]
+        c = {'default':(0,0,0)}
+        for i in range(-len(character.items),0):
+            c[i]=(255,255,255)
+        print('color dic:', c)
+        TextBox.__init__(self, box, string, size, text_pos, pos, size=font_size, color=c)
         self.imgs = [[character.sprite['portrait'], (0, 0)]]
 
 class ChildBox(TextBox):
@@ -263,16 +281,18 @@ class LevelUp(TextBox):
         string=[cname, lvl, PV, Spd, Str, Def, Mgc, Res, title]
         text_pos = [(45,29), (190,29), (45,62), (190,62), (45, 93), (190,93),
                (45,126), (190,126), (120, 8)]
+        c = {'default':(255,255,255)}
         TextBox.__init__(self, box, string, [(296,176)], text_pos, pos, size=13,
-                         color=(255,255,255))
+                         color=c)
 class Drop(TextBox):
     def __init__(self, drop, pos):
         box = ['Level_up.png']
         string = drop
         text_pos = [(190,29), (45,62), (190,62), (45, 93), (190,93), (45,126),
                (190,126)][:len(drop)]
+        c = {'default':(255,255,255)}
         TextBox.__init__(self, box, string, [(296,176)], text_pos, pos, size=13,
-                         color=(255,255,255))
+                         color=c)
     
 class ItemMenu(TextBox):
     def __init__(self, item, pos):
