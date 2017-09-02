@@ -207,8 +207,8 @@ class StatusBox(TextBox):
             posY = int((pos[1][1] - (size[0][1]+size[1][1]))/2)
             pos = [(posX, posY)]
         pos = pos + [(pos[0][0], pos[0][1]+size[0][1])]
-        text_pos += [(45,329), (190,329), (45,362), (190,362), (45, 393), (190,393),
-               (45,426), (190,426)]#[:len(character.items)]
+        text_pos += [(30,327), (175,327), (30,360), (175,360), (30, 391), (175,391),
+               (30,424), (175,424)]#[:len(character.items)]
         c = {'default':(0,0,0)}
         for i in range(-len(character.items),0):
             c[i]=(255,255,255)
