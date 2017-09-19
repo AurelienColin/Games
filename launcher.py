@@ -19,7 +19,5 @@ def Launcher():
 if __name__ == '__main__':
     Launcher()
 
-# Status minibox isn't updated whithout moving
+# Add content (skill, item, character, level)
 # Should do a void sprite sheet for Trade
-# Adjust item pos
-# Should print info about items (cara when use, equiped, unequiped, durability)

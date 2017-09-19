@@ -2,8 +2,9 @@ from pygame.locals import *
 from pytmx import *
 from os.path import join
 import pygame
-from . import Map, Highlight, TextBox, util, Character, Skill
+from . import Map, Highlight, TextBox, util, Character, Skill, Item
 from .Loop import listSkills
+from .TextBox import itemList
 
 class Screen():
     """A screen had
@@ -89,7 +90,6 @@ class Screen():
             self.objects.append([sprite, pos, 'character'])
         else:
             self.objects.append([sprite, pos, 'sprite'])
-        print('add sprite at:', pos)
         return len(self.objects)-1
 
     def AddCharacter(self, character, key):
@@ -114,7 +114,6 @@ class Screen():
                 self.objects.append([img[0], (box.pos[0][0]+img[1][0],
                                      box.pos[0][1]+img[1][1]), 'others'])
         for i, text in enumerate(box.text):
-            print("box.pos:", box.pos, '|', box.pos[0])
             self.objects.append([text.string, (text.pixel[0] + box.pos[0][0],
                                                  text.pixel[1] + box.pos[0][1]),
                                  'text', text.text])
@@ -159,11 +158,17 @@ class Screen():
         if self.charBox!=-1 and len(self.objects[menuIndex[select]])>3:
             for i in self.ui['childBox']:
                     self.RemoveObject(i)
-            if self.objects[menuIndex[select]][3] in listSkills():
-                box = TextBox.SkillDetails(Skill.Skill(self.objects[menuIndex[select]][3]),
+            name = self.objects[menuIndex[select]][3]
+            if [skill for skill in listSkills() if skill in name]:
+                skillName = [skill for skill in listSkills() if skill in name][0]
+                box = TextBox.SkillDetails(Skill.Skill(skillName),
                                            self.characters[self.charBox], pos)
+            elif [item for item in itemList() if item in name]:
+                itemName = [item for item in itemList() if item in name][0]
+                pos = [(pos[0][0], pos[0][1]-170)]
+                box = TextBox.ItemDetails(Item.Item(itemName), pos)
             else:
-                box = TextBox.ChildBox(self.objects[menuIndex[select]][3], pos)
+                box = TextBox.ChildBox(name, pos)
             self.ui['childBox'] = self.AddTextBox(box)
         size, pos = util.ObjToCoord(self.objects[menuIndex[select]])
         s = Highlight.Highlight(size, alpha, color, pos)

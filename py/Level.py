@@ -34,7 +34,6 @@ class Level():
             if char.team == 1 and char.leader and not char.dead:
                 opponentVictory = False
         if opponentVictory:
-            print('Game Over')
             self.screen.refresh()
             sys.exit()
 
@@ -119,12 +118,9 @@ class Level():
         while turn not in turns or turns[turn].dead:
             turn +=1
         turns[turn].passTurn()
-
-        print('will apply:', self.screen.tileEffects)
         effects = {}
         for i, tileEffect in enumerate(self.screen.tileEffects):
             pos, effect = tileEffect
-            print('apply effect', pos, effect.since)
             charEffect = Effect.Effect(effect.properties, effect.power, 1)
             if turns[turn].pos['tile'] == pos:
                 turns[turn].Affect(charEffect, self.screen)
@@ -137,14 +133,12 @@ class Level():
                 effect.since += 1
             else:
                 for j in i:
-                    print('remove effect at', pos)
                     self.screen.tileEffects[j] = None
         self.screen.tileEffects = [effect for effect in self.screen.tileEffects if effect]
 
         self.screen.MoveCircle(pos = turns[turn].pos['px'])
         self.screen.UpdateStatus(turns[turn])
         self.screen.UpdateIniList(turns, turn)
-        print('ia:', turns[turn].ia)
         if turns[turn].ia:
             turns[turn].IA_Action(self.screen)
             self.CheckVictoryCondition()

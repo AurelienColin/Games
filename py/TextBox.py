@@ -13,11 +13,9 @@ class TextBox():
             self.string += [text[i] for i in range(len(text))]
             self.text += [Text(text[i], (text_pos[j][0], text_pos[j][1]+i*(size+2)),
                           size, color=c) for i in range(len(text))]
-        print("text in object:", self.text)
         for i, c in color.items():
             if type(i)==int:
                 if i < 0:
-                    print('change', i, 'to', len(self.text)+i, len(self.text))
                     i = len(self.text)+i
                 self.text[i].ChangeColor(c)
                 
@@ -139,6 +137,21 @@ class SkillDetails(TextBox):
         string = [';'.join(data)]
         box = ["TextBox_ExtraLarge.png"]
         TextBox.__init__(self, box, string, [(128,100)], [(20, 10)], pos, size = 15)
+        
+class ItemDetails(TextBox):
+    def __init__(self, item, pos):
+        data = ['       -- Passif --;', 'PA: ', item.cara['PA'], '; PM: ', item.cara['PM'], ';']+\
+            ['Str: ', item.cara['strength'], '; Mgc: ', item.cara['magic'], ';']+\
+            ['Def: ', item.cara['defense'], '; Res: ', item.cara['resistance'], ';']+\
+            ['Spd: ', item.cara['speed'], ';PV: ', item.cara['PV'], ';']+\
+            ['       -- Actif --;', 'PV: ', item.use['PV'], ';PM: ', item.use['PM'], ';']+\
+            ['Str: ', item.use['strength'], ';Mgc: ', item.use['magic'], ';']+\
+            ['Def: ', item.use['defense'], ';Res: ', item.use['resistance'], ';']+\
+            ['Spd: ', item.use['speed'], ';PV: ', item.use['PV'], ';']+\
+            ['Cost: ', item.cost]
+        string = [''.join([str(ele) for ele in data])]
+        box = ["TextBox_ExtraLarge.png"]
+        TextBox.__init__(self, box, string, [(128,370)], [(20, 20)], pos, size = 15)
 
 class Portrait(TextBox):
     def __init__(self, chara, pos):
@@ -197,9 +210,15 @@ class StatusBox(TextBox):
                     + str(u(c['resistance'])) + ';Spd: ' + str(u(c['speed'])) \
                     + ';Hit: ' + str(u(c['hit'])) + ';Avd: ' + str(u(c['avoid']))
         for skill in character.skills[:5]:
-            string[3] +=skill.cara['name'] + ';'
+            string[3] +=' '+skill.cara['name'] + ';'
         string[3] = string[3][:-1]  # Remove the last ';'
-        string+=[item.name for item in character.items]
+        temp = []
+        for item in character.items:
+            if item.usable:
+                temp.append(' ' + item.name +'  '+ str(item.durability))
+            else:
+                temp.append(' ' + item.name)
+        string+=temp
         box = ["TextBox_ExtraLarge.png", "Level_up.png"]
         size = [(300, 300), (296,176)]
         if pos[0] == "middle":  # pos[1] == screen.size
@@ -212,7 +231,6 @@ class StatusBox(TextBox):
         c = {'default':(0,0,0)}
         for i in range(-len(character.items),0):
             c[i]=(255,255,255)
-        print('color dic:', c)
         TextBox.__init__(self, box, string, size, text_pos, pos, size=font_size, color=c)
         self.imgs = [[character.sprite['portrait'], (0, 0)]]
 
@@ -308,12 +326,8 @@ class ItemMenu(TextBox):
 class ItemsMenu(TextBox):
     def __init__(self, character, pos):
         box = ["TextBox_ExtraLarge.png"]
-        string = ""
-        for item in character.items:
-            string += item.name +';'
-        if string and string[-1] == ';':
-            string = string[:-1]
-        TextBox.__init__(self,box, [string], [(170,170)], [(30, 20)], pos)
+        string = ';'.join([item.name for item in character.items])
+        TextBox.__init__(self,box, [string], [(170,205)], [(20, 15)], pos)
 
 class ExitBox(TextBox):
     def __init__(self, pos):

@@ -27,7 +27,6 @@ class Character():
 
 
     def FromJSON(self, file):
-        print('open:', file)
         with open(join('res','json', 'character', file+'.json'), 'r') as file:
             data = json.load(file)['character']
         self.cara = data['cara']
@@ -60,35 +59,31 @@ class Character():
         util.WriteJSON({'character':temp}, self.cara['name'])
 
     def Equip(self, name):
-        for item in self.items:
-            if item.equiped:
-                print("One item already equiped")
-                return
-        item = self.getItem(name)
-        for cara, power in item.cara.items():
-            self.cara[cara]+=power
-        item.equiped=True
+        if not [item for item in self.items if item.equiped]:
+            item = self.getItem(name)
+            for cara, power in item.cara.items():
+                self.cara[cara]+=power
+            item.equiped=True
 
     def Desequip(self, name):
         item = self.getItem(name)
-        print(item)
         for cara, power in item.cara.items():
             self.cara[cara]-=power
         item.equiped=False
 
     def UseItem(self, name, screen):
         item = self.getItem(name)
-        for cara, value in item.use.items():
-            power, length = value
-            effect = Effect.Effect(cara, power, length)
-            self.Affect(effect, screen)
-            self.cara['effects'].append(effect)
-        self.cara['PA']-=item.cost
-        item.ReduceDurability()
+        if item.usable:
+            for cara, value in item.use.items():
+                power, length = value
+                effect = Effect.Effect(cara, power, length)
+                self.Affect(effect, screen)
+                self.cara['effects'].append(effect)
+            self.cara['PA']-=item.cost
+            item.ReduceDurability()
 
     def getItem(self, name):
         for item in self.items:
-            print('getItem:', item.name, name)
             if item.name == name:
                 return item
 
@@ -120,7 +115,6 @@ class Character():
 
         Output:
         obj - a sprite"""
-        print('AddSpriteCharacter:', begin, end)
         rows = self.sprite['values']['rows']
         cols = self.sprite['values']['cols']
         if not end:
@@ -278,21 +272,16 @@ class Character():
 
 
     def Trade(self, item, screen, tile_target):
-        print("begin trade")
         item = self.getItem(item)
         target = [char for char in screen.characters if char.pos['tile']==tile_target]
         if not target:
             return
         target = target[0]
         if target.team == self.team and len(target.items) <= max_item:
-            print("OK TEAM")
             if item.equiped:
                 self.Desequip(item.name)
             self.items.pop(self.items.index(item))
             target.items.append(item)
-            print('the item is:', item)
-            print(target.items)
-            print(self.items)
 
 
 

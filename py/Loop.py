@@ -26,7 +26,6 @@ def IfDeplacement(char, key, screen):
         newPos = (oldPos[0]+1, oldPos[1])
     else:
         newPos = oldPos
-    print('Move from', oldPos, 'to', newPos)
     px_pos = newPos[0]*screen.tileSize, newPos[1]*screen.tileSize
     change = True
     for altChar in screen.characters:
@@ -67,7 +66,6 @@ def AimingLoop(char, screen, skill):
             elif event.type == KEYDOWN:
                 change = True
                 if event.key == K_RETURN and char.cara['PA'] > skill.cara['cost']:
-                    print('apply:', skill.name)
                     if skill.name == "Trade":
                         char.Trade(skill.item, screen, tile)
                     else:
@@ -91,7 +89,6 @@ def AimingLoop(char, screen, skill):
 
             if (event.type == KEYDOWN and event.key == K_ESCAPE) or end:# Return to skill menu
                 screen.RemoveUI()
-                print('Return to skill menu')
                 for index in list(blue.values()) + list(red.values()) + skillDetails:
                     screen.RemoveObject(index)
                 if end:
@@ -137,6 +134,8 @@ def MenusLoop(menu, screen, char=None):
             elif event.type == KEYDOWN:
                 ####### We are doing something in the menu ######
                 if event.key == K_RETURN:  # We open a menu
+                    if choice == 'Status':
+                        continue
                     choice = screen.objects[menuIndex[0]][0].string[select-1]
                     if char and choice in listSkills(): # We use a skill
                         skill = False
@@ -147,7 +146,6 @@ def MenusLoop(menu, screen, char=None):
                             for skill in char.skills:
                                 if choice == skill.cara['name']:
                                     break
-                        print('Aim with skill', choice)
                         screen.QuitMenu(menuIndex, selectId)
                         select = 1
                         use = AimingLoop(char, screen, skill)
@@ -157,7 +155,6 @@ def MenusLoop(menu, screen, char=None):
                             return
 
                     elif choice in listMenus():
-                        print('Open menu:', choice)
                         menus.append(choice)
                         old_menuIndex, old_selectId = menuIndex, selectId
                         menuIndex, selectId = screen.OpenMenu(menus[-1], char=char)
@@ -181,7 +178,6 @@ def MenusLoop(menu, screen, char=None):
                     screen.RemoveUI()
                     if len(menus) > 1:  # Go to the previous menu
                         menus.pop(-1)
-                        print('Return to menu:', menus[-1])
                         screen.QuitMenu(menuIndex, selectId)
                         menuIndex, selectId = screen.OpenMenu(menus[-1], char=char)
                         select = 1
@@ -207,7 +203,6 @@ def MovementLoop(char, screen):
 
             elif event.type == KEYDOWN:
                 if event.key == K_RETURN:
-                    print('Opening main menu')
                     return 'MainMenu'
                 if event.key in [K_UP, K_DOWN, K_RIGHT, K_LEFT]:
                     # We move the current character
@@ -322,7 +317,6 @@ def PlacementLoop(iniTiles, screen):
                 mouse_pos = screen.onHover(event.pos)
                 for i, tile in enumerate(l):
                     if mouse_pos == tile:
-                        print(mouse_pos)
                         select = i
                         change = True
                         break
@@ -377,7 +371,6 @@ def VNLoop(screen, lines):
                         change = True
                         [screen.RemoveObject(index) for index in current_dialog]
     [screen.RemoveObject(i) for i in current_dialog + list(on_screen.values())]
-    print('Dialog end')
 
 def listMenus():
     return ['MainMenu', 'Skills', 'Status', 'LauncherMenu', 'Level Selection',

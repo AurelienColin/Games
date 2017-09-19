@@ -17,8 +17,14 @@ class Item():
             self.use = data['use']
             self.usable = True
         else:
+            self.use = {}
             self.usable = False
         self.durability = data['durability']
+        for key in ['PA', 'PV', 'PM', 'strength', 'magic', 'defense', 'resistance', 'speed']:
+            if key not in self.cara:
+                self.cara[key]=0
+            if key not in self.use:
+                self.use[key]=0
 
     def ReduceDurability(self):
         self.durability-=1

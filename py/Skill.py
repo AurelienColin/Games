@@ -149,7 +149,6 @@ class Skill():
         animated = []
         for tile in tiles:
             for effect in self.tileEffects['effects']:
-                print('apply effect',effect)
                 screen.tileEffects.append([tile, effect])
         for i, affected in enumerate(allAffected):
             cara = affected.cara
@@ -208,10 +207,8 @@ class Skill():
                         if uniform(0.0, 1.0) < proba:
                             drop.append(name)
         animations = []
-        print('launch animation to:', animated)
         for tile in animated:
             pos = tuple(x*screen.tileSize for x in tile)
-            print('indeed:', pos)
             animations.append(screen.AddSprite(self.sprite, pos))
         if animations != []:
             mainClock = pygame.time.Clock()
