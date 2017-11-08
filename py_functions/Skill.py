@@ -30,6 +30,7 @@ class Skill():
         for e in self.tileEffects['values']:
             effect = Effect.Effect(e['type'], e['power'], e['duration'])
             self.tileEffects['effects'].append(effect)
+        self.sound = pygame.mixer.Sound(join('res', 'sound', data['sound']))
 
     def ToJSON(self):
         """Write the character in a .json

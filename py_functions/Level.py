@@ -19,7 +19,13 @@ class Level():
         screen.IniChar(chars)
 
         iniTiles = data['initial_tiles']
+        self.music = pygame.mixer.Sound(join('res', 'music', data['music']['placement']))
+        self.music.play(loops=-1)
         Loop.PlacementLoop(iniTiles, self.screen)
+        self.music.stop()
+        
+        self.music = pygame.mixer.Sound(join('res', 'music', data['music']['TRPG']))
+        self.music.play(loops=-1)
         self.victories = data['victories']
         self.ModeTRPG()
 
@@ -35,6 +41,7 @@ class Level():
                 opponentVictory = False
         if opponentVictory:
             self.screen.refresh()
+            self.music.stop()
             sys.exit()
 
         for victory in self.victories:
@@ -50,6 +57,7 @@ class Level():
                         playerVictory = False
             if playerVictory:
                 print('You win')
+                self.music.stop()
                 self = Level(self.screen, nextLevel)
 
     def ModeTRPG(self):

@@ -1,4 +1,6 @@
-from py import Screen, Loop
+import py_functions.Screen as Screen
+import py_functions.Loop as Loop
+
 from os.path import join
 import pygame
 
@@ -20,4 +22,3 @@ if __name__ == '__main__':
     Launcher()
 
 # Add content (skill, item, character, level)
-# Should do a void sprite sheet for Trade

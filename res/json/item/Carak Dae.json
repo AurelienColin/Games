@@ -11,6 +11,7 @@
 			"PV_max":[20,1],
 			"strength":[50,2],
 			"PA":[5,3]
-				}
+				},
+		"sound":"Unsheathed.ogg"
 		}
 }

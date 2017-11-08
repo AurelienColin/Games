@@ -25,6 +25,7 @@
 		"tileEffects":[{
 				"type":"strength",
 				"duration":5,
-				"power":-50}]
+				"power":-50}],
+		"sound":"Unsheathed.ogg"
 }
 }

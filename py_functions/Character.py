@@ -74,6 +74,7 @@ class Character():
     def UseItem(self, name, screen):
         item = self.getItem(name)
         if item.usable:
+            item.sound.play()
             for cara, value in item.use.items():
                 power, length = value
                 effect = Effect.Effect(cara, power, length)
@@ -316,6 +317,8 @@ class Character():
         for character in screen.characters:
             if character.pos['tile'] in tiles:
                 affected.append(character)
+                
+        skill.sound.play()
 
         self.cara = cara
         self.AddXP(skill.Affect(self, affected, tiles, screen), screen)

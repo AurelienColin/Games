@@ -1,3 +1,4 @@
+music_on VC3_Main_Theme.ogg
 enter Anna Anna_fullL.png raw 0,-256
 Anna: Sir, won't you give up and put down your weapon?
 enter Henry Henry_fullL.png sym -256,-256
@@ -10,6 +11,8 @@ Anna: No. Your reign end today.
 Henry: This will be decided on the battlefied. Show me the strength of your resolution.
 leave Henry
 Anna: I never wanted to harm you, my king.
+sound Unsheathed.ogg
 Anna: I only wanted...
 leave Anna
 Narator: Why do we fight?
+music_off

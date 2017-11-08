@@ -30,6 +30,7 @@
 				"type":"PM",
 				"duration":5,
 				"power":-1
-				}]
+				}],
+		"sound":"Unsheathed.ogg"
 	}
 }

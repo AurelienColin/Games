@@ -1,5 +1,6 @@
 from os.path import join
 import json
+import pygame
 
 class Item():
     def __init__(self, file):
@@ -24,7 +25,8 @@ class Item():
             if key not in self.cara:
                 self.cara[key]=0
             if key not in self.use:
-                self.use[key]=0
+                self.use[key]=[0,0]
+        self.sound = pygame.mixer.Sound(join('res', 'sound', data['sound']))
 
     def ReduceDurability(self):
         self.durability-=1

@@ -340,7 +340,7 @@ def VNLoop(screen, lines):
             pos = (int((screen.size[0]-300)/2),screen.size[1]-100)
             box = TextBox.Dialog(util.FormatText(line, 42), [pos])
             current_dialog = screen.AddTextBox(box)
-        else:  # A character enter or leave
+        else:  # A character enter or leave, or a music/sound is played
             change = True
             line = line.split()
             if line[0] == 'enter':
@@ -359,6 +359,13 @@ def VNLoop(screen, lines):
                 on_screen[char] = screen.AddSprite(sprite, (x, y))
             elif line[0] == 'leave':
                 screen.RemoveObject(on_screen[line[1]])
+            elif line[0] == 'music_on':
+                music = pygame.mixer.Sound(join('res', 'music', line[1]))
+                music.play(loops=-1)
+            elif line[0] == 'music_off':
+                music.stop()
+            elif line[0] == 'sound':
+                pygame.mixer.Sound(join('res', 'sound', line[1])).play()
         while change == False:
             screen.refresh()
             mainClock.tick(30)

@@ -4,6 +4,7 @@
 		"cara":{},
 		"durability":1,
 		"cost":0,
-		"use":{}
+		"use":{},
+		"sound":"Unsheathed.ogg"
 		}
 }
