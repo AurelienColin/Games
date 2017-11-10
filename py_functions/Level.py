@@ -7,7 +7,7 @@ import json
 class Level():
     def __init__(self, screen, file):
         screen.Clean()
-        with open(join('res','json', 'level', file+'.json'), 'r') as file:
+        with open(join('res','json', 'level', file), 'r') as file:
             data = json.load(file)['level']
         mapIndex = screen.AddMap(data['map'])
         screen.mapData = screen.objects[mapIndex][0].renderer.tmx_data
@@ -106,7 +106,7 @@ class Level():
         self.screen.MoveCircle(pos = turns[turn].pos['px'])
         self.screen.UpdateStatus(turns[turn])
         self.screen.UpdateIniList(turns, turn)
-        if turns[turn].ia:
+        if turns[turn].ia!='null':
             turns[turn].IA_Action(self.screen)
             self.CheckVictoryCondition()
             return self.NextTurn(turns, turn)

@@ -10,7 +10,6 @@
             "avoid": 1,
             "defense": 1,
             "effects": [
-                false
             ],
             "elementalRes": {
                 "earth": 1,
@@ -47,7 +46,7 @@
                 "on_kill": 1
             }
         },
-        "sheet": "Anna_sheet",
+        "sheet": "Anna_sheet.png",
         "skill": [
             ["Execution", 1],
             ["Horizontal", 1],

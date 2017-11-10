@@ -10,7 +10,6 @@ from random import uniform
 class Skill():
     def __init__(self, file):
         self.FromJSON(file)
-        self.sprite = self.AddSprite('fire_4', 1, 11, 0, 10)
 
     def FromJSON(self, file):
         self.name = file
@@ -56,7 +55,7 @@ class Skill():
 
         Output:
         obj - a sprite"""
-        fullname = join('res', 'sprite', 'effect', name + '.png')
+        fullname = join('res', 'sprite', 'effect', name)
         perso = pyganim.getImagesFromSpriteSheet(fullname,cols=cols,rows=rows)[begin:end]
         if end > begin+1:
             frames = list(zip(perso, [100]*(end-begin)))
@@ -100,7 +99,7 @@ class Skill():
         tiles = [tile_pos]
         if self.cara['size'] == 1:
             pass
-        elif not self.cara['AOE']:
+        elif self.cara['AOE'] == 'null':
             for i in range(self.cara['size']):
                 j = 0
                 while j+i < self.cara['size']:

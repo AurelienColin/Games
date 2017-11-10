@@ -10,7 +10,6 @@
             "avoid": 1,
             "defense": 30,
             "effects": [
-                false
             ],
             "elementalRes": {
                 "earth": 1,
@@ -47,7 +46,7 @@
                 "on_kill": 100
             }
         },
-        "sheet": "Henry_sheet",
+        "sheet": "Henry_sheet.png",
         "skill": [
             ["Apocalypse", 1],
             ["Horizontal", 1]

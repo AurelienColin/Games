@@ -2,7 +2,7 @@
     "skill": {
         "cara": {
 			"name":"Apocalypse",
-			"AOE":null,
+			"AOE":"null",
 			"size":2,
 			"cost":4,
 			"damage":10,
@@ -20,7 +20,7 @@
 				10
 			]
 		},
-        "sheet": "fire_4",
+        "sheet": "fire_4.png",
 		"effects":  [{
 				"type":"PA",
 				"duration":2,

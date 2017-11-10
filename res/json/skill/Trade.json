@@ -2,7 +2,7 @@
     "skill": {
         "cara": {
 			"name":"Trade",
-			"AOE":null,
+			"AOE":"null",
 			"size":1,
 			"cost":2,
 			"damage":0,
@@ -10,7 +10,7 @@
 			"perce":false,
 			"type":"physic",
 			"ele":"neutral",
-			"hit":10
+			"hit":10.0
 			},
         "sprite":{
 			"rows":1,
@@ -20,7 +20,7 @@
 				1
 			]
 		},
-		"sheet": "fire_4",
+		"sheet": "void.png",
 		"effects": [],
 		"tileEffects":[],
 		"sound":"Unsheathed.ogg"

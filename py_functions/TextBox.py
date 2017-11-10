@@ -45,12 +45,16 @@ class TextBox():
         elif name == 'Level Selection':
             self = LevelSelection(pos)
         elif name == 'Level0':
-            Level.Level(screen, 'level0')
+            Level.Level(screen, 'level0.json')
         elif name == 'Items':
             self = ItemsMenu(char, pos)
         elif name in itemList():
-            self = ItemMenu(char.getItem(name), pos)
-            screen.currentItem = name
+            if char.getItem(name):
+                self = ItemMenu(char.getItem(name), pos)
+                screen.currentItem = name
+            else:
+                self = ExitBox(pos)
+                
         elif name == 'Use':
             char.UseItem(screen.currentItem, screen)
             self = ExitBox(pos)

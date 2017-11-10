@@ -3,29 +3,29 @@
         "map":"TestLevel.tmx",
 		"victories":[{
 			"condition":"destroy",
-			"next_level":"level0"}],
+			"next_level":"level0.json"}],
 		"script":"level0.txt",
 		"characters":[{
-			"name":"Anna",
-			"initial":null,
+			"name":"Anna.json",
+			"initial":[-1,-1],
 			"team":1,
-			"ia":null,
+			"ia":"null",
 			"leader":true,
-			"coef":1
+			"coef":1.0
 		},{
-			"name":"Henry",
-			"initial":null,
+			"name":"Henry.json",
+			"initial":[-1,-1],
 			"team":1,
-			"ia":null,
+			"ia":"null",
 			"leader":true,
-			"coef":1
+			"coef":1.0
 		},{
-			"name":"Henry",
+			"name":"Henry.json",
 			"initial":[3,3],
 			"team":2,
 			"ia":"defensif",
 			"leader":false,
-			"coef":1
+			"coef":1.0
 		}],
 		"initial_tiles":[[5, 5], [10,5], [3,2]],
 		"music": {

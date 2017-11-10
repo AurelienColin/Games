@@ -27,7 +27,7 @@ class Character():
 
 
     def FromJSON(self, file):
-        with open(join('res','json', 'character', file+'.json'), 'r') as file:
+        with open(join('res','json', 'character', file), 'r') as file:
             data = json.load(file)['character']
         self.cara = data['cara']
         self.sprite = {'values': data['sprite']}
@@ -81,7 +81,10 @@ class Character():
                 self.Affect(effect, screen)
                 self.cara['effects'].append(effect)
             self.cara['PA']-=item.cost
-            item.ReduceDurability()
+            item.durability-=1
+            if item.durability == 0:
+                self.items.pop(self.items.index(item))
+                self.items.append(Item.Item("Broken Artefact"))
 
     def getItem(self, name):
         for item in self.items:
@@ -120,7 +123,7 @@ class Character():
         cols = self.sprite['values']['cols']
         if not end:
             end = begin+1
-        fullname = join('res', 'sprite', self.cara['name'], str(self.sheetName) + '.png')
+        fullname = join('res', 'sprite', self.cara['name'], str(self.sheetName))
         perso = pyganim.getImagesFromSpriteSheet(fullname,cols=cols,rows= rows)[begin:end]
         if end > begin+1:
             frames = list(zip(perso, [200]*(end-begin)))

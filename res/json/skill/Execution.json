@@ -2,7 +2,7 @@
     "skill": {
         "cara": {
 			"name":"Execution",
-			"AOE":null,
+			"AOE":"null",
 			"size":1,
 			"cost":5,
 			"damage":30,
@@ -20,7 +20,7 @@
 				10
 			]
 		},
-		"sheet": "fire_4",
+		"sheet": "fire_4.png",
 		"effects": [],
 		"tileEffects":[],
 		"sound":"Unsheathed.ogg"

@@ -202,7 +202,7 @@ class Screen():
                                         ia = character['ia'],
                                         leader = character['leader'],
                                         coef=character['coef'])
-            if character['initial']:
+            if character['initial']!=[-1,-1]:
                 char.index = self.AddCharacter(char, 'standing')
             self.characters.append(char)
             

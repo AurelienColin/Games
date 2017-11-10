@@ -27,8 +27,3 @@ class Item():
             if key not in self.use:
                 self.use[key]=[0,0]
         self.sound = pygame.mixer.Sound(join('res', 'sound', data['sound']))
-
-    def ReduceDurability(self):
-        self.durability-=1
-        if self.durability == 0:
-            self = Item("Broken Arte")
