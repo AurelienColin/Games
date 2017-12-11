@@ -1,0 +1,171 @@
+{
+  "plaine": {
+    "slowness" : 1,
+    "Def" : 0,
+    "Res" : 0,
+    "Avoid" : 0,
+    "type": "neutral",
+    "transparent":true
+  },
+  "pont": {
+    "slowness" : 1,
+    "Def" : 0,
+    "Res" : 0,
+    "Avoid" : 0,
+    "type": "neutral",
+    "transparent":true
+  },
+  "montagne": {
+    "slowness" : 4,
+    "Def" : 40,
+    "Res" : 0,
+    "Avoid" : 40,
+    "type": "earth",
+    "transparent":false
+  },
+  "gue": {
+    "slowness" : 1,
+    "Def" : 0,
+    "Res" : 0,
+    "Avoid" : -12,
+    "type": "neutral",
+    "transparent":true
+  },
+  "rive": {
+    "slowness" : 1,
+    "Def" : 0,
+    "Res" : 0,
+    "Avoid" : 0,
+    "type": "neutral",
+    "transparent":true
+  },
+  "coffre": {
+    "slowness" : -1,
+    "Def" : 0,
+    "Res" : 0,
+    "Avoid" : 0,
+    "type": "neutral",
+    "transparent":false
+  },
+  "eau": {
+    "slowness" : -1,
+    "Def" : 0,
+    "Res" : 0,
+    "Avoid" : 0,
+    "type": "neutral",
+    "transparent":true
+  },
+  "falaise": {
+    "slowness" : -1,
+    "Def" : 0,
+    "Res" : 0,
+    "Avoid" : 0,
+    "type": "neutral",
+    "transparent":true
+  },
+  "colline": {
+    "slowness" : 2,
+    "Def" : 26,
+    "Res" : 0,
+    "Avoid" : 26,
+    "type": "neutral",
+    "transparent":true
+  },
+  "foret": {
+    "slowness" : 2,
+    "Def" : 13,
+    "Res" : 0,
+    "Avoid" : 13,
+    "type": "neutral",
+    "transparent":false
+  },
+  "chateau": {
+    "slowness" : -1,
+    "Def" : 0,
+    "Res" : 0,
+    "Avoid" : 0,
+    "type": "neutral",
+    "transparent":false
+  },
+  "maison": {
+    "slowness" : 2,
+    "Def" : 13,
+    "Res" : 13,
+    "Avoid" : 13,
+    "type": "neutral",
+    "transparent":true
+  },
+  "boutique": {
+    "slowness" : 2,
+    "Def" : 13,
+    "Res" : 13,
+    "Avoid" : 13,
+    "type": "neutral",
+    "transparent":true
+  },
+  "armurerie": {
+    "slowness" : 2,
+    "Def" : 13,
+    "Res" : 13,
+    "Avoid" : 13,
+    "type": "neutral",
+    "transparent":true
+  },
+  "entree du chateau": {
+    "slowness" : 2,
+    "Def" : 26,
+    "Res" : 26,
+    "Avoid" : 26,
+    "type": "neutral",
+    "transparent":true
+  },
+  "ruine": {
+    "slowness" : 2,
+    "Def" : 8,
+    "Res" : 24,
+    "Avoid" : 8,
+    "type": "neutral",
+    "transparent":true
+  },
+  "entree": {
+    "slowness" : 2,
+    "Def" : 15,
+    "Res" : 15,
+    "Avoid" : 15,
+    "type": "neutral",
+    "transparent":true
+  },
+  "ruines": {
+    "slowness" : -1,
+    "Def" : 0,
+    "Res" : 0,
+    "Avoid" : 0,
+    "type": "neutral",
+    "transparent":true
+  },
+  "village": {
+    "slowness" : -1,
+    "Def" : 0,
+    "Res" : 0,
+    "Avoid" : 0,
+    "type": "neutral",
+    "transparent":false
+  },
+  "fort": {
+    "slowness" : 2,
+    "Def" : 26,
+    "Res" : 26,
+    "Avoid" : 26,
+    "type": "neutral",
+    "transparent":true
+  },
+  "colise": {
+    "slowness" : 2,
+    "Def" : 13,
+    "Res" : 13,
+    "Avoid" : 13,
+    "type": "neutral",
+    "transparent":true
+  }
+  
+}

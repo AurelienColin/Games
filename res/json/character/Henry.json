@@ -1,44 +1,43 @@
 {
     "character": {
         "cara": {
-            "PA": 100,
-            "PA_max": 100,
-            "PM": 100,
-            "PM_max": 100,
-            "PV": 100,
-            "PV_max": 100,
-            "avoid": 1,
-            "defense": 30,
+            "PA": 5,
+            "PA_max": 5,
+            "PM": 3,
+            "PM_max": 3,
+            "PV": 60,
+            "PV_max": 30,
+            "avoid": 0,
+            "defense": 40,
             "effects": [
             ],
             "elementalRes": {
-                "earth": 1,
-                "fire": 1,
-                "holy": 1,
-                "neutral": 1,
-                "unholy": 1,
-                "water": 1,
-                "wind": 1
+                "earth": 0,
+                "fire": 0,
+                "holy": 0,
+                "neutral": 0,
+                "unholy": 0,
+                "water": 0,
+                "wind": 0
             },
             "growth": {
                 "PV": 5,
-                "defense": 5,
-                "magic": 5,
-                "resistance": 5,
-                "speed": 5,
-                "strength": 5
+                "defense": 2,
+                "magic": 2,
+                "resistance": 1,
+                "speed": 1,
+                "strength": 1
             },
-            "hit": 1,
+            "hit": 0,
             "level": 1,
-            "magic": 1,
+            "magic": 0,
             "name": "Henry",
-            "object": 1,
-            "resPA": 1,
-            "resPM": 1,
-            "resistance": 1,
+            "resPA": 5,
+            "resPM": 3,
+            "resistance": 40,
             "sex": "m",
             "speed": 80,
-            "strength": 1,
+            "strength": 0,
             "type": "neutral",
             "xp": {
                 "current": 0,
@@ -48,8 +47,9 @@
         },
         "sheet": "Henry_sheet.png",
         "skill": [
-            ["Apocalypse", 1],
-            ["Horizontal", 1]
+            ["Apocalypse", 5],
+            ["Horizontal", 2],
+            ["Thrust", 1]
         ],
         "sprite": {
             "attacking": [
@@ -57,7 +57,7 @@
                 404
             ],
             "cols": 12,
-            "portrait": "Henry_portrait.png",
+            "portrait": "HenryP2.png",
             "rows": 80,
             "standing": [
                 388,

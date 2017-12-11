@@ -6,7 +6,7 @@ import pygame
 
 
 def Launcher():
-    screenHeight, screenWidth = (640,640)
+    screenHeight, screenWidth = (870,870)
     tileSize = 29
     pygame.init()
 
@@ -20,5 +20,3 @@ def Launcher():
 
 if __name__ == '__main__':
     Launcher()
-
-# Add content (skill, item, character, level)

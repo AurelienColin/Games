@@ -1,0 +1,13 @@
+music_on plain1.ogg
+enter background ruins1.png	raw 0,0
+enter Katarite HenryF4.png sym 0,-256
+enter Rignak TikiF2.png raw -256,-256
+Rignak: De toute ma vie, j'ai rarement assisté à tant d'incompétence...
+Katarite: Je ne sais que dire...
+leave Rignak
+enter Rignak TikiF5.png raw -256,-256
+Rignak: Alors ne dit rien. Combat, on y retourne.
+music_off
+leave Katarite
+leave Rignak
+leave background

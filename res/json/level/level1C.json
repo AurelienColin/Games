@@ -1,0 +1,60 @@
+{
+    "level": {
+        "map":"Lvl1.tmx",
+		"victories":[{
+			"condition":"destroy",
+			"next_level":"level1C.json"}], 
+		"script":"level1C.txt",
+		"characters":[{
+			"name":"Rignak.json",
+			"initial":[24,18],
+			"team":1,
+			"ia":"null",
+			"leader":true,
+			"items":[],
+			"level":4,
+			"coef":1.0
+		},{
+			"name":"Henry.json",
+			"initial":[-1,-1],
+			"team":1,
+			"ia":"null",
+			"leader":true,
+			"items":["Potion"],
+			"level":4,
+			"coef":1.0
+		},{
+			"name":"Lazarus.json",
+			"initial":[23,23],
+			"team":2,
+			"ia":"defensif",
+			"leader":true,
+			"items":[],
+			"level":1,
+			"coef":1.0
+		},{
+			"name":"Releve.json",
+			"initial":[10,4],
+			"team":2,
+			"ia":"aggressif",
+			"leader":false,
+			"items":["Potion"],
+			"level":4,
+			"coef":1.0
+		},{
+			"name":"Releve.json",
+			"initial":[17,10],
+			"team":1,
+			"ia":"aggressif",
+			"leader":false,
+			"items":["Potion"],
+			"level":4,
+			"coef":1.0
+		}],
+		"initial_tiles":[[14, 7], [15,11], [17,11]],
+		"music": {
+			"placement" : "plain1.ogg",
+			"TRPG": "plain1.ogg"
+		}
+	}
+}

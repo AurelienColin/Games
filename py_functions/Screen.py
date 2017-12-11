@@ -19,7 +19,7 @@ class Screen():
         self.display = pygame.display.set_mode(self.size, pygame.RESIZABLE)
         self.tileSize = tileSize
         self.frameNumber = self.tileSize
-        circle = pygame.image.load(join('res', 'sprite', 'circle.png'))
+        circle = pygame.image.load(join('res', 'sprite', 'others', 'circle.png'))
         self.objects = [[circle, (-tileSize, -tileSize), 'hide']]
         self.charBox = -1
         self.ui={'hovering':[],'initiative':[], 'childBox':[]}
@@ -63,7 +63,7 @@ class Screen():
         pygame.display.update()
 
     def Clean(self):
-        circle = pygame.image.load(join('res', 'sprite', 'circle.png'))
+        circle = pygame.image.load(join('res', 'sprite', 'others', 'circle.png'))
         self.objects = [[circle, (0, 0), 'hide']]
         self.ui={'hovering':[], 'initiative':[], 'status':[], 'childBox':[]}
         self.charBox = -1
@@ -201,7 +201,9 @@ class Screen():
                                        posTile = character['initial'],
                                         ia = character['ia'],
                                         leader = character['leader'],
-                                        coef=character['coef'])
+                                        coef=character['coef'],
+                                        level=character['level'],
+                                        items=character['items'])
             if character['initial']!=[-1,-1]:
                 char.index = self.AddCharacter(char, 'standing')
             self.characters.append(char)

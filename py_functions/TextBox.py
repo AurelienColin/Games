@@ -44,8 +44,8 @@ class TextBox():
             self = LauncherMenu(pos)
         elif name == 'Level Selection':
             self = LevelSelection(pos)
-        elif name == 'Level0':
-            Level.Level(screen, 'level0.json')
+        elif name in levelList():
+            Level.Level(screen, name+'.json')
         elif name == 'Items':
             self = ItemsMenu(char, pos)
         elif name in itemList():
@@ -100,7 +100,7 @@ class LauncherMenu(TextBox):
 
 class LevelSelection(TextBox):
     def __init__(self, pos):
-        string = ['Level0;Prologue;Level1;Epilogue']
+        string = ['Level0;Prologue;Level1;VisualNovel']
         box = ["TextBox_ExtraLarge.png"]
         TextBox.__init__(self,box, string, [(130,170)], [(30, 20)], pos)
 
@@ -340,4 +340,7 @@ class ExitBox(TextBox):
 
 
 def itemList():
-    return ['Carak Dae', 'Broken Artefact']
+    return ['Carak Dae', 'Broken Artefact', 'Potion']
+    
+def levelList():
+    return ['Level1', 'VisualNovel']

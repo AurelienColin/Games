@@ -1,0 +1,41 @@
+music_on plain1.ogg
+enter background ruins1.png	raw 0,0
+enter Katarite HenryF1.png sym 0,-256
+enter Rignak TikiF1.png raw -256,-256
+Rignak: Tu t'améliores. Nous pouvons faire une pause...
+enter ??? LazarusF1.png raw 256,256
+???: *Des hurlements retentissent au loin*
+leave ???
+Rignak: Qu'était-ce ? Katarite, sort ton arme.
+Rignak: Nous avons la visite.
+leave Rignak
+enter Rignak TikiF1.png sym 256,-256
+enter Lazarus LazarusF1.png raw -256,-256
+Lazarus: Ainsi donc nous te retrouvons, traitresse.
+leave Rignak
+enter Rignak TikiF4.png sym 256,-256
+Rignak: Lazarus...
+leave Katarite
+enter Katarite HenryF2.png sym 0,-256
+Katarite: Qui est-ce ?
+Rignak: Le sixième des chevaliers de la liche.
+Lazarus: Cinquième depuis ta défection. Notre maître m'a ordonné de t'abattre.
+Lazarus: Je pensais faire de même avec ton serviteur. Cependant...
+Lazarus: Il a l'air de savoir manier l'épée. Une qualité rare à cette époque.
+Lazarus: S'il s'en montre digne, je pourrais le relever une fois le combat fini.
+leave Rignak
+enter Rignak TikiF2.png sym 256,-256
+Rignak: Tu semble sûr de toi.
+Rignak: Je vais devir te rappeler pourquoi ton rang était inférieur au mien.
+leave Rignak
+enter Rignak TikiF2.png raw 256,-256
+Rignak: Je m'occupe du chevalier. Peux-tu gérer ses serviteurs ?
+Katarite: Je ferais en sorte que ces abominations ne te gêne pas. au mien.
+leave Rignak
+enter Rignak TikiF3.png raw 256,-256
+Rignak: En ce cas, je n'ai pas à craindre pour mes arrières.
+music_off
+leave Katarite
+leave Rignak
+leave Lazarus
+leave background

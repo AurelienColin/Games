@@ -9,12 +9,12 @@ import pyganim
 
 max_item = 8
 class Character():
-    def __init__(self, file,team = 0, tileSize = None, posTile = False, ia = False, leader = False, coef=1):
+    def __init__(self, file,team = 0, tileSize = None, posTile = False, ia = False, leader = False, coef=1, level=1, items=[]):
         self.index, self.lifebar = None, (None, None)
         self.ia, self.leader, self.team = ia, leader, team
         self.dead = False
         self.direction = 2
-        self.FromJSON(file)
+        self.FromJSON(file, items=items)
 
         self.pos = {}
         if posTile:
@@ -22,18 +22,20 @@ class Character():
         else:
             self.pos = {'tile':None, 'px':None}
         for key in self.cara['growth']:
-            self.cara[key]*=coef
-        self.cara['PV_max']*=coef
+            self.cara[key]=int(coef*self.cara[key])
+        self.cara['PV_max']=int(coef*self.cara['PV_max'])
+        for i in range(self.cara['level']):
+            self.LevelUp(hide = True)
 
 
-    def FromJSON(self, file):
+    def FromJSON(self, file, items=[]):
         with open(join('res','json', 'character', file), 'r') as file:
             data = json.load(file)['character']
         self.cara = data['cara']
         self.sprite = {'values': data['sprite']}
         self.sheetName = data['sheet']
         self.CreateSprite()
-        self.items = [Item.Item(item) for item, equiped in data['items']]
+        self.items = [Item.Item(item) for item, equiped in data['items']+[[item, False] for item in items]]
         [self.Equip(name) for name, equiped in data['items'] if equiped]
         skills = [(Skill.Skill(skill), level) for skill, level in data['skill']]
         self.skills = []
@@ -102,7 +104,7 @@ class Character():
             if key in ['cols', 'rows']:
                 continue
             if key == 'portrait':
-                value = join('res','sprite', self.cara['name'], value)
+                value = join('res','sprite', 'portrait', value)
                 self.sprite[key] = pygame.image.load(value)
             elif len(value) == 2:
                 self.sprite[key] = self.AddSprite(value[0], value[1])
@@ -123,7 +125,7 @@ class Character():
         cols = self.sprite['values']['cols']
         if not end:
             end = begin+1
-        fullname = join('res', 'sprite', self.cara['name'], str(self.sheetName))
+        fullname = join('res', 'sprite', 'sheet', str(self.sheetName))
         perso = pyganim.getImagesFromSpriteSheet(fullname,cols=cols,rows= rows)[begin:end]
         if end > begin+1:
             frames = list(zip(perso, [200]*(end-begin)))
@@ -214,6 +216,8 @@ class Character():
         Output:
         xp - int: xp to add to the attacking character"""
         xp = 0
+        if effect in self.cara['effects']:
+            return 0
         if type(effect) == int:
             xp = abs(self.cara['xp']['on_damage']*effect)
             self.cara['PV'] = min(self.cara['PV_max'], max(0,self.cara['PV']-effect))
@@ -238,11 +242,11 @@ class Character():
         self.cara['xp']['current'] += xp
         while self.cara['xp']['current'] > 100:
             self.cara['xp']['current'] = self.cara['xp']['current']-100
-            self.LevelUp(screen)
+            self.LevelUp(screen=screen)
 
 
-    def LevelUp(self, screen):
-        if self.team == 1:
+    def LevelUp(self, screen=None, hide = False):
+        if not hide and self.team == 1:
             screen.RemoveUI()
             pos = (int((screen.size[0]-288)/2), int((screen.size[1]-174)/2))
             index = screen.AddTextBox(TextBox.LevelUp(self, [pos]))
@@ -348,8 +352,8 @@ class Character():
 
         Output:
         PA, PM, and effect are updated"""
-        self.cara['PA'] = self.cara['PA_max']
-        self.cara['PM'] = self.cara['PM_max']
+        self.cara['PA'] += self.cara['resPA']
+        self.cara['PM'] += self.cara['resPM']
         for i, effect in enumerate(self.cara['effects']):
             if effect:
                 if effect.duration == effect.since:
@@ -360,6 +364,10 @@ class Character():
                     self.cara['effects'][i].since += 1
                     v = max(0, self.cara[effect.properties]-effect.power)
                     self.cara[effect.properties] = v
+        if self.cara['PA'] > self.cara['PA_max']:
+            self.cara['PA'] = self.cara['PA_max']
+        if self.cara['PM'] > self.cara['PM_max']:
+            self.cara['PM'] = self.cara['PM_max']
 
     def IA_Action(self, screen):
         """Execute the ia
@@ -375,6 +383,8 @@ class Character():
             reachable = self.getReachable(screen)
         elif self.ia == 'passif':
             reachable = {(self.pos['tile']):(0, [])}
+        elif self.ia == 'null':
+            return
         max_dmgs = 0
         path, skill_target, tiles_target = False, False, False
         for skill in self.skills:
@@ -412,6 +422,7 @@ class Character():
                 self.Move(screen, 0, self.pos['tile'], tile)
             self.cara['PM'] -= d
         if skill_target and tiles_target:
+            print(skill_target)
             self.Attack(skill_target, tiles_target, screen, tile_target)
 
     def Move(self, screen, p, ini_pos, new_pos):

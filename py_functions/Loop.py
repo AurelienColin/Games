@@ -65,7 +65,7 @@ def AimingLoop(char, screen, skill):
                 sys.exit()
             elif event.type == KEYDOWN:
                 change = True
-                if event.key == K_RETURN and char.cara['PA'] > skill.cara['cost']:
+                if event.key == K_RETURN and char.cara['PA'] >= skill.cara['cost']:
                     if skill.name == "Trade":
                         char.Trade(skill.item, screen, tile)
                     else:
@@ -350,11 +350,12 @@ def VNLoop(screen, lines):
                     x = screen.size[0]+x
                 if y < 0:
                     y = screen.size[1]+y
-                img = pygame.image.load(join('res', 'sprite',
-                                        file.split('_')[0], file))
+                img = pygame.image.load(join('res', 'sprite', file))
+                if char == 'background':
+                    img = pygame.transform.scale(img, screen.size)
                 if transf == 'sym':
                     sprite = pygame.transform.flip(img, True, False)
-                else:
+                elif transf == 'raw':
                     sprite = img
                 on_screen[char] = screen.AddSprite(sprite, (x, y))
             elif line[0] == 'leave':
@@ -381,6 +382,6 @@ def VNLoop(screen, lines):
 
 def listMenus():
     return ['MainMenu', 'Skills', 'Status', 'LauncherMenu', 'Level Selection',
-            'Level0', 'Items', 'Use', 'Equip', 'Desequip']+TextBox.itemList()
+            'Level1', 'Items', 'Use', 'Equip', 'Desequip', 'VisualNovel']+TextBox.itemList()
 def listSkills():
-    return ['Horizontal', 'Vertical', 'Execution', 'Apocalypse', 'Trade']
+    return ['Horizontal', 'Vertical', 'Execution', 'Apocalypse', 'Trade', 'Thrust']

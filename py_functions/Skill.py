@@ -48,7 +48,6 @@ class Skill():
         cols = self.sprite['values']['cols']
         begin, end = self.sprite['values']['action']
         self.sprite['action'] = self.AddSprite(name, rows, cols, begin, end)
-        pass
 
     def AddSprite(self, name, rows, cols, begin, end):
         """Make a sprite (animated or not) from a sheet
@@ -156,13 +155,13 @@ class Skill():
             tileType = Map.CheckProperties(affected.pos['tile'], 'type',
                                             screen.mapData, screen.tileSize)
             if tileType == w:
-                affected.cara['def'] -= 56
+                affected.cara['defense'] -= 56
                 affected.cara['avoid'] -= 56
                 affected.cara['speed'] -= 56
                 affected.cara['resistance'] -= 56
                 affected.cara['elementalRes'][w] -= 56
-            elif tileType == cara['type']:
-                affected.cara['def'] += 56
+            elif w and tileType == cara['type']:
+                affected.cara['defense'] += 56
                 affected.cara['avoid'] += 56
                 affected.cara['speed'] += 56
                 affected.cara['resistance'] += 56
@@ -209,7 +208,7 @@ class Skill():
         animations = []
         for tile in animated:
             pos = tuple(x*screen.tileSize for x in tile)
-            animations.append(screen.AddSprite(self.sprite, pos))
+            animations.append(screen.AddSprite(self.sprite['action'], pos))
         if animations != []:
             mainClock = pygame.time.Clock()
             for i in range(25):
@@ -233,7 +232,7 @@ class Skill():
         mapData, tileSize = screen.mapData, screen.tileSize
         aimable = set()
         scope = self.cara['range']
-        p = 'slowness'
+        p = 'transparent'
         for x in range(max(pos[0]-scope, 0), pos[0]+scope+1):
             diffX = x-pos[0]
             for y in range(max(pos[1]-scope,0), pos[1]+scope+1):
@@ -244,7 +243,7 @@ class Skill():
                     transparent = False
                 elif abs(diffX) + abs(diffY) > scope:
                     transparent = False
-                elif Map.CheckProperties((x*tileSize, y*tileSize), p, mapData, tileSize) != '1':
+                elif not Map.CheckProperties((x*tileSize, y*tileSize), p, mapData, tileSize):
                     transparent = False
                 elif diffY != 0 or diffX != 0:
                     R = abs(diffY)+abs(diffX)
@@ -265,7 +264,8 @@ class Skill():
                                 if atlChar.pos['tile'] == (x_c, y_c) and atlChar.team != character.team:
                                     transparent = False
                                     break
-                        if Map.CheckProperties((x_c*tileSize, y_c*tileSize), p, mapData, tileSize) != '1':
+                        if not Map.CheckProperties((x_c*tileSize, y_c*tileSize), p, mapData, tileSize):
+                            print('here we break')
                             transparent = False
                             break
                 if transparent:

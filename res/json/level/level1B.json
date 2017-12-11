@@ -1,0 +1,33 @@
+{
+    "level": {
+        "map":"Lvl1.tmx",
+		"victories":[{
+			"condition":"destroy",
+			"next_level":"level1C.json"}],
+		"script":"level1B.txt",
+		"characters":[{
+			"name":"Rignak.json",
+			"initial":[18,7],
+			"team":2,
+			"ia":"passif",
+			"leader":true,
+			"items":[],
+			"level":1,
+			"coef":1.0
+		},{
+			"name":"Henry.json",
+			"initial":[-1,-1],
+			"team":1,
+			"ia":"null",
+			"leader":true,
+			"items":["Potion"],
+			"level":4,
+			"coef":1.0
+		}],
+		"initial_tiles":[[14, 7], [15,11], [17,11]],
+		"music": {
+			"placement" : "plain1.ogg",
+			"TRPG": "plain1.ogg"
+		}
+	}
+}

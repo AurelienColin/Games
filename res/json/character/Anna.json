@@ -32,7 +32,6 @@
             "level": 1,
             "magic": 1,
             "name": "Anna",
-            "object": 1,
             "resPA": 1,
             "resPM": 1,
             "resistance": 1,
@@ -58,7 +57,7 @@
                 16
             ],
             "cols": 12,
-            "portrait": "Anna_portrait.png",
+            "portrait": "AnnaP5A.png",
             "rows": 144,
             "standing": [
                 0,

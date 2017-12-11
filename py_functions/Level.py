@@ -19,13 +19,14 @@ class Level():
         screen.IniChar(chars)
 
         iniTiles = data['initial_tiles']
-        self.music = pygame.mixer.Sound(join('res', 'music', data['music']['placement']))
-        self.music.play(loops=-1)
+        if data['music']['placement']:
+            self.music = pygame.mixer.Sound(join('res', 'music', data['music']['placement']))
+            self.music.play(loops=-1)
         Loop.PlacementLoop(iniTiles, self.screen)
-        self.music.stop()
-        
-        self.music = pygame.mixer.Sound(join('res', 'music', data['music']['TRPG']))
-        self.music.play(loops=-1)
+        if self.music:
+            self.music.stop()
+            self.music = pygame.mixer.Sound(join('res', 'music', data['music']['TRPG']))
+            self.music.play(loops=-1)
         self.victories = data['victories']
         self.ModeTRPG()
 
@@ -57,7 +58,8 @@ class Level():
                         playerVictory = False
             if playerVictory:
                 print('You win')
-                self.music.stop()
+                if self.music:
+                    self.music.stop()
                 self = Level(self.screen, nextLevel)
 
     def ModeTRPG(self):
@@ -117,6 +119,7 @@ class Level():
 
         Output:
         turns - char: next char to play"""
+        print(turn, turns[turn])
         if not turns[turn].dead:
             speed = turn + int(util.StatCalculation(turns[turn].cara['speed'])*100)
             while speed in turns:
@@ -147,7 +150,7 @@ class Level():
         self.screen.MoveCircle(pos = turns[turn].pos['px'])
         self.screen.UpdateStatus(turns[turn])
         self.screen.UpdateIniList(turns, turn)
-        if turns[turn].ia:
+        if turns[turn].ia != 'null':
             turns[turn].IA_Action(self.screen)
             self.CheckVictoryCondition()
             return self.NextTurn(turns, turn)

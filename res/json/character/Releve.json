@@ -1,0 +1,100 @@
+{
+    "character": {
+        "cara": {
+            "PA": 6,
+            "PA_max": 6,
+            "resPA": 1,
+            "PM": 6,
+            "PM_max": 6,
+            "resPM": 1,
+            "PV": 30,
+            "PV_max": 30,
+            "avoid": 15,
+            "defense": 15,
+            "resistance": 15,
+            "strength": 15,
+            "speed": 20,
+            "magic": 15,
+            "effects": [
+            ],
+            "elementalRes": {
+                "earth": 15,
+                "fire": 15,
+                "holy": 0,
+                "neutral": 15,
+                "unholy": 20,
+                "water": 15,
+                "wind": 15
+            },
+            "growth": {
+                "PV": 5,
+                "defense": 2,
+                "magic": 2,
+                "resistance": 1,
+                "speed": 5,
+                "strength": 2
+            },
+            "hit": 1,
+            "level": 1,
+            "name": "Relevé",
+            "sex": "m",
+            "type": "neutral",
+            "xp": {
+                "current": 0,
+                "on_damage": 1,
+                "on_kill": 50
+            }
+        },
+        "sheet": "64153.png",
+        "skill": [
+            ["Apocalypse", 1],
+            ["Horizontal", 1]
+        ],
+        "sprite": {
+            "attacking": [
+                400,
+                404
+            ],
+            "cols": 36,
+            "portrait": "UndeadP1.png",
+            "rows": 432,
+            "standing": [
+                388,
+                392
+            ],
+            "static": [
+                388
+            ],
+            "static_down": [
+                436
+            ],
+            "static_left": [
+                412
+            ],
+            "static_right": [
+                424
+            ],
+            "static_up": [
+                448
+            ],
+            "walking_down": [
+                436,
+                440
+            ],
+            "walking_left": [
+                412,
+                416
+            ],
+            "walking_right": [
+                424,
+                428
+            ],
+            "walking_up": [
+                448,
+                452
+            ]
+        },
+        "items":[],
+        "drop":[]
+    }
+}

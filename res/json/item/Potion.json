@@ -1,0 +1,10 @@
+{
+    "item": {
+        "name":"Potion",
+		"cara":{},
+		"durability":3,
+		"cost":2,
+		"use":{"PV":[10,1]},
+		"sound":"none.ogg"
+		}
+}

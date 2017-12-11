@@ -7,6 +7,8 @@ Created on Wed Nov  8 21:41:08 2017
 from os.path import join, exists
 from os import listdir
 from json import load
+import glob
+from lxml import etree
 
 def Error(file, key, reason, opt=False):
     s = 'Error in ' + str(file) + " : '"+ str(key)+"'"
@@ -23,24 +25,22 @@ def Error(file, key, reason, opt=False):
         s+= ' incorrect length'
         s+= " | expecting " + str(opt[0]) + ", got " + str(opt[1])
     print(s)
+    return 1
 
 
 def CheckExistence(file, data, key, folder):
     if key in data and type(data[key]) == str:  # If not, error message already printed
         if not exists(join(folder, data[key])):
-            Error(file, key, 3)
-            return 1
+            return Error(file, data[key], 3)
     return 0
                 
 def CheckValue(file, data, expected):
     e = 0
     for key, type_ in expected:
         if key not in data:
-            Error(file, key, 1)
-            e += 1
+            e += Error(file, key, 1)
         elif type_ != type(data[key]):
-            Error(file, key, 2, opt = (type_, type(data[key])))
-            e += 1
+            e += Error(file, key, 2, opt = (type_, type(data[key])))
     return e
             
 
@@ -50,19 +50,15 @@ def CheckUniDic(file, data, key1, type_):
         for key2, v in data[key1].items():
             if type(type_)== list:
                 if type(v)!=list:
-                    Error(file, [key1, key2], 2, opt = (list, type(v)))
-                    e += 1
+                    e += Error(file, [key1, key2], 2, opt = (list, type(v)))
                 elif len(v)!= len(type_):
-                    Error(file, [key1, key2], 4, opt = (len(type_), len(v)))
-                    e += 1
+                    e += Error(file, [key1, key2], 4, opt = (len(type_), len(v)))
                 else:
                     for i in range(len(type_)):
                         if type_[i]!= type(v[i]):
-                            Error(file, [key1, key2, i], 2, opt = (type_[i], type(v[i])))
-                            e += 1
+                            e += Error(file, [key1, key2, i], 2, opt = (type_[i], type(v[i])))
             elif type_ != type(v):
-                Error(file, [key1, key2], 2, opt = (type_, type(v)))
-                e += 1
+                e += Error(file, [key1, key2], 2, opt = (type_, type(v)))
     return e
 
 def CheckCmnDic(file, data, rules):
@@ -71,19 +67,15 @@ def CheckCmnDic(file, data, rules):
         v = data[key]
         if type(type_)== list:
             if type(v)!=list:
-                Error(file, key, 2, opt = (list, type(v)))
-                e += 1
+                e += Error(file, key, 2, opt = (list, type(v)))
             elif len(v)!= len(type_):
-                Error(file, key, 4, opt = (len(type_), len(v)))
-                e += 1
+                e += Error(file, key, 4, opt = (len(type_), len(v)))
             else:
                 for i in range(len(type_)):
                     if type_[i]!= type(v[i]):
-                        Error(file, [key, i], 2, opt = (type_[i], type(v[i])))
-                        e += 1
+                        e += Error(file, [key, i], 2, opt = (type_[i], type(v[i])))
         elif type_ != type(v):
-            Error(file, key, 2, opt = (type_, type(v)))
-            e += 1
+            e += Error(file, key, 2, opt = (type_, type(v)))
     return e
     
 def CheckItem(item):
@@ -105,16 +97,14 @@ def CheckItem(item):
         e += CheckUniDic(item, data, 'cara', int)
         return e
     else:
-        Error(item, item, 'item', 1)
-        return 1
+        return Error(item, item, 'item', 1)
 
 def CheckList(file, key, l, rules):
     e = 0
     for i in range(len(l)):
         for j in range(len(rules)):
             if type(l[i][j]) != rules[j]:
-                Error(file, [key,(i,j)], 2, opt = (rules[j], type(l[i][j])))
-                e += 1
+                e += Error(file, [key,(i,j)], 2, opt = (rules[j], type(l[i][j])))
     return e
         
                 
@@ -123,8 +113,7 @@ def CheckSkill(skill):
         try:
             data = load(file)
         except:
-            Error(skill, skill, '', 0)
-            return 1
+            return Error(skill, skill, '', 0)
     if 'skill' in data:
         e = 0
         data = data['skill']
@@ -147,16 +136,15 @@ def CheckSkill(skill):
                 e +=  CheckCmnDic(skill, dic, expected)
         return e
     else:
-        Error(skill, skill, 'skill', 1)
-        return 1
+        
+        return Error(skill, skill, 'skill', 1)
 
 def CheckCharacter(character):
     with open(join('..', 'res', 'json', 'character', character), 'r') as file:
         try:
             data = load(file)
         except:
-            Error(character, character, '', 0)
-            return 1
+            return Error(character, character, '', 0)
     if 'character' in data:
         e = 0
         data = data['character']
@@ -168,8 +156,8 @@ def CheckCharacter(character):
         e += CheckList(character, 'skill', data['skill'], [str, int])
         e += CheckList(character, 'drop', data['drop'], [str, float])
         e += CheckList(character, 'items', data['items'], [str, bool])
-        e += CheckExistence(character, data, 'sheet', join('..', 'res', 'sprite', data['cara']['name']))
-        e += CheckExistence(character, data['sprite'], 'portrait', join('..', 'res', 'sprite', data['cara']['name']))
+        e += CheckExistence(character, data, 'sheet', join('..', 'res', 'sprite', 'sheet'))
+        e += CheckExistence(character, data['sprite'], 'portrait', join('..', 'res', 'sprite', 'portrait'))
         
         expected = [['attacking', [int, int]], ['cols', int], ['portrait', str],
                     ['rows', int], ['standing', [int, int]],['static', [int]],
@@ -181,7 +169,7 @@ def CheckCharacter(character):
         expected = [['PA', int], ['PA_max', int], ['PM', int], ['PM_max', int],
                     ['PV', int], ['PV_max', int], ['avoid', int], ['defense', int],
                     ['elementalRes', dict], ['growth', dict], ['hit', int],
-                    ['level', int], ['magic', int], ['name', str], ['object', int],
+                    ['level', int], ['magic', int], ['name', str],
                     ['resPA', int], ['resPM', int], ['resistance', int], ['sex', str],
                     ['speed', int], ['strength', int], ['type', str], ['xp', dict],
                     ['effects', list]]
@@ -190,27 +178,24 @@ def CheckCharacter(character):
         e += CheckUniDic(character, data['cara'], 'growth', int)
         e += CheckUniDic(character, data['cara'], 'xp', int)
         
+        if data['cara']['sex'] not in ['f', 'm']:
+            e += Error(character, ['cara', 'sex'], 2, opt=[['f', 'm'], data['cara']['sex']])
         expected = [['type', str], ['duration', int], ['power', int]]
         for dic in data['cara']['effects']:
             e +=  CheckCmnDic(character, dic, expected)
-        
         for skill, level in data['skill']:
             if not exists(join('..', 'res', 'json', 'skill', skill+'.json')):
-                Error(character, ['skill', skill+'.json'], 3)
-                e += 1
+                e += Error(character, ['skill', skill+'.json'], 3)
         for item, b in data['items']:
             if not exists(join('..', 'res', 'json', 'item', item+'.json')):
-                Error(character, ['items', item+'.json'], 3)
-                e += 1
+                e += Error(character, ['item', item+'.json'], 3)
         for item, p in data['drop']:
             if not exists(join('..', 'res', 'json', 'item', item+'.json')):
-                Error(character, ['drop', item+'.json'], 3)
-                e += 1
+                e += Error(character, ['drop', item+'.json'], 3)
         return e
             
     else:
-        Error(character, character, 'character', 1)
-        return 1
+        return Error(character, character, 'character', 1)
         
 def CheckScript(script):
     with open(join('..', 'res', 'script', script), 'r') as file:
@@ -219,57 +204,49 @@ def CheckScript(script):
     music = False
     characters = []
     for i, line in enumerate(lines):
-        if ':' not in line:
-            line = line.split()
+        line = line.split()
+        if ':' not in line[0]:
             if line[0] == 'music_on':
                 if len(line) != 2:
-                    Error(script, i+1, 3)
-                    e += 1  
+                    e += Error(script, i+1, 3)
                 elif not exists(join('..', 'res', 'music', line[1])):
-                    Error(script, [i+1, line[1]], 3)
-                    e += 1
+                    e += Error(script, [i+1, line[1]], 3)
                 else:
                     music = line[1]
             elif line[0] == 'music_off':
                 if len(line) != 1:
-                    Error(script, i+1, 3)
-                    e += 1  
+                    e += Error(script, i+1, 3)
                 elif music:
                     music = False
                 else:
-                    Error(script, [i+1, 'music_off'], -1)
-                    e += 1
+                    e += Error(script, [i+1, 'music_off'], -1)
             elif line[0] == 'sound':
                 if len(line) != 2:
-                    Error(script, i+1, 3)
-                    e += 1  
+                    e += Error(script, i+1, 3)
                 elif not exists(join('..', 'res', 'sound', line[1])):
-                    Error(script, [i, line[1]], 3)
-                    e += 1
+                    e += Error(script, [i, line[1]], 3)
             elif line[0] == 'enter':
                 if len(line) != 5:
-                    Error(script, i+1, 3)
-                    e += 1  
+                    e += Error(script, i+1, 4, opt=(5, len(line)))
+                elif not exists(join('..', 'res', 'sprite', line[2])):
+                    e += Error(script, [i, line[2]], 3)
                 elif line[1] in characters:
-                    Error(script, [i+1, line[1]], -1)
-                    e += 1
-                elif not exists(join('..', 'res', 'sprite', line[1], line[2])):
-                    Error(script, [i, line[2]], 3)
-                    e += 1
+                    e += Error(script, [i+1, line[1]], -1)
                 else:
                     characters.append(line[1])
             elif line[0] == 'leave':
                 if len(line) != 2:
-                    Error(script, i+1, 3)
-                    e += 1  
+                    e += Error(script, i+1, 3)
                 elif line[1] not in characters:
-                    Error(script, [i+1, line[1]], -1)
-                    e += 1
+                    e += Error(script, [i+1, line[1]], -1)
                 else:
                     characters.pop(characters.index(line[1]))
-            elif ':' not in line[0] or line[0][:1] not in characters:
-                Error(script, [i+1, line[0]], -1)
-                e += 1
+            else:
+                e += Error(script, [i+1, line[0]], -1)
+        elif line[0][:-1] not in characters+['Narrator']:
+            e += Error(script, [i+1, line[0]], -1)
+        elif len(' '.join(line[1:])) > 90:
+            e += Error(script, i+1, 4, opt=[90, len(' '.join(line[1:]))])
     return e
 
 def CheckLevel(level):
@@ -277,8 +254,7 @@ def CheckLevel(level):
         try:
             data = load(file)
         except:
-            Error(level, level, '', 0)
-            return 1
+            return Error(level, level, 0)
     if 'level' in data:
         data = data['level']
         e = 0
@@ -291,9 +267,13 @@ def CheckLevel(level):
             e +=  CheckCmnDic(level, dic, expected)
         
         expected = [['name', str], ['initial', [int, int]], ['team', int],
-                    ['ia', str], ['leader', bool], ['coef', float]]
+                    ['ia', str], ['leader', bool], ['coef', float], ['level', int],
+                    ['items', list]]
         for dic in data['characters']:
             e +=  CheckCmnDic(level, dic, expected)
+            for item in dic['items']:
+                if not exists(join('..', 'res', 'json', 'item', item+'.json')):
+                    e += Error(level, ['item', item+'.json'], 3)
             
         expected = [['placement', str], ['TRPG', str]]
         e +=  CheckCmnDic(level, data['music'], expected)
@@ -305,28 +285,45 @@ def CheckLevel(level):
         for dic in data['victories']:
             e += CheckExistence(level, dic, 'next_level', join('..', 'res', 'json', 'level'))
             if dic['condition'] not in ["destroy", "kill leaders"]:
-                Error(level, 'condition', 2, [["destroy", "kill leaders"], dic['condition']])
-                e += 1
+                e += Error(level, 'condition', 2, [["destroy", "kill leaders"], dic['condition']])
         for dic in data['characters']:
             if dic['ia'] not in ['null', 'defensif', 'aggressif', 'passif']:
-                Error(level, 'condition', 2, [['null', 'defensif', 'aggressif', 'passif'], dic['ia']])
-                e += 1
+                e += Error(level, 'condition', 2, [['null', 'defensif', 'aggressif', 'passif'], dic['ia']])
             e += CheckExistence(level, dic, 'name', join('..', 'res', 'json', 'character'))
         return e
     else:
         return 1
 
+def CheckTSX(tsx):
+    e = 0
+    with open(join('..','res','map', '_rules.json'), 'r') as file:
+        rules = load(file)
+    tree = etree.parse(tsx)
+    for properties in tree.xpath("/tileset/tile/properties"):
+        for property_ in properties.findall('property'):
+            if  property_.get('name') == 'name' and property_.get('value') not in rules:
+                e += Error(tsx, property_.get('value'), 1)
+                rules[property_.get('value')] = 'detected'
+    return e
+    
 if __name__ == '__main__':
     e = 0
+    print('----Check items')
     for item in listdir(join('..', 'res', 'json', 'item')):
         e += CheckItem(item)
+    print('----Check skills')
     for skill in listdir(join('..', 'res', 'json', 'skill')):
         e += CheckSkill(skill)
+    print('----Check characters')
     for character in listdir(join('..', 'res', 'json', 'character')):
         e += CheckCharacter(character)
+    print('----Check script')
     for script in listdir(join('..', 'res', 'script')):
         e += CheckScript(script)
+    print('----Check level')
     for level in listdir(join('..', 'res', 'json', 'level')):
         e += CheckLevel(level)
-        
-    print('End with', e, 'errors')
+    print('----Check maps')
+    for file in glob.glob(join('..','res','map', '*.tsx')):
+        e += CheckTSX(file)
+    print('\nEnd with', e, 'errors')

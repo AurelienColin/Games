@@ -1,0 +1,36 @@
+music_on graveyard1.ogg
+enter background graveyard1.png	raw 0,0
+enter Aurore AnnaF4F.png raw 0,-256
+Aurore: … Aïe, aïe, *touche l’arrière de son crâne* aïe. 
+Aurore: On dirait que j’ai eu de la chance, dégringoler d’une falaise comme ça.
+Aurore: Je m’en tire avec une sale bosse. *Regarde aux alentours*.  Un cimetierre ?
+enter Rignak TikiF1.png raw -256,-256
+Rignak: Vous êtes dans le domaine de la mort, étrangère.
+leave Aurore
+enter Aurore AnnaF3F.png sym 0,-256
+Aurore: Houah ! Vous m’avez surprise, mais qui êtes vous ? Une cosplayeuse.
+leave Rignak
+enter Rignak TikiF2.png raw -256,-256
+Rignak: Pouah, quelle impertinence. Je suis Rignak, seigneur de ces terres.
+Aurore: Le fossoyeur en somme, habillée ainsi ?
+leave Rignak
+enter Rignak TikiF1.png raw -256,-256
+Rignak: Je ne pense pas que vous soyez venu voir mes sujets, mademoiselle.
+leave Aurore
+enter Aurore AnnaF1F.png sym 0,-256
+Aurore: Oh ! Je ne me suis pas encore présentée. Je m’appelle Aur…
+Rignak: Aucune importance puisque vous allez quitter mes terres.
+sound unsheathed.ogg
+leave Aurore
+enter Aurore AnnaF3F.png sym 0,-256
+Aurore: Je… 
+Rignak: Simple plaisanterie. Vous semblez venir de loin. 
+Rignak: Suivez-moi, je dirai à mes sujets de vous préparer le couvert.
+Aurore: Vos sujets ?
+leave Rignak
+enter Rignak TikiF2.png sym -256,-256
+Rignak: *soupir* Ce n’est jamais que votre quatrième question.
+music_off
+leave Rignak
+leave Aurore
+leave background
