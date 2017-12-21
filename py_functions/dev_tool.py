@@ -33,7 +33,7 @@ def CheckExistence(file, data, key, folder):
         if not exists(join(folder, data[key])):
             return Error(file, data[key], 3)
     return 0
-                
+
 def CheckValue(file, data, expected):
     e = 0
     for key, type_ in expected:
@@ -42,7 +42,7 @@ def CheckValue(file, data, expected):
         elif type_ != type(data[key]):
             e += Error(file, key, 2, opt = (type_, type(data[key])))
     return e
-            
+
 
 def CheckUniDic(file, data, key1, type_):
     e = 0
@@ -77,7 +77,7 @@ def CheckCmnDic(file, data, rules):
         elif type_ != type(v):
             e += Error(file, key, 2, opt = (type_, type(v)))
     return e
-    
+
 def CheckItem(item):
     with open(join('..', 'res', 'json', 'item', item), 'r') as file:
         try:
@@ -91,7 +91,7 @@ def CheckItem(item):
         expected = [['name', str], ['cara', dict], ['durability', int], ['cost', int],
                     ['use', dict], ['sound', str]]
         e += CheckValue(item, data, expected)
-        
+
         e += CheckExistence(item, data, 'sound', join('..', 'res', 'sound'))
         e += CheckUniDic(item, data, 'use', [int, int])
         e += CheckUniDic(item, data, 'cara', int)
@@ -106,8 +106,8 @@ def CheckList(file, key, l, rules):
             if type(l[i][j]) != rules[j]:
                 e += Error(file, [key,(i,j)], 2, opt = (rules[j], type(l[i][j])))
     return e
-        
-                
+
+
 def CheckSkill(skill):
     with open(join('..', 'res', 'json', 'skill', skill), 'r') as file:
         try:
@@ -121,22 +121,22 @@ def CheckSkill(skill):
         e += CheckExistence(skill, data, 'sheet', join('..', 'res', 'sprite', 'effect'))
         e += CheckExistence(skill, data, 'sound', join('..', 'res', 'sound'))
         e += CheckValue(skill, data, expected)
-        
+
         expected = [["rows", int], ['cols', int], ['action', [int, int]]]
         e += CheckCmnDic(skill, data['sprite'], expected)
-        
+
         expected = [['name', str], ['AOE', str], ['size', int], ['cost', int],
                     ['damage', int], ['range', int], ['perce', bool], ['type', str],
                     ['ele', str], ['hit', float]]
         e += CheckCmnDic(skill, data['cara'], expected)
-        
+
         expected = [['type', str], ['duration', int], ['power', int]]
         for key in ['effects', 'tileEffects']:
             for dic in data[key]:
                 e +=  CheckCmnDic(skill, dic, expected)
         return e
     else:
-        
+
         return Error(skill, skill, 'skill', 1)
 
 def CheckCharacter(character):
@@ -148,24 +148,24 @@ def CheckCharacter(character):
     if 'character' in data:
         e = 0
         data = data['character']
-        
-        expected = [['cara', dict], ['sheet', str], ["skill", list], 
+
+        expected = [['cara', dict], ['sheet', str], ["skill", list],
                      ['sprite', dict], ['items' ,list], ['drop', list]]
         e += CheckValue(character, data, expected)
-        
+
         e += CheckList(character, 'skill', data['skill'], [str, int])
         e += CheckList(character, 'drop', data['drop'], [str, float])
         e += CheckList(character, 'items', data['items'], [str, bool])
         e += CheckExistence(character, data, 'sheet', join('..', 'res', 'sprite', 'sheet'))
         e += CheckExistence(character, data['sprite'], 'portrait', join('..', 'res', 'sprite', 'portrait'))
-        
+
         expected = [['attacking', [int, int]], ['cols', int], ['portrait', str],
                     ['rows', int], ['standing', [int, int]],['static', [int]],
                     ['static_down', [int]], ['static_left', [int]], ['static_right', [int]],
                     ['static_up', [int]], ['walking_down', [int, int]], ['walking_left', [int, int]],
                     ['walking_right', [int, int]], ['walking_up', [int, int]]]
         e += CheckCmnDic(character, data['sprite'], expected)
-                
+
         expected = [['PA', int], ['PA_max', int], ['PM', int], ['PM_max', int],
                     ['PV', int], ['PV_max', int], ['avoid', int], ['defense', int],
                     ['elementalRes', dict], ['growth', dict], ['hit', int],
@@ -177,7 +177,10 @@ def CheckCharacter(character):
         e += CheckUniDic(character, data['cara'], 'elementRes', int)
         e += CheckUniDic(character, data['cara'], 'growth', int)
         e += CheckUniDic(character, data['cara'], 'xp', int)
-        
+        for c, cmax in zip(['PV', 'PM', 'PA'], ['PV_max', 'PM_max', 'PA_max']):
+            if data['cara'][c] > data['cara'][cmax]:
+                print(c, '>', cmax, 'on', character)
+                e += 1
         if data['cara']['sex'] not in ['f', 'm']:
             e += Error(character, ['cara', 'sex'], 2, opt=[['f', 'm'], data['cara']['sex']])
         expected = [['type', str], ['duration', int], ['power', int]]
@@ -193,10 +196,10 @@ def CheckCharacter(character):
             if not exists(join('..', 'res', 'json', 'item', item+'.json')):
                 e += Error(character, ['drop', item+'.json'], 3)
         return e
-            
+
     else:
         return Error(character, character, 'character', 1)
-        
+
 def CheckScript(script):
     with open(join('..', 'res', 'script', script), 'r') as file:
         lines = file.readlines()
@@ -261,11 +264,11 @@ def CheckLevel(level):
         expected = [['map', str], ['victories', list], ['script', str], ['characters', list],
                     ['initial_tiles', list], ['music', dict]]
         e += CheckValue(level, data, expected)
-        
+
         expected = [['condition', str], ['next_level', str]]
         for dic in data['victories']:
             e +=  CheckCmnDic(level, dic, expected)
-        
+
         expected = [['name', str], ['initial', [int, int]], ['team', int],
                     ['ia', str], ['leader', bool], ['coef', float], ['level', int],
                     ['items', list]]
@@ -274,10 +277,10 @@ def CheckLevel(level):
             for item in dic['items']:
                 if not exists(join('..', 'res', 'json', 'item', item+'.json')):
                     e += Error(level, ['item', item+'.json'], 3)
-            
+
         expected = [['placement', str], ['TRPG', str]]
         e +=  CheckCmnDic(level, data['music'], expected)
-        
+
         e += CheckExistence(level, data, 'map', join('..', 'res', 'map'))
         e += CheckExistence(level, data, 'script', join('..', 'res', 'script'))
         e += CheckExistence(level, data['music'], 'TRPG', join('..', 'res', 'music'))
@@ -288,7 +291,7 @@ def CheckLevel(level):
                 e += Error(level, 'condition', 2, [["destroy", "kill leaders"], dic['condition']])
         for dic in data['characters']:
             if dic['ia'] not in ['null', 'defensif', 'aggressif', 'passif']:
-                e += Error(level, 'condition', 2, [['null', 'defensif', 'aggressif', 'passif'], dic['ia']])
+                e += Error(level, 'condition', 2, [['null', 'defensif', 'aggresif', 'passif'], dic['ia']])
             e += CheckExistence(level, dic, 'name', join('..', 'res', 'json', 'character'))
         return e
     else:
@@ -305,7 +308,7 @@ def CheckTSX(tsx):
                 e += Error(tsx, property_.get('value'), 1)
                 rules[property_.get('value')] = 'detected'
     return e
-    
+
 if __name__ == '__main__':
     e = 0
     print('----Check items')

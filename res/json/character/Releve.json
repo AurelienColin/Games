@@ -36,7 +36,7 @@
             },
             "hit": 1,
             "level": 1,
-            "name": "Relevé",
+            "name": "Releve",
             "sex": "m",
             "type": "neutral",
             "xp": {
@@ -45,53 +45,53 @@
                 "on_kill": 50
             }
         },
-        "sheet": "64153.png",
+        "sheet": "Releve.png",
         "skill": [
             ["Apocalypse", 1],
             ["Horizontal", 1]
         ],
         "sprite": {
-            "attacking": [
-                400,
-                404
-            ],
-            "cols": 36,
             "portrait": "UndeadP1.png",
-            "rows": 432,
+            "attacking": [
+                5,
+                8
+            ],
+            "cols": 4,
+            "rows": 10,
             "standing": [
-                388,
-                392
+                1,
+                4
             ],
             "static": [
-                388
+                1
             ],
             "static_down": [
-                436
+                17
             ],
             "static_left": [
-                412
+                9
             ],
             "static_right": [
-                424
+                13
             ],
             "static_up": [
-                448
+                21
             ],
             "walking_down": [
-                436,
-                440
+                17,
+                20
             ],
             "walking_left": [
-                412,
-                416
+                9,
+                12
             ],
             "walking_right": [
-                424,
-                428
+                13,
+                16
             ],
             "walking_up": [
-                448,
-                452
+                21,
+                24
             ]
         },
         "items":[],

@@ -57,7 +57,7 @@ class Character():
         skills = [skill.cara['name'] for skill in self.skills]
         temp = {'cara':self.cara, 'sprite':self.sprite['values'],
                 'skill':skills, 'sheet':self.sheetName, 'drop':self.drop}
-        temp[items] = [[item.name, item.equiped] for item in self.items]
+        temp['items'] = [[item.name, item.equiped] for item in self.items]
         util.WriteJSON({'character':temp}, self.cara['name'])
 
     def Equip(self, name):
@@ -75,18 +75,23 @@ class Character():
 
     def UseItem(self, name, screen):
         item = self.getItem(name)
-        if item.usable:
+        if item.usable and self.cara['PA'] >= item.cost:
             item.sound.play()
             for cara, value in item.use.items():
-                power, length = value
-                effect = Effect.Effect(cara, power, length)
-                self.Affect(effect, screen)
-                self.cara['effects'].append(effect)
+                print(cara, value)
+                if cara == 'PV':
+                    self.Affect(-value[0], screen)
+                else:
+                    power, length = value
+                    effect = Effect.Effect(cara, power, length, name)
+                    self.Affect(effect, screen)
+                    self.cara['effects'].append(effect)
             self.cara['PA']-=item.cost
             item.durability-=1
             if item.durability == 0:
                 self.items.pop(self.items.index(item))
                 self.items.append(Item.Item("Broken Artefact"))
+        screen.UpdateStatus(self)
 
     def getItem(self, name):
         for item in self.items:
@@ -216,6 +221,12 @@ class Character():
         Output:
         xp - int: xp to add to the attacking character"""
         xp = 0
+        if type(effect) == Effect.Effect:
+            for i, charEffect in enumerate(self.cara['effects']):
+                if type(charEffect) == Effect.Effect and effect.orig == charEffect.orig:
+                    self.cara['effects'][i].since = 0
+                    return 0
+
         if effect in self.cara['effects']:
             return 0
         if type(effect) == int:
@@ -227,6 +238,8 @@ class Character():
             self.cara[effect.properties] = v
         if self.cara['PV'] == 0:
             self.dead = True
+            if self in screen.characters:
+                screen.characters.pop(screen.characters.index(self))
             xp += self.cara['xp']['on_kill']
             for i in self.index:
                 screen.RemoveObject(i)
@@ -324,7 +337,7 @@ class Character():
         for character in screen.characters:
             if character.pos['tile'] in tiles:
                 affected.append(character)
-                
+
         skill.sound.play()
 
         self.cara = cara
@@ -379,11 +392,12 @@ class Character():
         Output:
         character move and attack, screen and character are updated
         """
-        if self.ia == 'aggresif' or self.ia == 'defensif':
+        if self.ia == 'aggressif' or self.ia == 'defensif':
             reachable = self.getReachable(screen)
         elif self.ia == 'passif':
             reachable = {(self.pos['tile']):(0, [])}
         elif self.ia == 'null':
+            self.passTurn
             return
         max_dmgs = 0
         path, skill_target, tiles_target = False, False, False
@@ -424,6 +438,7 @@ class Character():
         if skill_target and tiles_target:
             print(skill_target)
             self.Attack(skill_target, tiles_target, screen, tile_target)
+        self.passTurn
 
     def Move(self, screen, p, ini_pos, new_pos):
         """Change the position of the character
@@ -498,8 +513,8 @@ class Character():
         queue[(self.pos['tile'][0], self.pos['tile'][1])] = (0, [])
         reachable = {}
         tileSize = screen.tileSize
-        transparent = True
         while queue:
+            transparent = True
             x, y = list(queue.keys())[0]
             d, path = queue.pop((x, y))
             reachable[(x, y)] = (d, path)
@@ -509,15 +524,17 @@ class Character():
                 d_to = int(Map.CheckProperties((tile[0]*tileSize, tile[1]*tileSize),
                                                'slowness', screen.mapData,tileSize))
                 if tile[0] < 0 or tile[0] >= screen.size[1]//tileSize:
+                    print('Outside of screen 1')
                     transparent = False  # Outside of screen
                 elif tile[1] < 0 or tile[1] >= screen.size[1]//tileSize:
+                    print('Outside of screen 2')
                     transparent = False # Outside of screen
                 elif tile in reachable and d_to+d > reachable[(tile[0], tile[1])][0]:
                     transparent = False # Shorter path already in reachable
                 for character in screen.characters:
-                    if character.team != self.team:
+                    if character.team != self.team and character.pos['tile'] == tile:
                         transparent = False  # Obstacle on the path
-                if transparent and d_to != -1 and  d+d_to <= PM:  # Obstacle on the path
+                if transparent and d_to != -1 and  d+d_to <= PM:
                     queue[(tile[0], tile[1])] = (d+d_to, path+[(x, y)])
         return reachable
 

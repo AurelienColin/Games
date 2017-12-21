@@ -264,7 +264,7 @@ def PlacementLoop(iniTiles, screen):
                             screen.charBox = -1
                             return chars
                         screen.charBox = (screen.charBox+1)%len(l)
-                        while screen.characters[screen.charBox].team == 1:
+                        while screen.characters[screen.charBox].team != 1:
                             screen.charBox = (screen.charBox+1)%len(l)
                         event.key = K_ESCAPE
                     elif event.key in [K_UP, K_DOWN]:  # We navigate through the menu

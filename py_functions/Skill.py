@@ -22,12 +22,12 @@ class Skill():
         self.effects = {'values':data['effects'], 'effects':[]}
         if self.effects['values']:
             for e in self.effects['values']:
-                    effect = Effect.Effect(e['type'], e['power'], e['duration'])
-                    self.effects['effects'].append(effect)
+                effect = Effect.Effect(e['type'], e['power'], e['duration'], self.name)
+                self.effects['effects'].append(effect)
 
         self.tileEffects = {'values':data['tileEffects'], 'effects':[]}
         for e in self.tileEffects['values']:
-            effect = Effect.Effect(e['type'], e['power'], e['duration'])
+            effect = Effect.Effect(e['type'], e['power'], e['duration'], self.name)
             self.tileEffects['effects'].append(effect)
         self.sound = pygame.mixer.Sound(join('res', 'sound', data['sound']))
 
@@ -233,6 +233,7 @@ class Skill():
         aimable = set()
         scope = self.cara['range']
         p = 'transparent'
+        pos = (int(pos[0]), int(pos[1]))
         for x in range(max(pos[0]-scope, 0), pos[0]+scope+1):
             diffX = x-pos[0]
             for y in range(max(pos[1]-scope,0), pos[1]+scope+1):

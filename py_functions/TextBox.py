@@ -18,18 +18,28 @@ class TextBox():
                 if i < 0:
                     i = len(self.text)+i
                 self.text[i].ChangeColor(c)
-                
+
         self.size = dim
         self.imgs = False
         f1, f2 = pygame.transform.smoothscale, pygame.image.load
         self.box = [f1(f2(names[i]), self.size[i]) for i in range(len(names))]
         self.imgs = False
+
+
+
+
         if pos[0] == "middle":  # pos[1] == screen.size
             posX = int((pos[1][0] - self.size[0][0])/2)
             posY = int((pos[1][1] - self.size[0][1])/2)
             self.pos = [(posX, posY)]
         else:
             self.pos = pos
+
+        screenDim = (870,870)
+        decal = [min(0, screenDim[0]-self.size[0][0]-self.pos[0][0]),
+                 min(0, screenDim[1]-self.size[0][1]-self.pos[0][1])]
+        for i, xy in enumerate(self.pos):
+            self.pos[i] = [xy[0]+decal[0], xy[1]+decal[1]]
 
     def Initialization(name, pos, screen = None, char=None):
         if name == 'MainMenu':
@@ -54,7 +64,7 @@ class TextBox():
                 screen.currentItem = name
             else:
                 self = ExitBox(pos)
-                
+
         elif name == 'Use':
             char.UseItem(screen.currentItem, screen)
             self = ExitBox(pos)
@@ -80,11 +90,11 @@ class Text():
         self.text = text
         self.string = font.render(text, True, color)
         self.pixel = pixel
-    
+
     def ChangeColor(self, color):
         font = pygame.font.SysFont('freesans', self.size)
         self.string = font.render(self.text, True, color)
-        
+
 class MainMenu(TextBox):
     def __init__(self, pos):
         string = ["Skills;Items;Status;Exit;End Turn"]
@@ -101,6 +111,7 @@ class LauncherMenu(TextBox):
 class LevelSelection(TextBox):
     def __init__(self, pos):
         string = ['Level0;Prologue;Level1;VisualNovel']
+        string = ['Level1;VisualNovel']
         box = ["TextBox_ExtraLarge.png"]
         TextBox.__init__(self,box, string, [(130,170)], [(30, 20)], pos)
 
@@ -141,7 +152,7 @@ class SkillDetails(TextBox):
         string = [';'.join(data)]
         box = ["TextBox_ExtraLarge.png"]
         TextBox.__init__(self, box, string, [(128,100)], [(20, 10)], pos, size = 15)
-        
+
 class ItemDetails(TextBox):
     def __init__(self, item, pos):
         data = ['       -- Passif --;', 'PA: ', item.cara['PA'], '; PM: ', item.cara['PM'], ';']+\
@@ -180,7 +191,7 @@ class IniList(TextBox):
         cap = 10
         margin = 37
         while j < len(characters)*2:
-            if i in turns:
+            if i in turns and not turns[i].dead:
                 j+=1
                 temp.append(turns[i])
                 k = turn + int(util.StatCalculation(turns[turn].cara['speed'])*100)
@@ -315,7 +326,7 @@ class Drop(TextBox):
         c = {'default':(255,255,255)}
         TextBox.__init__(self, box, string, [(296,176)], text_pos, pos, size=13,
                          color=c)
-    
+
 class ItemMenu(TextBox):
     def __init__(self, item, pos):
         box = ["TextBox_ExtraLarge.png"]
@@ -341,6 +352,6 @@ class ExitBox(TextBox):
 
 def itemList():
     return ['Carak Dae', 'Broken Artefact', 'Potion']
-    
+
 def levelList():
     return ['Level1', 'VisualNovel']

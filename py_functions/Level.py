@@ -60,6 +60,8 @@ class Level():
                 print('You win')
                 if self.music:
                     self.music.stop()
+                self.screen.objects = []
+                self.screen.tileEffects = []
                 self = Level(self.screen, nextLevel)
 
     def ModeTRPG(self):
@@ -119,7 +121,6 @@ class Level():
 
         Output:
         turns - char: next char to play"""
-        print(turn, turns[turn])
         if not turns[turn].dead:
             speed = turn + int(util.StatCalculation(turns[turn].cara['speed'])*100)
             while speed in turns:
@@ -132,7 +133,7 @@ class Level():
         effects = {}
         for i, tileEffect in enumerate(self.screen.tileEffects):
             pos, effect = tileEffect
-            charEffect = Effect.Effect(effect.properties, effect.power, 1)
+            charEffect = Effect.Effect(effect.properties, effect.power, 1, turns[turn].cara['name'])
             if turns[turn].pos['tile'] == pos:
                 turns[turn].Affect(charEffect, self.screen)
             if effect not in effects:

@@ -7,7 +7,7 @@
 		"script":"level1C.txt",
 		"characters":[{
 			"name":"Rignak.json",
-			"initial":[24,18],
+			"initial":[-1,-1],
 			"team":1,
 			"ia":"null",
 			"leader":true,
@@ -31,7 +31,7 @@
 			"leader":true,
 			"items":[],
 			"level":1,
-			"coef":1.0
+			"coef":0.8
 		},{
 			"name":"Releve.json",
 			"initial":[10,4],
@@ -39,19 +39,19 @@
 			"ia":"aggressif",
 			"leader":false,
 			"items":["Potion"],
-			"level":4,
-			"coef":1.0
+			"level":3,
+			"coef":0.8
 		},{
 			"name":"Releve.json",
 			"initial":[17,10],
-			"team":1,
+			"team":2,
 			"ia":"aggressif",
 			"leader":false,
 			"items":["Potion"],
-			"level":4,
-			"coef":1.0
+			"level":3,
+			"coef":0.8
 		}],
-		"initial_tiles":[[14, 7], [15,11], [17,11]],
+		"initial_tiles":[[14, 7], [24,18]],
 		"music": {
 			"placement" : "plain1.ogg",
 			"TRPG": "plain1.ogg"

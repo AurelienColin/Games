@@ -1,5 +1,4 @@
 music_on plain1.ogg
-enter background ruins1.png	raw 0,0
 enter Katarite HenryF1.png sym 0,-256
 enter Rignak TikiF1.png raw -256,-256
 Rignak: C'est mieux, mais pense à prendre l'avantage du terrain.
@@ -8,4 +7,3 @@ Katarite: Bien.
 music_off
 leave Katarite
 leave Rignak
-leave background

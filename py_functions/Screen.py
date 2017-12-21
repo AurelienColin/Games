@@ -2,6 +2,7 @@ from pygame.locals import *
 from pytmx import *
 from os.path import join
 import pygame
+import pyganim
 from . import Map, Highlight, TextBox, util, Character, Skill, Item
 from .Loop import listSkills
 from .TextBox import itemList
@@ -52,12 +53,12 @@ class Screen():
         [self.display.blit(ele, pos) for ele, pos in sprites]
         for ele, pos, t, index in box:
             for i in index:
-                ele, pos=  self.objects[i][:2]
-                if type(ele) == pygame.Surface:
-                    self.display.blit(ele, pos)
-                else:
-                    for i in range(len(ele.box)):
-                        self.display.blit(ele.box[i], ele.pos[i])
+                ele2, pos2=  self.objects[i][:2]
+                if type(ele2) == pygame.Surface:
+                    self.display.blit(ele2, pos2)
+                elif type(ele2) != pyganim.PygAnimation :
+                    for j in range(len(ele2.box)):
+                        self.display.blit(ele2.box[j], ele2.pos[j])
         [self.display.blit(ele, pos) for ele, pos in highlight]
 
         pygame.display.update()
@@ -74,7 +75,7 @@ class Screen():
             self.RemoveObject(i)
         mouse_pos = (pos[0]//self.tileSize, pos[1]//self.tileSize)
         for character in self.characters:
-            if mouse_pos == character.pos['tile'] and not character.dead:
+            if mouse_pos == character.pos['tile']:
                 pos = character.pos['px'][0]+self.tileSize, character.pos['px'][1]+self.tileSize
                 self.ui['hovering'] = self.AddTextBox(TextBox.Portrait(character, [pos]))
                 break
@@ -207,7 +208,7 @@ class Screen():
             if character['initial']!=[-1,-1]:
                 char.index = self.AddCharacter(char, 'standing')
             self.characters.append(char)
-            
+
     def RemoveUI(self):
         for index in self.ui['childBox'] + self.ui['hovering']:
             self.RemoveObject(index)
