@@ -2,6 +2,7 @@ from . import Highlight, Map, util, Effect
 import random
 from os.path import join
 import pyganim
+from math import ceil
 import pygame
 import json
 import numpy as np
@@ -239,38 +240,49 @@ class Skill():
             for y in range(max(pos[1]-scope,0), pos[1]+scope+1):
                 diffY = y-pos[1]
                 transparent = True
-
-                if (self.cara['AOE'] == 'parallel' or self.cara['AOE'] == 'orthogonal') and (x != pos[0] and y!= pos[1]):
-                    transparent = False
-                elif abs(diffX) + abs(diffY) > scope:
-                    transparent = False
-                elif not Map.CheckProperties((x*tileSize, y*tileSize), p, mapData, tileSize):
+                if ((self.cara['AOE'] == 'parallel' or self.cara['AOE'] == 'orthogonal') and x != pos[0] and y!= pos[1])\
+                    or abs(diffX) + abs(diffY) > scope\
+                    or x >= screen.size[0]/tileSize or y >= screen.size[1]/tileSize \
+                    or not Map.CheckProperties((x*tileSize, y*tileSize), p, mapData, tileSize):
                     transparent = False
                 elif diffY != 0 or diffX != 0:
-                    R = abs(diffY)+abs(diffX)
-                    yStep = diffY/R
-                    xStep = diffX/R
-                    if xStep != 0:
-                        xRange = np.arange(pos[0], x, xStep)
-                    else:
-                        xRange = [x for i in range(R+1)]
-                    if yStep != 0:
-                        yRange = np.arange(pos[1], y, yStep)
-                    else:
-                        yRange = [y for i in range(R+1)]
-                    tileRange = [(int(xRange[i]+0.5), int(yRange[i]+0.5)) for i in range(R)]
+                    tileRange = Trajectory((x,y), pos, (diffX, diffY))
                     for x_c, y_c in tileRange:
+                        if not Map.CheckProperties((x_c*tileSize, y_c*tileSize), p, mapData, tileSize)\
+                            and (x_c, y_c) != pos:
+                            transparent = False
+                            break
                         if not self.cara['perce']:
                             for atlChar in screen.characters:
                                 if atlChar.pos['tile'] == (x_c, y_c) and atlChar.team != character.team:
                                     transparent = False
                                     break
-                        if not Map.CheckProperties((x_c*tileSize, y_c*tileSize), p, mapData, tileSize):
-                            print('here we break')
-                            transparent = False
-                            break
                 if transparent:
                     aimable.add((x, y))
+        aimable.add(pos)
         character.aiming = pos
         return list(aimable)
 
+def Trajectory(xy, pos, diff):
+    x, y = xy
+    diffX, diffY = diff
+    R = abs(diffY)+abs(diffX)
+    yStep = diffY/R
+    xStep = diffX/R
+    if x < pos[0] and y < pos[1]:
+        x, y = pos
+        pos = xy
+        yStep,xStep = -yStep, -xStep
+    if xStep != 0:
+        xRange = np.arange(pos[0], x, xStep)
+    else:
+        xRange = [x for i in range(R+1)]
+    if yStep != 0:
+        yRange = np.arange(pos[1], y, yStep)
+    else:
+        yRange = [y for i in range(R+1)]
+    tileRange = []
+    for x, y in zip(xRange, yRange):
+        if abs(x%1-0.5) > 0.01 or abs(y%1-0.5) > 0.01:
+            tileRange.append((round(x), round(y)))
+    return tileRange

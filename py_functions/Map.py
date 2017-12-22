@@ -102,14 +102,15 @@ class TiledMap(object):
 
 
 def CheckProperties(xy, P,  mapData, tile_size):
-    # Add a try, because if some properties aren't define on all tiles
-    # there will be casualties
+    x_id = xy[0]//tile_size
+    y_id = xy[1]//tile_size
+    gid = mapData.get_tile_gid(x_id, y_id,0)
     try:
-        x_id = xy[0]//tile_size
-        y_id = xy[1]//tile_size
-        gid = mapData.get_tile_gid(x_id, y_id,0)
-        properties = mapData.get_tile_properties_by_gid(gid)
-        return properties[P]
-    except Exception as e:
-        print('ERROR: no propertie',P,'at', x_id, y_id, 'for', xy)
-        return 0
+        p = mapData.get_tile_properties_by_gid(gid)[P]
+        if p == 'True':
+            return True
+        elif p == 'False':
+            return False
+        return p
+    except:
+        return False
