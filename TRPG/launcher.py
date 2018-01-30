@@ -11,7 +11,7 @@ def Launcher():
     global screenDim
     screenDim = (870,870)
     screen = Screen.Screen(screenDim[0], screenDim[1], tileSize)
-    img = join('res', 'img', 'bg_main.png')
+    img = join('..', 'res', 'img', 'bg_main.png')
     background = pygame.image.load(img)
     screen.AddSprite(background, (0,0))
 

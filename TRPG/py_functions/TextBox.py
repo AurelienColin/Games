@@ -4,7 +4,7 @@ from . import util, Map, Level
 
 class TextBox():
     def __init__(self, files, texts, dim, text_pos, pos, size=20, color={'default':(0,0,0)}):
-        names = [join('res', 'textbox', file) for file in files]
+        names = [join('..', 'res', 'textbox', file) for file in files]
         self.text = []
         self.string = []
         c = color['default']

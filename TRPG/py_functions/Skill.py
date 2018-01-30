@@ -14,7 +14,7 @@ class Skill():
 
     def FromJSON(self, file):
         self.name = file
-        with open(join('res','json', 'skill', file+'.json'), 'r') as file:
+        with open(join('..', 'res','json', 'skill', file+'.json'), 'r') as file:
             data = json.load(file)['skill']
         self.cara = data['cara']
         self.sprite = {'values': data['sprite']}
@@ -30,7 +30,7 @@ class Skill():
         for e in self.tileEffects['values']:
             effect = Effect.Effect(e['type'], e['power'], e['duration'], self.name)
             self.tileEffects['effects'].append(effect)
-        self.sound = pygame.mixer.Sound(join('res', 'sound', data['sound']))
+        self.sound = pygame.mixer.Sound(join('..', 'res', 'sound', data['sound']))
 
     def ToJSON(self):
         """Write the character in a .json
@@ -55,7 +55,7 @@ class Skill():
 
         Output:
         obj - a sprite"""
-        fullname = join('res', 'sprite', 'effect', name)
+        fullname = join('..', 'res', 'sprite', 'effect', name)
         perso = pyganim.getImagesFromSpriteSheet(fullname,cols=cols,rows=rows)[begin:end]
         if end > begin+1:
             frames = list(zip(perso, [100]*(end-begin)))
