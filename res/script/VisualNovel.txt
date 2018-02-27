@@ -34,3 +34,6 @@ music_off
 leave Rignak
 leave Aurore
 leave background
+choice Je vous suis&Je refuse
+1 level1.txt
+2 level1C.txt

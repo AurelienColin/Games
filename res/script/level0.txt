@@ -1,7 +1,7 @@
 music_on VC3_Main_Theme.ogg
 enter Anna AnnaF5A.png sym 0,-256
 Anna: Sir, won't you give up and put down your weapon?
-enter Henry HenryF2.png raw +++-256,-256
+enter Henry HenryF2.png raw -256,-256
 Henry: Anna, you were once my most faithful retainers. Now, the leader of the traitors...
 Anna: You betrayed your kingdom, using this despicable magic.
 Henry: And by this magic, I will attain my goal.
