@@ -1,0 +1,20 @@
+{
+	"cruiser": {
+		"hp": 100,
+		"shield": {
+			"front": 0.5,
+			"side": 0.25,
+			"rear": 0
+		},
+		"acceleration": {
+			"front": 5,
+			"rear": 2,
+			"side": 1
+		},
+		"inertia": 0.5,
+		"fireDelay": 0.5,
+		"damage": 20,
+		"bulletSpeed": 2,
+		"sprite":"cruiser.png"
+	}
+}
