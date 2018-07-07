@@ -39,8 +39,10 @@ def Loop(screen):
                     screen.ships[0].Motor([0,-1])
                 if keys[K_LEFT]:
                     screen.ships[0].Motor([0,1])
+                if keys[K_RETURN]:
+                    screen.ships[0].Fire()
         
-        screen.MoveShips()
+        screen.MoveSprites()
         screen.Refresh()
     pass
 
