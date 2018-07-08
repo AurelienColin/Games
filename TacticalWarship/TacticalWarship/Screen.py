@@ -14,7 +14,6 @@ class Screen():
     def __init__(self, size, background):
         self.size = size
         self.display = pygame.display.set_mode(self.size, pygame.RESIZABLE)
-        
         self.ships = []
         self.background = background
         self.ui = {'score'}
@@ -22,12 +21,12 @@ class Screen():
     def Refresh(self):        
         self.display.blit(self.background, (0,0))
         for ship in self.ships:
-            ship.Rotate()
+            ship.sprite.Rotate(ship.sprite.angle)
             ship.lastFire += 1
-            self.display.blit(ship.image, ship.rect)
+            self.display.blit(ship.sprite.image, ship.sprite.rect)
             for bullet in ship.bullets:
-                bullet.Rotate()
-                self.display.blit(bullet.image, bullet.rect)
+                bullet.sprite.Rotate(bullet.sprite.angle)
+                self.display.blit(bullet.sprite.image, bullet.sprite.rect)
         pygame.display.update()
                 
     def InitiateBattle(self):
@@ -50,6 +49,6 @@ class Screen():
         
     def MoveSprites(self):
         for ship in self.ships:
-            ship.Move()
+            ship.sprite.Move()
             for bullet in ship.bullets:
-                bullet.Move()
+                bullet.sprite.Move()
