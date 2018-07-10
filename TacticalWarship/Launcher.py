@@ -43,9 +43,25 @@ def Loop(screen):
                     screen.ships[0].Fire()
         
         screen.MoveSprites()
+        collisions = screen.GetBulletCollisions()
+        for ship1, ship2, bullet in collisions:
+            dmg = GetDamage(ship1, ship2, bullet)
+            score = screen.ships[ship2[1]].ApplyDamage(dmg)
+            screen.ships[ship1[1]].scorePlayer += score
         screen.Refresh()
     pass
 
+def GetDamage(ship1, ship2, bullet):
+    angle = (bullet[0].sprite.angle-ship2[0].sprite.angle)%360
+    if angle > 120 and angle < 240:
+        part = "front"
+    elif angle <60 or angle > 300:
+        part = "rear"
+    else:
+        part = "side"
+    dmg = ship1[0].damage*ship2[0].shield[part]
+    return dmg
+    
 if __name__ == '__main__':
     screen = Launcher()
     screen.Refresh()

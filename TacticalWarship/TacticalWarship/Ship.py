@@ -11,7 +11,8 @@ import math
 class Ship():
     def __init__(self, ship, xy, team, angle):
         self.team = team
-        self.score = 0
+        self.scorePlayer = 0
+        self.score = ship['score']
         
         self.hp = ship['hp']
         self.shield = ship['shield']
@@ -41,4 +42,14 @@ class Ship():
             self.bullets.append(Bullet.Bullet(self))
             self.lastFire = 0
         
-    
+    def ApplyDamage(self, dmg):
+        score = min(self.hp, dmg)*self.score['onDamage']
+        self.hp -= dmg
+        if self.hp <= 0:
+            self.Kill()
+            score += self.score['onKill']
+        return score
+        
+    def Kill(self):
+        # Should not remove entirely because bullet are still pending
+        self.sprite = False

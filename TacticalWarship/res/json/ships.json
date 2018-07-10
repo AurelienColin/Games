@@ -15,6 +15,10 @@
 		"fireDelay": 0,
 		"damage": 20,
 		"bulletSpeed": 20,
-		"sprite":"cruiser.png"
+		"sprite":"cruiser.png",
+		"score": {
+			"onDamage":2,
+			"onKill":500
+		}
 	}
 }

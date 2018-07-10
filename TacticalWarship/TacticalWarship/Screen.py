@@ -9,6 +9,7 @@ import pygame
 from . import Ship
 from os.path import join
 import json
+from pygame.sprite import spritecollide, collide_mask
 
 class Screen():
     def __init__(self, size, background):
@@ -21,6 +22,8 @@ class Screen():
     def Refresh(self):        
         self.display.blit(self.background, (0,0))
         for ship in self.ships:
+            if not ship.sprite:
+                continue
             ship.sprite.Rotate(ship.sprite.angle)
             ship.lastFire += 1
             self.display.blit(ship.sprite.image, ship.sprite.rect)
@@ -49,6 +52,30 @@ class Screen():
         
     def MoveSprites(self):
         for ship in self.ships:
-            ship.sprite.Move()
+            if ship.sprite:
+                ship.sprite.Move()
             for bullet in ship.bullets:
                 bullet.sprite.Move()
+                
+    def GetBulletCollisions(self):
+        collisions = []
+        for i, ship1 in enumerate(self.ships):
+            bullets = [bullet.sprite for bullet in ship1.bullets]
+            for j, ship2 in enumerate(self.ships):
+                if not ship2.sprite:
+                    continue
+                # For performance (and laziness) we suppose that:
+                    # 1/ A ship cannot shot itself
+                    # 2/ The delay is too high to have one ship shooted twice by one ship in one frame
+                if ship2 == ship1:
+                    continue
+                collision =  spritecollide(ship2.sprite, bullets,
+                                           False, collide_mask)
+                if not collision:
+                    continue
+                for k, bullet in enumerate(ship1.bullets):
+                    if bullet.sprite == collision[0]:
+                        ship1.bullets.pop(k)
+                        collisions.append(((ship1, i), (ship2,j), (bullet,k)))
+                        break
+        return collisions
