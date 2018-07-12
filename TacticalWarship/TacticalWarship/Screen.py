@@ -22,7 +22,7 @@ class Screen():
     def Refresh(self):        
         self.display.blit(self.background, (0,0))
         for ship in self.ships:
-            if not ship.sprite:
+            if ship.killedInDuty:
                 continue
             ship.sprite.Rotate(ship.sprite.angle)
             ship.lastFire += 1
@@ -48,11 +48,16 @@ class Screen():
                     xy = [self.size[1]*[0.1, 0.9][team], self.size[0]//(nb+1)*(j+1)]
                     self.ships.append(Ship.Ship(shipsBasis[ship], xy,
                                                 team, [0, 180][team]))
+                                     
+        from . import Sprites
+        self.ships[0].sprite = Sprites.Sprite('player.png', self.ships[0].sprite.rect.center)
+        self.ships[0].sprite.speed = [0, 0, 0]
+        self.ships[0].sprite.angle = 0
         return self.ships
         
     def MoveSprites(self):
         for ship in self.ships:
-            if ship.sprite:
+            if not ship.killedInDuty:
                 ship.sprite.Move()
             for bullet in ship.bullets:
                 bullet.sprite.Move()
@@ -62,7 +67,7 @@ class Screen():
         for i, ship1 in enumerate(self.ships):
             bullets = [bullet.sprite for bullet in ship1.bullets]
             for j, ship2 in enumerate(self.ships):
-                if not ship2.sprite:
+                if ship2.killedInDuty:
                     continue
                 # For performance (and laziness) we suppose that:
                     # 1/ A ship cannot shot itself
@@ -78,4 +83,21 @@ class Screen():
                         ship1.bullets.pop(k)
                         collisions.append(((ship1, i), (ship2,j), (bullet,k)))
                         break
+        return collisions
+        
+    def GetShipCollisions(self):
+        collisions = []
+        for i, ship1 in enumerate(self.ships):
+            if ship1.killedInDuty:
+                continue
+            for j, ship2 in enumerate(self.ships):
+                if ship2.killedInDuty:
+                    continue
+                if ship2 == ship1:
+                    continue
+                collision = spritecollide(ship2.sprite, [ship1.sprite],
+                                           False, collide_mask)
+                if collision:
+                    collisions.append(((ship1, i), (ship2, j)))
+        
         return collisions

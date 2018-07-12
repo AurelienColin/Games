@@ -1,7 +1,7 @@
 {
 	"baseBattle": {
 		"ships": {
-			"cruiser": 10,
+			"cruiser": 1,
 			"battleship": 0,
 			"interceptor": 0
 		}

@@ -30,6 +30,8 @@ class Ship():
         self.sprite.speed = [0, 0, 0]
         self.sprite.angle = angle
         
+        self.killedInDuty = False
+        
     def Motor(self, command):
         factor = command[0]*self.inertia*self.acceleration[['rear', 'front'][command[0] > 0]]
         angle = self.sprite.angle/180*math.pi
@@ -52,4 +54,4 @@ class Ship():
         
     def Kill(self):
         # Should not remove entirely because bullet are still pending
-        self.sprite = False
+        self.killedInDuty = True
