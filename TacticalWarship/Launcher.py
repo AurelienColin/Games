@@ -11,13 +11,21 @@ from pygame.locals import KEYDOWN, K_RETURN, QUIT, K_UP, K_DOWN, K_LEFT, K_RIGHT
 
 from os.path import join
 
+# ------------------------------
+# place for global constants
+battle = 'staticTower'
+
+
+
+# ------------------------------
+
 def Launcher():
     pygame.init()
     global screenDim
     screenDim = (1000,1000)
     background = pygame.image.load(join('res', 'img', 'bg_main.png'))
     screen = Screen.Screen(screenDim, background)
-    
+
     return screen
 
 
@@ -40,7 +48,7 @@ def Loop(screen):
             screen.ships[0].Motor([0,1])
         if keys[K_RETURN]:
             screen.ships[0].Fire()
-        
+
         screen.MoveSprites()
         collisions = screen.GetBulletCollisions()
         for ship1, ship2, bullet in collisions:
@@ -48,40 +56,26 @@ def Loop(screen):
             score = screen.ships[ship2[1]].ApplyDamage(dmg)
             screen.ships[ship1[1]].scorePlayer += score
             screen.ships[ship2[1]].scorePlayer -= score
-            
-        collisions = screen.GetShipCollisions()
-        
-        dmgs = []
-        for ship1, ship2 in collisions:
-            dmg = GetShipDamage(ship1[0], ship2[0])
-            dmgs.append((ship1, ship2, dmg))
-            
-        for ship1, ship2, dmg in dmgs:
-            score = screen.ships[ship2[1]].ApplyDamage(dmg)
-            screen.ships[ship1[1]].scorePlayer += score
-            screen.ships[ship2[1]].scorePlayer -= score
-            
-            # We also stop the ships (not calculating rebounce)
-            screen.ships[ship1[1]].sprite.speed = [0, 0, 0]
-            screen.ships[ship2[1]].sprite.speed = [0, 0, 0]
-                        
-            
-        screen.Refresh()
-    pass
 
-def GetShipDamage(ship1, ship2):
-    # This one is false since the ship not always move forward
-    diffSpeedSquared = (ship1.sprite.speed[0]-ship2.sprite.speed[0])**2 + \
-                       (ship1.sprite.speed[1]-ship2.sprite.speed[1])**2 
-                       
-    dmg = (10*ship2.shield['front']*diffSpeedSquared)
-    return dmg
+        collisions = screen.GetShipCollisions()
+        for ship1, ship2 in collisions:
+            screen.ships[ship2[1]].ApplyDamage(1000)
+
+        if battle == 'staticTower':
+            screen.Repop()
+        screen.Refresh()
+        if screen.ships[0].killedInDuty == True:
+            print('Game Over')
+            print('Score:', screen.ships[0].scorePlayer)
+            pygame.quit()
+            sys.exit()
+    pass
 
 def GetBulletDamage(ship1, ship2, bullet):
     part = GetPart(bullet.sprite.angle, ship2.sprite.angle)
     dmg = ship1.damage*ship2.shield[part]
     return dmg
-    
+
 def GetPart(angle1, angle2):
     angle = (angle1-angle2)%360
     if angle > 120 and angle < 240:
@@ -91,10 +85,10 @@ def GetPart(angle1, angle2):
     else:
         part = "side"
     return part
-    
-    
+
+
 if __name__ == '__main__':
     screen = Launcher()
     screen.Refresh()
-    screen.InitiateBattle()
+    screen.InitiateBattle(battleType = battle)
     Loop(screen)

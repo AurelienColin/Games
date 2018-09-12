@@ -1,9 +1,17 @@
 {
+	"staticTower":{
+		"ships":{
+			"cruiser":{
+				"0":[[500,500, 0]]
+			}
+		}
+	},
 	"baseBattle": {
 		"ships": {
-			"cruiser": 1,
-			"battleship": 0,
-			"interceptor": 0
+			"cruiser":{
+				"0":[[100, 500, 0]],
+				"1":[[900, 500, 180]]
+			}
 		}
 	}
 }
