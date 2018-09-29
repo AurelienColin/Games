@@ -9,7 +9,7 @@ from . import Bullet, Sprites
 import math
 
 class Ship():
-    def __init__(self, ship, xy, team, angle):
+    def __init__(self, ship, xy, team, angle, sprite, bulletSprite):
         self.team = team
         self.scorePlayer = 0
         self.killedInDuty = False
@@ -19,31 +19,60 @@ class Ship():
         self.shield = ship['shield']
 
         self.acceleration = ship['acceleration']
-        self.inertia = ship['inertia']
 
         self.bullets = []
         self.lastFire = 0
         self.fireDelay = ship['fireDelay']
         self.damage = ship['damage']
         self.bulletSpeed = ship['bulletSpeed']
+        self.bulletSprite = bulletSprite
 
-        self.sprite = Sprites.Sprite(ship['sprite'], xy)
+        self.sprite = Sprites.Sprite(sprite, xy)
         self.sprite.speed = [0, 0, 0]
         self.sprite.angle = angle
 
         self.killedInDuty = False
 
     def Motor(self, command):
-        factor = command[0]*self.inertia*self.acceleration[['rear', 'front'][command[0] > 0]]
+        self.sprite.speed[0] *= 0.8
+        self.sprite.speed[1] *= 0.8
+        if command[0] == 1:
+            factor = self.acceleration['front']
+        elif command[1] == 1:
+            factor = -self.acceleration['rear']
+        else:
+            factor = 0
+        if command[3] == 1:
+            self.sprite.speed[2] += self.acceleration['side']
+        elif command[4] == 1:
+            self.sprite.speed[2] -= self.acceleration['side']
+
+
         angle = self.sprite.angle/180*math.pi
+
         self.sprite.speed[0] += factor*math.cos(angle)
         self.sprite.speed[1] -= factor*math.sin(angle)
-        self.sprite.speed[2] += command[1]*self.inertia*self.acceleration['side']
+
+        if  self.sprite.speed[0] > 20:
+            self.sprite.speed[0] = 20
+        elif self.sprite.speed[0]< -20:
+            self.sprite.speed[0] = -20
+        if  self.sprite.speed[1] > 20:
+            self.sprite.speed[1] = 20
+        elif self.sprite.speed[1]< -20:
+            self.sprite.speed[1] = -20
+        if  self.sprite.speed[2] > 20:
+            self.sprite.speed[2] = 20
+        elif self.sprite.speed[2]< -20:
+            self.sprite.speed[2] = -20
 
     def Fire(self):
+        reward = 0
         if self.lastFire > self.fireDelay:
-            self.bullets.append(Bullet.Bullet(self))
+            reward = -1
+            self.bullets.append(Bullet.Bullet(self, self.bulletSprite))
             self.lastFire = 0
+        return reward
 
     def ApplyDamage(self, dmg):
         score = min(self.hp, dmg)*self.score['onDamage']

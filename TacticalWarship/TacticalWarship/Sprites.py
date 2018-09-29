@@ -11,9 +11,10 @@ from os.path import join
 from pygame.transform import rotate
 from pygame.mask import from_surface
 
+
 class Sprite():
-    def __init__(self, name, xy):
-        self.origSprite = pygame.image.load(join('res', 'img', name))
+    def __init__(self, sprite, xy):
+        self.origSprite = sprite
         self.image = self.origSprite
         self.rect = self.image.get_rect()
         self.rect.center = xy

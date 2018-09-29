@@ -1,17 +1,16 @@
 {
 	"cruiser": {
-		"hp": 140,
+		"hp": 100,
 		"shield": {
 			"front": 0.5,
 			"side": 0.25,
 			"rear": 0
 		},
 		"acceleration": {
-			"front": 5,
-			"rear": 2,
-			"side": 1
+			"front": 1.6,
+			"rear": 0.8,
+			"side": 0.4
 		},
-		"inertia": 0.5,
 		"fireDelay": 3,
 		"damage": 40,
 		"bulletSpeed": 20,
