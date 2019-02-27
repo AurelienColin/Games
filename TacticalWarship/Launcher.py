@@ -7,6 +7,7 @@ Created on Thu Jul  5 18:00:07 2018
 from TacticalWarship import Screen
 import sys
 import pygame
+import numpy as np
 import random
 from pygame.locals import KEYDOWN, K_RETURN, QUIT, K_UP, K_DOWN, K_LEFT, K_RIGHT
 from PIL import Image
@@ -51,7 +52,7 @@ class GameState:
         for ship1, ship2, bullet in collisions:
             dmg = GetBulletDamage(ship1[0], ship2[0], bullet[0])
             self.screen.ships[ship2[1]].ApplyDamage(dmg)
-            #reward += 0.1
+            reward += 0.1
 
         collisions = self.screen.GetShipCollisions()
         for ship1, ship2 in collisions:
@@ -65,16 +66,31 @@ class GameState:
         imageData = pygame.surfarray.array2d(self.screen.display)
 
         if self.player.killedInDuty == True:
-            reward -= 1
+            reward = -10
             frames = self.frames
             self.__init__(clear=False)
             return imageData, reward, frames
         else:
-            reward += 0.01
+            reward =0.1
             self.player.scorePlayer += reward
             return imageData, reward, False
 
+    def GetState(self):
+        x = np.zeros(66,)
+        x[0:2] = self.player.sprite.rect.center
+        x[0:2] = (x[0:2]-SCREENWIDTH/2)/SCREENWIDTH
+        x[2]   = self.player.sprite.angle
+        x[3:6] = self.player.sprite.speed
+        for i, ship  in enumerate(self.screen.ships):
+            if i == 10:
+                break
+            x[6+i*5:8+i*5]   = ship.sprite.rect.center
+            x[6+i*5:8+i*5]   = (x[6+i*5:8+i*5]-SCREENWIDTH/2)/SCREENWIDTH
+            x[8+i*5]         = ship.sprite.angle
+            x[9+i*5:12+i*5] = ship.sprite.speed
 
+
+        return x
 
 
 def GetBulletDamage(ship1, ship2, bullet):
@@ -104,17 +120,17 @@ def ManualInput():
     elif keys[K_DOWN]:
         actions[1] = 1
     else:
-        actions[2] = 1
+        actions[2] = 0.5
     if keys[K_RIGHT]:
         actions[4] = 1
     elif keys[K_LEFT]:
         actions[3] = 1
     else:
-        actions[5] = 1
+        actions[5] = 0.5
     if keys[K_RETURN]:
         actions[6] = 1
     else:
-        actions[7] = 1
+        actions[7] = 0.5
     return actions
 
 def LaunchManual():
@@ -131,7 +147,7 @@ def TrainNetwork(model, args):
     from collections import deque
     import numpy as np
     from keras.optimizers import Adam
-    imgSizeX, imgSizeY = args['shape'][:2]
+    #imgSizeX, imgSizeY = args['shape'][:2]
 
     game = GameState()
     D = deque()
@@ -139,9 +155,11 @@ def TrainNetwork(model, args):
     doNothing = [0, 0, 1, 0, 0, 1, 0, 1]
     x0, r0, terminal = game.FrameStep(doNothing, FPS=None)
 
-    x0 = RL.FormatPic(x0, imgSizeX, imgSizeY)
-    s0 = np.stack((x0, x0, x0, x0), axis=2)
-    s0 = s0.reshape(1, s0.shape[0], s0.shape[1], s0.shape[2])
+#    x0 = RL.FormatPic(x0, imgSizeX, imgSizeY)
+#    s0 = np.stack((x0, x0, x0, x0), axis=2)
+#    s0 = s0.reshape(1, s0.shape[0], s0.shape[1], s0.shape[2])
+    s0 = game.GetState()
+    s0 = s0.reshape(1, s0.shape[0])
 
     if args['mode'] == 'Run':
         OBSERVE = 999999999    #We keep observe, never train
@@ -158,13 +176,11 @@ def TrainNetwork(model, args):
     t = 0
 
     from datetime import datetime
-    d2 = datetime.now()-datetime.now()
-    d3 = d2
-    d1 = d2
+
     delta_epsilon = (args['ini_epsilon'] - args['final_epsilon']) / args['exploration']
 
 
-    rdBatch = args['shape'][2]-1
+    #rdBatch = args['shape'][2]-1
     batchNb = args['batch']
     replay = args['replay']
     finalE = args['final_epsilon']
@@ -175,9 +191,8 @@ def TrainNetwork(model, args):
     cumR = 0
     loss_mean = 0
     Qsa_maxmean = 0
-    exp = 0
+    exp = [0,0]
     frames = []
-    begin = datetime.now()
     while (True):
         a0 = np.zeros([ACTIONS])
         r0 = 0
@@ -195,48 +210,41 @@ def TrainNetwork(model, args):
         else:
             q = model.predict(s0)[0]
             act_i = np.argmax(q)
-            exp += q[act_i]
+            exp = [exp[0] + q[act_i], exp[1]+1]
             FPS = None
         a0[act_i] = 1
 
         if epsilon > finalE and t > OBSERVE:
             epsilon -= delta_epsilon
 
-        begin1 = datetime.now()
         x1, r0, terminal = game.FrameStep(a0, FPS=FPS)
         for i in range(args['frameSkip']):
             game.FrameStep(doNothing, FPS=FPS)
-        d1 +=  datetime.now() - begin1
 
         if terminal:
             frames.append(terminal)
             terminal = True
 
         cumR += r0
-        x1 = RL.FormatPic(x1, imgSizeX, imgSizeY)
-#        if t == 1000:
-#            return
-#        im = Image.fromarray(x1*255)
-#        im = im.convert('RGB')
-#        im.save(f"im\\{t}.jpeg")
-        x1 = x1.reshape(1, imgSizeX, imgSizeY, 1)
-        s1 = np.append(x1, s0[:, :, :, :rdBatch], axis=3)
+        #x1 = RL.FormatPic(x1, imgSizeX, imgSizeY)
+        #x1 = x1.reshape(1, imgSizeX, imgSizeY, 1)
+        s1 = game.GetState()
+        s1 = s1.reshape(1, s1.shape[0])
         D.append((s0, s1, act_i, r0, terminal))
 
+        if not t%10:
+            RL.GetMap(SCREENWIDTH, SCREENHEIGHT, s1, model)
 
         if len(D) > replay:
             D.popleft()
-        if t > OBSERVE:
-            begin2 = datetime.now()
+        if t > OBSERVE and not t%10:
             targets, input_, maxQ_sa = RL.UpdateRule(D, batchNb, model, gamma)
-            d2 +=  datetime.now() - begin2
-
-            begin3 = datetime.now()
             loss_mean += model.train_on_batch(input_, targets)
-            d3 +=  datetime.now() - begin3
             Qsa_maxmean += max(maxQ_sa)
 
         if t % delay == 0 and t:
+            if t == OBSERVE:
+                begin = datetime.now()
             cumR /= delay
             frames  = np.mean(frames)
             if t <= OBSERVE:
@@ -246,12 +254,12 @@ def TrainNetwork(model, args):
             else:
                 Qsa_maxmean /= delay
                 loss_mean /= delay
-                exp /= delay
+                exp = exp[0]/exp[1]
                 if len(model.plot.rewards)>OBSERVE//delay:
                     m = max(model.plot.rewards[OBSERVE//delay:])
                 else:
                     m = -1
-                print(f'{t} - [{round(cumR, 5)}|{round(m, 5)}] - e: [{round(epsilon,4)}]')
+                print(f'{t} - [{round(cumR, 5)}|{round(m, 5)}] - e: [{round(epsilon,2)}] - {(t-OBSERVE)/(datetime.now()-begin).total_seconds()}')
 #                if cumR >= m:
 #                    print('Model get more rewards than before, we save the weights')
 #                    model.save_weights("model.h5", overwrite=True)
@@ -262,12 +270,11 @@ def TrainNetwork(model, args):
 #                    model.load_weights("model.h5")
 #                    adam = Adam(lr=args['lr'])
 #                    model.compile(loss='mse',optimizer=adam)
-            model.plot.Plot(Qsa_maxmean, loss_mean, cumR, exp, frames,
-                            [d1, (datetime.now()-begin)-d3-d2-d1, d2, d3], t, OBSERVE)
+            model.plot.Plot(Qsa_maxmean, loss_mean, cumR, exp, frames, t, OBSERVE)
             cumR = 0
             Qsa_maxmean = 0
             loss_mean = 0
-            exp = 0
+            exp = [0,0]
             frames = []
 
         s0 = s1
@@ -278,18 +285,17 @@ def TrainNetwork(model, args):
 def LaunchRL():
     args = {}
     args['actF'] =              'relu'
-    args['lr'] =                10**-4
-    args['shape'] =             (84, 84, 4)
-    args['final_epsilon'] =     10**-2
-    args['ini_epsilon'] =       1
-    args['observation'] =       10000
-    args['exploration'] =       230000
-    args['batch'] =             32
+    args['lr'] =                10**-3
+    args['shape'] =             (66,)
+    args['final_epsilon'] =     5*10**-2
+    args['ini_epsilon'] =       7.5*10**-1
+    args['exploration'] =       50000
+    args['batch'] =             1024
     args['gamma'] =             0.99
-    args['replay'] =            30000
+    args['replay'] =            20000
     args['observation'] =       10000
     args['frameSkip'] =         0
-    args['delay'] =             2500
+    args['delay'] =             10000
     args['mode'] =              "Train"
 
     model = RL.BuildModel(args)

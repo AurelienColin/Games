@@ -58,8 +58,8 @@ class Screen():
 #            score = 0
 #        scoreText = self.font.render(str(round(score, 1)), 1, (255, 255, 255))
 #        self.display.blit(scoreText, (0,0))
-#        fps = self.font.render(str(int(self.FPSCLOCK.get_fps())), True, pygame.Color('white'))
-#        self.display.blit(fps, (0, 0))
+        fps = self.font.render(str(int(self.FPSCLOCK.get_fps())), True, pygame.Color('white'))
+        self.display.blit(fps, (5, 5))
         pygame.display.update()
         if FPS:
             self.FPSCLOCK.tick(FPS)
@@ -161,7 +161,7 @@ class Screen():
         f1, f2 = 1-self.margin, self.margin
         h, w = self.size
         p = random.random()
-        if p < self.p:
+        if p < self.p and len(self.ships)<10:
             if self.p == 1:
                 self.p = 0.015
             side = int(random.random()*4)
@@ -181,6 +181,9 @@ class Screen():
             ship = Ship.Ship(self.shipsBasis['cruiser'], (x, y), 1, a,
                              self.sprites['cruiser'],
                              self.sprites['bullet'])
+
+            ship.sprite.Rotate(a)
             ship.Motor([1, 0, 0, 0, 0, 1, 0, 1])
             ship.Motor([1, 0, 0, 0, 0, 1, 0, 1])
+
             self.ships.append(ship)

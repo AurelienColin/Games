@@ -34,8 +34,8 @@ class Ship():
         self.killedInDuty = False
 
     def Motor(self, command):
-        self.sprite.speed[0] *= 0.8
-        self.sprite.speed[1] *= 0.8
+        self.sprite.speed[0] *= 0.7
+        self.sprite.speed[1] *= 0.7
         if command[0] == 1:
             factor = self.acceleration['front']
         elif command[1] == 1:
@@ -43,15 +43,18 @@ class Ship():
         else:
             factor = 0
         if command[3] == 1:
-            self.sprite.speed[2] += self.acceleration['side']
+            self.sprite.angle += 45
+#            self.sprite.speed[2] += self.acceleration['side']
         elif command[4] == 1:
-            self.sprite.speed[2] -= self.acceleration['side']
-
+            self.sprite.angle -= 45
+#            self.sprite.speed[2] -= self.acceleration['side']
+        self.sprite.angle = self.sprite.angle%360
 
         angle = self.sprite.angle/180*math.pi
 
         self.sprite.speed[0] += factor*math.cos(angle)
         self.sprite.speed[1] -= factor*math.sin(angle)
+
 
         if  self.sprite.speed[0] > 20:
             self.sprite.speed[0] = 20
