@@ -5,7 +5,7 @@ import pygame
 from Rignak_Misc.path import get_local_file
 from Rignak_Games.Asteroid.Screen import Screen
 from Rignak_Games.Asteroid.collisions import get_bullet_collisions, get_ship_collisions
-from Rignak_Games.Sprites import SCALING_FACTOR
+from Rignak_Games.Sprites import SCALING_FACTOR, SPRITE_ROOT
 
 DEFAULT_BATTLE = 'default'
 BATTLE_FILENAME = get_local_file(__file__, os.path.join('res', 'json', 'battles.json'))
@@ -13,8 +13,7 @@ BATTLE_FILENAME = get_local_file(__file__, os.path.join('res', 'json', 'battles.
 SCREEN_WIDTH = 512
 SCREEN_HEIGHT = 512
 
-SPRITE_ROOT = os.path.join('res', 'img')
-BACKGROUND_FILENAME = get_local_file(__file__, os.path.join(SPRITE_ROOT, 'bg_main.png'))
+BACKGROUND_FILENAME = os.path.join(SPRITE_ROOT, 'bg_main.png')
 
 BACKGROUND = pygame.transform.scale(pygame.image.load(BACKGROUND_FILENAME),
                                     (int(SCREEN_WIDTH * SCALING_FACTOR), int(SCREEN_HEIGHT * SCALING_FACTOR)))
@@ -40,7 +39,7 @@ class GameState:
         current_player_score = self.player.score
 
         self.player.use_motor(input_action)
-        if input_action[4]:
+        if input_action[5]:
             self.player.fire()
 
         bullet_collisions = get_bullet_collisions(self.screen.ships)
@@ -51,7 +50,6 @@ class GameState:
 
         ship_collisions = get_ship_collisions(self.screen.ships)
         for ship_a, ship_b in ship_collisions:  # each ship will appear as ship_a AND ship_b
-            print(ship_a, ship_b)
             ship_a.receive_damage(damage_on_collision)
 
         for ship in self.screen.ships:

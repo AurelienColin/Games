@@ -5,7 +5,9 @@ from functools import lru_cache
 from pygame.transform import rotate
 from pygame.mask import from_surface
 
-SPRITE_ROOT = os.path.join('res', 'img')
+from Rignak_Misc.path import get_local_file
+
+SPRITE_ROOT = get_local_file(__file__, os.path.join('sprites'))
 SCALING_FACTOR = 0.5
 
 def set_scaling_factor(scaling_factor):

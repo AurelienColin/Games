@@ -35,22 +35,23 @@ class Ship(Entity):
 
     def use_motor(self, command):
         """
-        0 : forward
-        1 : backward
-        2 : left
-        3 : right
+        0 : nothing
+        1 : forward
+        2 : backward
+        3 : left
+        4 : right
         """
 
-        if command[0]:
+        if command[1]:
             acceleration_rate = self.acceleration['front']
-        elif command[1]:
+        elif command[2]:
             acceleration_rate = -self.acceleration['rear']
         else:
             acceleration_rate = 0
 
-        if command[2]:
+        if command[3]:
             self.angle_speed -= self.acceleration['side']
-        elif command[3]:
+        elif command[4]:
             self.angle_speed += self.acceleration['side']
 
         angle = self.sprite.angle / 180 * math.pi
@@ -78,6 +79,7 @@ class Ship(Entity):
     def pass_turn(self):
         super().pass_turn()
         self.last_fire += 1
+        self.score += 1
         for bullet in self.bullets:
             bullet.pass_turn()
 

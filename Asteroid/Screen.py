@@ -93,12 +93,12 @@ class Screen:
         elif side == 3:
             y = margin_b * width
 
-        angle_radian = math.atan((height / 2 - x) / (width / 2 - y)) - math.pi / 2 * [-1, 1][y < width / 2]
+        angle_radian = math.atan((height / 2 - x) / (width / 2 - y+0.1)) - math.pi / 2 * [-1, 1][y < width / 2]
         angle = angle_radian * 180 / math.pi
 
         ship = Ship(ship_name, team, x=x, y=y, angle=angle)
-        ship.use_motor([1, 0, 0, 0])
-        ship.use_motor([1, 0, 0, 0])
+        ship.use_motor([0, 1, 0, 0, 0])
+        ship.use_motor([0, 1, 0, 0, 0])
 
         self.ships.append(ship)
 
