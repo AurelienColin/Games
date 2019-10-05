@@ -125,6 +125,6 @@ def WriteJSON(data, file):
     Output:
     Nothing, but a .json is written"""
     folder = list(data.keys())[0] # Only one key aniway
-    with open(join('..', 'res', 'json', folder, file+'.json'), 'w') as file:
+    with open(join('res', 'json', folder, file+'.json'), 'w') as file:
         json.dump(data, file, sort_keys=True, indent=4)
 

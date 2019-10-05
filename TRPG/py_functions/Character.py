@@ -29,7 +29,7 @@ class Character():
 
 
     def FromJSON(self, file, items=[]):
-        with open(join('..', 'res','json', 'character', file), 'r') as file:
+        with open(join('res','json', 'character', file), 'r') as file:
             data = json.load(file)['character']
         self.cara = data['cara']
         self.sprite = {'values': data['sprite']}
@@ -109,7 +109,7 @@ class Character():
             if key in ['cols', 'rows']:
                 continue
             if key == 'portrait':
-                value = join('..', 'res','sprite', 'portrait', value)
+                value = join('res','sprite', 'portrait', value)
                 self.sprite[key] = pygame.image.load(value)
             elif len(value) == 2:
                 self.sprite[key] = self.AddSprite(value[0], value[1])
@@ -130,7 +130,7 @@ class Character():
         cols = self.sprite['values']['cols']
         if not end:
             end = begin+1
-        fullname = join('..', 'res', 'sprite', 'sheet', str(self.sheetName))
+        fullname = join('res', 'sprite', 'sheet', str(self.sheetName))
         perso = pyganim.getImagesFromSpriteSheet(fullname,cols=cols,rows= rows)[begin:end]
         if end > begin+1:
             frames = list(zip(perso, [200]*(end-begin)))

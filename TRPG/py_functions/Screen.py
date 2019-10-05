@@ -20,7 +20,7 @@ class Screen():
         self.display = pygame.display.set_mode(self.size, pygame.RESIZABLE)
         self.tileSize = tileSize
         self.frameNumber = self.tileSize
-        circle = pygame.image.load(join('..', 'res', 'sprite', 'others', 'circle.png'))
+        circle = pygame.image.load(join('res', 'sprite', 'others', 'circle.png'))
         self.objects = [[circle, (-tileSize, -tileSize), 'hide']]
         self.charBox = -1
         self.ui={'hovering':[],'initiative':[], 'childBox':[]}
@@ -64,7 +64,7 @@ class Screen():
         pygame.display.update()
 
     def Clean(self):
-        circle = pygame.image.load(join('..', 'res', 'sprite', 'others', 'circle.png'))
+        circle = pygame.image.load(join('res', 'sprite', 'others', 'circle.png'))
         self.objects = [[circle, (0, 0), 'hide']]
         self.ui={'hovering':[], 'initiative':[], 'status':[], 'childBox':[]}
         self.charBox = -1
@@ -102,7 +102,7 @@ class Screen():
         return bar1Index-1, bar1Index, bar2Index
 
     def AddMap(self, filename):
-        fullname = join('..', 'res', 'map', filename)
+        fullname = join('res', 'map', filename)
         self.objects.append([Map.TiledMap(fullname), (0, 0), 'tiled_map'])
         self.objects[-1][0].run(self)
         return len(self.objects)-1

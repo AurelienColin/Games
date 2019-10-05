@@ -79,7 +79,7 @@ def CheckCmnDic(file, data, rules):
     return e
 
 def CheckItem(item):
-    with open(join('..', '..', 'res', 'json', 'item', item), 'r') as file:
+    with open(join('..', 'res', 'json', 'item', item), 'r') as file:
         try:
             data = load(file)
         except:
@@ -92,7 +92,7 @@ def CheckItem(item):
                     ['use', dict], ['sound', str]]
         e += CheckValue(item, data, expected)
 
-        e += CheckExistence(item, data, 'sound', join('..', '..', 'res', 'sound'))
+        e += CheckExistence(item, data, 'sound', join('..', 'res', 'sound'))
         e += CheckUniDic(item, data, 'use', [int, int])
         e += CheckUniDic(item, data, 'cara', int)
         return e
@@ -109,7 +109,7 @@ def CheckList(file, key, l, rules):
 
 
 def CheckSkill(skill):
-    with open(join('..', '..', 'res', 'json', 'skill', skill), 'r') as file:
+    with open(join('..', 'res', 'json', 'skill', skill), 'r') as file:
         try:
             data = load(file)
         except:
@@ -118,8 +118,8 @@ def CheckSkill(skill):
         e = 0
         data = data['skill']
         expected = [['sheet', str], ['sound', str]]
-        e += CheckExistence(skill, data, 'sheet', join('..', '..', 'res', 'sprite', 'effect'))
-        e += CheckExistence(skill, data, 'sound', join('..', '..', 'res', 'sound'))
+        e += CheckExistence(skill, data, 'sheet', join('..', 'res', 'sprite', 'effect'))
+        e += CheckExistence(skill, data, 'sound', join('..', 'res', 'sound'))
         e += CheckValue(skill, data, expected)
 
         expected = [["rows", int], ['cols', int], ['action', [int, int]]]
@@ -140,7 +140,7 @@ def CheckSkill(skill):
         return Error(skill, skill, 'skill', 1)
 
 def CheckCharacter(character):
-    with open(join('..', '..', 'res', 'json', 'character', character), 'r') as file:
+    with open(join('..', 'res', 'json', 'character', character), 'r') as file:
         try:
             data = load(file)
         except:
@@ -156,8 +156,8 @@ def CheckCharacter(character):
         e += CheckList(character, 'skill', data['skill'], [str, int])
         e += CheckList(character, 'drop', data['drop'], [str, float])
         e += CheckList(character, 'items', data['items'], [str, bool])
-        e += CheckExistence(character, data, 'sheet', join('..', '..', 'res', 'sprite', 'sheet'))
-        e += CheckExistence(character, data['sprite'], 'portrait', join('..', '..', 'res', 'sprite', 'portrait'))
+        e += CheckExistence(character, data, 'sheet', join('..', 'res', 'sprite', 'sheet'))
+        e += CheckExistence(character, data['sprite'], 'portrait', join('..', 'res', 'sprite', 'portrait'))
 
         expected = [['attacking', [int, int]], ['cols', int], ['portrait', str],
                     ['rows', int], ['standing', [int, int]],['static', [int]],
@@ -187,13 +187,13 @@ def CheckCharacter(character):
         for dic in data['cara']['effects']:
             e +=  CheckCmnDic(character, dic, expected)
         for skill, level in data['skill']:
-            if not exists(join('..', '..', 'res', 'json', 'skill', skill+'.json')):
+            if not exists(join('..', 'res', 'json', 'skill', skill+'.json')):
                 e += Error(character, ['skill', skill+'.json'], 3)
         for item, b in data['items']:
-            if not exists(join('..', '..', 'res', 'json', 'item', item+'.json')):
+            if not exists(join('..', 'res', 'json', 'item', item+'.json')):
                 e += Error(character, ['item', item+'.json'], 3)
         for item, p in data['drop']:
-            if not exists(join('..', '..', 'res', 'json', 'item', item+'.json')):
+            if not exists(join('..', 'res', 'json', 'item', item+'.json')):
                 e += Error(character, ['drop', item+'.json'], 3)
         return e
 
@@ -201,7 +201,7 @@ def CheckCharacter(character):
         return Error(character, character, 'character', 1)
 
 def CheckScript(script):
-    with open(join('..', '..', 'res', 'script', script), 'r') as file:
+    with open(join('..', 'res', 'script', script), 'r') as file:
         lines = file.readlines()
     e = 0
     music = False
@@ -212,7 +212,7 @@ def CheckScript(script):
             if line[0] == 'music_on':
                 if len(line) != 2:
                     e += Error(script, i+1, 3)
-                elif not exists(join('..', '..', 'res', 'music', line[1])):
+                elif not exists(join('..', 'res', 'music', line[1])):
                     e += Error(script, [i+1, line[1]], 3)
                 else:
                     music = line[1]
@@ -226,12 +226,12 @@ def CheckScript(script):
             elif line[0] == 'sound':
                 if len(line) != 2:
                     e += Error(script, i+1, 3)
-                elif not exists(join('..', '..', 'res', 'sound', line[1])):
+                elif not exists(join('..', 'res', 'sound', line[1])):
                     e += Error(script, [i, line[1]], 3)
             elif line[0] == 'enter':
                 if len(line) != 5:
                     e += Error(script, i+1, 4, opt=(5, len(line)))
-                elif not exists(join('..', '..', 'res', 'sprite', line[2])):
+                elif not exists(join('..', 'res', 'sprite', line[2])):
                     e += Error(script, [i, line[2]], 3)
                 elif line[1] in characters:
                     e += Error(script, [i+1, line[1]], -1)
@@ -247,7 +247,7 @@ def CheckScript(script):
             elif line[0] == 'choice':
                 pass # Correctness of this function requires following line
             elif line[0] in ['1', '2', '3']:
-                if not exists(join('..', '..', 'res', 'script', line[1])):
+                if not exists(join('..', 'res', 'script', line[1])):
                     return Error(file, line[1], 3)
             else:
                 e += Error(script, [i+1, line[0]], -1)
@@ -258,7 +258,7 @@ def CheckScript(script):
     return e
 
 def CheckLevel(level):
-    with open(join('..', '..', 'res', 'json', 'level', level), 'r') as file:
+    with open(join('..', 'res', 'json', 'level', level), 'r') as file:
         try:
             data = load(file)
         except:
@@ -280,24 +280,24 @@ def CheckLevel(level):
         for dic in data['characters']:
             e +=  CheckCmnDic(level, dic, expected)
             for item in dic['items']:
-                if not exists(join('..', '..', 'res', 'json', 'item', item+'.json')):
+                if not exists(join('..', 'res', 'json', 'item', item+'.json')):
                     e += Error(level, ['item', item+'.json'], 3)
 
         expected = [['placement', str], ['TRPG', str]]
         e +=  CheckCmnDic(level, data['music'], expected)
 
-        e += CheckExistence(level, data, 'map', join('..', '..', 'res', 'map'))
-        e += CheckExistence(level, data, 'script', join('..', '..', 'res', 'script'))
-        e += CheckExistence(level, data['music'], 'TRPG', join('..', '..', 'res', 'music'))
-        e += CheckExistence(level, data['music'], 'placement', join('..', '..', 'res', 'music'))
+        e += CheckExistence(level, data, 'map', join('..', 'res', 'map'))
+        e += CheckExistence(level, data, 'script', join('..', 'res', 'script'))
+        e += CheckExistence(level, data['music'], 'TRPG', join('..', 'res', 'music'))
+        e += CheckExistence(level, data['music'], 'placement', join('..', 'res', 'music'))
         for dic in data['victories']:
-            e += CheckExistence(level, dic, 'next_level', join('..', '..', 'res', 'json', 'level'))
+            e += CheckExistence(level, dic, 'next_level', join('..', 'res', 'json', 'level'))
             if dic['condition'] not in ["destroy", "kill leaders"]:
                 e += Error(level, 'condition', 2, [["destroy", "kill leaders"], dic['condition']])
         for dic in data['characters']:
             if dic['ia'] not in ['null', 'defensif', 'aggressif', 'passif']:
                 e += Error(level, 'condition', 2, [['null', 'defensif', 'aggresif', 'passif'], dic['ia']])
-            e += CheckExistence(level, dic, 'name', join('..', '..', 'res', 'json', 'character'))
+            e += CheckExistence(level, dic, 'name', join('..', 'res', 'json', 'character'))
         return e
     else:
         return 1
@@ -317,19 +317,19 @@ def CheckTSX(tsx):
 if __name__ == '__main__':
     e = 0
     print('----Check items')
-    for item in listdir(join('..', '..', 'res', 'json', 'item')):
+    for item in listdir(join('..', 'res', 'json', 'item')):
         e += CheckItem(item)
     print('----Check skills')
-    for skill in listdir(join('..', '..', 'res', 'json', 'skill')):
+    for skill in listdir(join('..', 'res', 'json', 'skill')):
         e += CheckSkill(skill)
     print('----Check characters')
-    for character in listdir(join('..', '..', 'res', 'json', 'character')):
+    for character in listdir(join('..', 'res', 'json', 'character')):
         e += CheckCharacter(character)
     print('----Check script')
-    for script in listdir(join('..', '..', 'res', 'script')):
+    for script in listdir(join('..', 'res', 'script')):
         e += CheckScript(script)
     print('----Check level')
-    for level in listdir(join('..', '..', 'res', 'json', 'level')):
+    for level in listdir(join('..', 'res', 'json', 'level')):
         e += CheckLevel(level)
     print('----Check maps')
     for file in glob.glob(join('..','res','map', '*.tsx')):

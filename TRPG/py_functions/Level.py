@@ -7,7 +7,7 @@ import json
 class Level():
     def __init__(self, screen, file):
         screen.Clean()
-        with open(join('..', 'res','json', 'level', file), 'r') as file:
+        with open(join('res','json', 'level', file), 'r') as file:
             data = json.load(file)['level']
         mapIndex = screen.AddMap(data['map'])
         screen.mapData = screen.objects[mapIndex][0].renderer.tmx_data
@@ -20,12 +20,12 @@ class Level():
 
         iniTiles = data['initial_tiles']
         if data['music']['placement']:
-            self.music = pygame.mixer.Sound(join('..', 'res', 'music', data['music']['placement']))
+            self.music = pygame.mixer.Sound(join('res', 'music', data['music']['placement']))
             self.music.play(loops=-1)
         Loop.PlacementLoop(iniTiles, self.screen)
         if self.music:
             self.music.stop()
-            self.music = pygame.mixer.Sound(join('..', 'res', 'music', data['music']['TRPG']))
+            self.music = pygame.mixer.Sound(join('res', 'music', data['music']['TRPG']))
             self.music.play(loops=-1)
         self.victories = data['victories']
         self.ModeTRPG()
@@ -84,7 +84,7 @@ class Level():
 
     def ModeVN(self, filename):
         """Launch action loop for a visual novel"""
-        fullname = join('..', 'res', 'script', filename)
+        fullname = join('res', 'script', filename)
         file = open(fullname)
         lines = file.readlines()
         file.close()

@@ -14,7 +14,7 @@ def Launcher():
 
     #filename = input('Enter filename:')
     filename = "VisualNovel.txt"
-    fullname = join('..', 'res', 'script', filename)
+    fullname = join('res', 'script', filename)
     file = open(fullname)
     lines = file.readlines()
     file.close()
@@ -53,7 +53,7 @@ def VNLoop(screen, lines):
                     x = screen.size[0]+x
                 if y < 0:
                     y = screen.size[1]+y
-                img = pygame.image.load(join('..', 'res', 'sprite', file))
+                img = pygame.image.load(join('res', 'sprite', file))
                 if char == 'background':
                     img = pygame.transform.scale(img, screen.size)
                 if transf == 'sym':
@@ -64,12 +64,12 @@ def VNLoop(screen, lines):
             elif line[0] == 'leave':
                 screen.RemoveObject(on_screen[line[1]])
             elif line[0] == 'music_on':
-                music = pygame.mixer.Sound(join('..', 'res', 'music', line[1]))
+                music = pygame.mixer.Sound(join('res', 'music', line[1]))
                 music.play(loops=-1)
             elif line[0] == 'music_off':
                 music.stop()
             elif line[0] == 'sound':
-                pygame.mixer.Sound(join('..', 'res', 'sound', line[1])).play()
+                pygame.mixer.Sound(join('res', 'sound', line[1])).play()
             elif line[0] == 'choice':
                 choices = ' '.join(line[1:])
                 choice = ChoiceLoop(screen, choices)
@@ -90,7 +90,7 @@ def VNLoop(screen, lines):
     [screen.RemoveObject(i) for i in current_dialog + list(on_screen.values())]
     music.stop()
     if choice:
-        fullname = join('..', 'res', 'script', choice)
+        fullname = join('res', 'script', choice)
         file = open(fullname)
         lines = file.readlines()
         file.close()
@@ -129,7 +129,7 @@ def ChoiceLoop(screen, choices):
 
 class TextBox():
     def __init__(self, files, texts, dim, text_pos, pos, size=20, color={'default':(0,0,0)}):
-        names = [join('..', 'res', 'textbox', file) for file in files]
+        names = [join('res', 'textbox', file) for file in files]
         self.text = []
         self.string = []
         c = color['default']

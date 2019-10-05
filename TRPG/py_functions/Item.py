@@ -9,7 +9,7 @@ class Item():
         pass
 
     def FromJson(self, file):
-        with open(join('..', 'res','json', 'item', file+'.json'), 'r') as file:
+        with open(join('res','json', 'item', file+'.json'), 'r') as file:
             data = json.load(file)['item']
         self.name = data['name']
         self.cara = data['cara']
@@ -26,4 +26,4 @@ class Item():
                 self.cara[key]=0
             if key not in self.use:
                 self.use[key]=[0,0]
-        self.sound = pygame.mixer.Sound(join('..', 'res', 'sound', data['sound']))
+        self.sound = pygame.mixer.Sound(join('res', 'sound', data['sound']))

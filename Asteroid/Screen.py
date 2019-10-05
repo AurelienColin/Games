@@ -14,7 +14,7 @@ MARGIN = 0.1
 
 REPOPING_SHIP_TEAM = 1
 REPOPING_SHIP_NAME = 'cruiser'
-REPOPING_PROBABILITY = 0.01
+REPOPING_PROBABILITY = 0.02
 MAX_SHIPS = 10
 
 
@@ -110,15 +110,15 @@ class Screen:
             j = 0
             while j < len(ship.bullets):
                 x, y = ship.bullets[j].sprite.rect.center
-                x += ship.bullets[j].sprite.original_size[0]
-                y += ship.bullets[j].sprite.original_size[1]
+                x += ship.bullets[j].sprite.original_size[0]//2
+                y += ship.bullets[j].sprite.original_size[1]//2
                 if x < 0 or x > height or y < 0 or y > width:
                     self.ships[i].bullets.pop(j)
                 else:
                     j += 1
             x, y = ship.sprite.rect.center
-            x += ship.sprite.original_size[0]
-            y += ship.sprite.original_size[1]
+            x += ship.sprite.original_size[0]//2
+            y += ship.sprite.original_size[1]//2
             if x < 0 or x > height or y < 0 or y > width:
                 self.ships[i].kill()
                 if i != 0 and not ship.bullets:
