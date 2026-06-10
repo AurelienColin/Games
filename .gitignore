@@ -1,2 +1,5 @@
 .ENHANCEMENT_PROPOSAL_PLAN/
 WorldsOfStrife/
+__pycache__/
+*.pyc
+.pytest_cache/
